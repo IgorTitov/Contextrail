@@ -1,0 +1,190 @@
+{
+  "name": "local-llm",
+  "description": "In-browser LLM inference with WebLLM and Transformers.js adapters",
+  "maturity": "stable",
+  "exports": [
+    "public-api.mjs"
+  ],
+  "dependencies": {
+    "modules": [
+      "ai-chat"
+    ],
+    "external": [
+      "@xenova/transformers",
+      "web-llm"
+    ],
+    "builtins": []
+  },
+  "dependents": [],
+  "structure": {
+    "domain": [
+      "model-cache-manager.mjs"
+    ],
+    "ports": [
+      "local-llm-port.mjs"
+    ],
+    "adapters": [
+      "transformers-adapter.mjs",
+      "webllm-adapter.mjs"
+    ],
+    "root": [
+      "public-api.mjs",
+      "messages.mjs"
+    ]
+  },
+  "testFiles": [
+    "tests/unit/local-llm.test.mjs",
+    "tests/unit/local-llm-ui.test.mjs",
+    "tests/contract/local-llm-hex-contract.test.mjs",
+    "tests/bdd/local-llm.test.mjs"
+  ],
+  "capabilities": {
+    "adapters": [
+      "transformers-adapter.mjs",
+      "webllm-adapter.mjs"
+    ],
+    "ports": {
+      "LocalLlmPort": {
+        "kind": "interface",
+        "methods": {
+          "clearHistory": {
+            "params": [],
+            "returns": "void"
+          },
+          "getHistory": {
+            "params": [],
+            "returns": "AiChatMessage[]"
+          },
+          "isModelLoaded": {
+            "params": [],
+            "returns": "boolean"
+          },
+          "loadModel": {
+            "params": [
+              {
+                "name": "modelId",
+                "type": "string"
+              },
+              {
+                "name": "options",
+                "optional": true,
+                "type": "LocalLlmLoadOptions"
+              }
+            ],
+            "returns": "Promise<void>"
+          },
+          "offMessage": {
+            "params": [
+              {
+                "name": "listener",
+                "type": "(message: AiChatMessage) => void"
+              }
+            ],
+            "returns": "void"
+          },
+          "onMessage": {
+            "params": [
+              {
+                "name": "listener",
+                "type": "(message: AiChatMessage) => void"
+              }
+            ],
+            "returns": "void"
+          },
+          "sendMessage": {
+            "params": [
+              {
+                "name": "message",
+                "type": "string"
+              },
+              {
+                "name": "options",
+                "optional": true,
+                "type": "AiChatOptions"
+              }
+            ],
+            "returns": "Promise<AiChatResponse>"
+          },
+          "streamMessage": {
+            "params": [
+              {
+                "name": "message",
+                "type": "string"
+              },
+              {
+                "name": "options",
+                "optional": true,
+                "type": "AiChatOptions"
+              }
+            ],
+            "returns": "AsyncIterable<AiChatStreamChunk>"
+          },
+          "unloadModel": {
+            "params": [],
+            "returns": "Promise<void>"
+          }
+        }
+      }
+    },
+    "typedefs": {
+      "LocalLlmLoadOptions": {
+        "fields": {
+          "contextLength": {
+            "optional": true,
+            "type": "number"
+          },
+          "quantization": {
+            "optional": true,
+            "type": "string"
+          }
+        }
+      },
+      "LocalLlmModelConfig": {
+        "fields": {
+          "backend": {
+            "type": "'webllm' | 'transformers'"
+          },
+          "contextLength": {
+            "optional": true,
+            "type": "number"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "modelId": {
+            "type": "string"
+          },
+          "quantization": {
+            "optional": true,
+            "type": "string"
+          },
+          "sizeBytes": {
+            "type": "number"
+          }
+        }
+      },
+      "LocalLlmProgress": {
+        "fields": {
+          "bytesLoaded": {
+            "optional": true,
+            "type": "number"
+          },
+          "bytesTotal": {
+            "optional": true,
+            "type": "number"
+          },
+          "message": {
+            "optional": true,
+            "type": "string"
+          },
+          "progress": {
+            "type": "number"
+          },
+          "stage": {
+            "type": "'downloading' | 'initializing' | 'ready' | 'error'"
+          }
+        }
+      }
+    }
+  }
+}

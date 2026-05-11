@@ -1,0 +1,143 @@
+# Contextrail — Cursor Rules
+# Generated from docs/agent-contract/compatibility-contract.json
+# Do not edit manually — run: node scripts/agent-contract/sync.mjs
+
+## Project overview
+
+This is a Contextrail (COA) template — a hexagonal-architecture monorepo with 40 modules. Context-Optimized Architecture treats AI agent context windows as a first-class design constraint.
+
+## Agent capability tiers
+
+Each role and skill names the **minimum** tier that can fulfill it; higher tiers may always step in. Local-tier support is landing across TPL-208..215.
+
+- **frontier** (≥200,000 ctx tokens) — Frontier-class hosted models with rich harness tooling. Owns architecture, control-plane, multi-module slices.
+  - Capabilities: subagents, hooks, skills, memory-persistence, long-horizon-reasoning, cross-module-architectural-decisions
+  - Harnesses: Claude Code, Codex CLI, Cursor
+- **mid** (≥32,000 ctx tokens) — Mid-tier capabilities — single-agent tool use without subagent dispatch. Owns bounded slices within one module. May run cloud (Sonnet, GPT-4o-mini) or local (Llama-3.1-70B, Qwen-2.5-72B in LM Studio/Ollama).
+  - Capabilities: skills, tool-use, single-agent-loop, bounded-implementation, i18n-aware-edits
+  - Harnesses: Aider, Cline, Continue, Claude Code with Sonnet/Haiku, Cursor with smaller cloud models
+- **small** (≥16,000 ctx tokens) — Local-small tier (16K context floor). NOT a slice owner — runs as deterministic helper for header sync, README generation, commit-message templating, prettier-fix, doc-translation, narrow extracts. Always invoked by a higher-tier agent that owns the slice.
+  - Capabilities: tool-use-narrow, deterministic-transformation
+  - Harnesses: Aider with 7B-class models, Cline with 7B-class, Continue with 7B-class
+
+## Architecture rules
+
+- Hex module boundaries: cross-module access through `public-api.mjs` only.
+- No deep imports into another module's internals.
+- Domain stays framework-free; the app layer (`apps/*`) may use any UI framework.
+- TDD is the default; bugfixes start with a failing regression test.
+- Trunk-based delivery with Branch by Abstraction.
+- Keep commits atomic and reviewable — one slice per commit.
+
+## Non-negotiable principles
+
+- Prefer the smallest implementation-ready slice that can be proven locally.
+- Before implementing any user-facing behavior change, use product-planner first and confirm persona/workflow USM plus PRD coverage exists.
+- Keep commits atomic and reviewable; one slice should become one commit before the next slice begins.
+- Never mark work complete before checks, acceptance proof, changelog discipline, and commit discipline are satisfied.
+- Use deterministic repository scripts and hooks as the executable truth.
+- Keep architectural boundaries explicit and avoid broad repo wandering.
+- Treat trunk plus Branch by Abstraction as the default delivery model.
+- Never git add -u or git add . — always name specific files. Scope repo-wide fix scripts (header-fix, readme-fix, prettier, eslint) to your active directory, not repo-wide.
+
+## Navigation protocol
+
+Use tiered loading to minimize context usage:
+
+1. **Tier 1** — Start with `docs/SYSTEM_MAP.md` (~1850 tokens full, ~950 focused). Scan the Category Index to find your target domain.
+2. **Tier 2** — Read `modules/X/manifest.json` + `public-api.mjs` + `README.md` for your target module.
+3. **Tier 3** — Consult `docs/module-catalog.md` only if you need full API details.
+4. **Deep-read only files you will actually change** and their direct collaborators.
+
+## Quality commands
+
+### Headers
+
+```bash
+node scripts/checks/header-create.mjs <files...>
+node scripts/checks/header-check.mjs
+node scripts/checks/header-fix.mjs
+```
+
+### Quality gates
+
+```bash
+node scripts/checks/architecture-check.mjs
+node scripts/checks/delivery-flow-check.mjs
+node scripts/checks/control-plane-check.mjs
+node scripts/checks/changeset-size-check.mjs
+node scripts/checks/test-gate.mjs
+node scripts/checks/changelog-sync.mjs --check
+```
+
+### Traceability and docs
+
+```bash
+node scripts/checks/spec-check.mjs
+node scripts/checks/spec-sync.mjs
+node scripts/checks/backlog-sync.mjs
+node scripts/checks/product-docs-check.mjs
+node scripts/checks/usm-check.mjs
+node scripts/checks/pre-impl-gate.mjs
+node scripts/checks/design-docs-check.mjs
+```
+
+### Coordination (inter-agent claims)
+
+```bash
+node scripts/checks/claim-check.mjs --targets=<paths> --action=<extend|modify|replace>
+node scripts/checks/claim-check.mjs --query=<path>
+node scripts/checks/claim-check.mjs --audit
+node scripts/checks/claim-check.mjs --auto-expire
+node scripts/checks/claim-check.mjs --enforce --staged
+node scripts/checks/claim-check.mjs --create --agent=<name> --slice=<id> --targets=<paths> --action=<action>
+node scripts/checks/claim-check.mjs --auto-complete --staged
+```
+
+### Compatibility sync
+
+```bash
+node scripts/agent-contract/sync.mjs
+node scripts/agent-contract/check.mjs
+```
+
+## Roles
+
+| Role | Min tier | When to use |
+| --- | --- | --- |
+| repo-architect | frontier | structural, orchestration, control-plane, or seam design work |
+| product-planner | frontier | new intake, decomposition, backlog normalization, or mandatory PRD/USM routing before implementation |
+| designer | frontier | user-facing visual language, prompt templates, accepted assets, or design handoff |
+| feature-implementer | mid | bounded implementation slices outside heavy UI concerns |
+| frontend-specialist | mid | visible UI, accessibility, messages/i18n, or selector discipline matters |
+| acceptance-tester | mid | closing acceptance or deciding finalization readiness |
+| control-plane-supervisor | frontier | cross-surface drift or orchestration consistency is in doubt |
+| release-operator | mid | artifact packaging or release/finalization discipline is needed |
+
+## Enforced rules
+
+Blocked at lint time AND runtime — bypass paths are explicitly closed.
+
+- **r1-test-isolation** — Tests must not write to git repositories outside os.tmpdir() / RUNNER_TEMP (`scripts/checks/test-isolation-check.mjs`) — see `docs/adr/0015-test-isolation-enforcement.md`.
+- **r4-worktree-lifecycle** — Worktrees are ephemeral; audit + safe cleanup primitives required (`scripts/coa-worktree.mjs`) — see `docs/adr/0016-worktree-lifecycle.md`.
+- **r2-transport-branch** — Every commit lands on trunk OR on a tx-<slice> transport branch; ceremony bumps gated by a coa-merge marker; ff-update to trunk is repo-shape-aware (F12) (`scripts/checks/transport-branch-check.mjs`) — see `docs/adr/0017-transport-branch-enforcement.md`.
+
+## Definition of done
+
+- Trace links resolve for the changed slice.
+- The changed implementation/proof files reference a ready work item through SpecRefs.
+- Required tests and deterministic checks pass.
+- Architecture and public-API boundaries still hold.
+- Headers, READMEs, and generated adapters are aligned.
+- Acceptance proof is explicit.
+- CHANGELOG.md and commit discipline are satisfied.
+
+## Adapter discipline
+
+- Source of truth: `docs/agent-contract/compatibility-contract.json`
+- Human guide: `docs/agent-contract/README.md`
+- `.claude/CLAUDE.md` is the Claude adapter.
+- `AGENTS.md` is the Codex adapter.
+- `.cursorrules` is the Cursor adapter.
+- `LOCAL.md` / `MICRO.md` slots reserve the local-tier adapter (generated in TPL-209).
+- All four are generated from the same contract — do not edit manually.

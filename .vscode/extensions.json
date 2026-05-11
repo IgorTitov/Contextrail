@@ -1,0 +1,15 @@
+{
+  "recommendations": [
+    "openai.chatgpt",
+    "seunlanlege.action-buttons",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "EditorConfig.EditorConfig",
+    "redhat.vscode-yaml",
+    "yzhang.markdown-all-in-one",
+    "ms-playwright.playwright",
+    "vitest.explorer",
+    "alexkrechik.cucumberautocomplete",
+    "eamodio.gitlens"
+  ]
+}

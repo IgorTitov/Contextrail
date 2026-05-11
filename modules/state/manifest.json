@@ -1,0 +1,78 @@
+{
+  "name": "state",
+  "description": "Observable state store with memory and persistent adapters",
+  "maturity": "stable",
+  "exports": [
+    "public-api.mjs"
+  ],
+  "dependencies": {
+    "modules": [
+      "user-preferences"
+    ],
+    "external": [],
+    "builtins": []
+  },
+  "dependents": [],
+  "structure": {
+    "domain": [
+      "store.mjs"
+    ],
+    "ports": [
+      "state-port.mjs"
+    ],
+    "adapters": [
+      "memory-state-adapter.mjs",
+      "persistent-state-adapter.mjs",
+      "sqlite-adapter.mjs"
+    ],
+    "root": [
+      "public-api.mjs"
+    ]
+  },
+  "testFiles": [
+    "tests/unit/state.test.mjs",
+    "tests/contract/state-hex-contract.test.mjs",
+    "tests/bdd/state-store.test.mjs"
+  ],
+  "capabilities": {
+    "adapters": [
+      "memory-state-adapter.mjs",
+      "persistent-state-adapter.mjs",
+      "sqlite-adapter.mjs"
+    ],
+    "ports": {
+      "StatePort": {
+        "kind": "interface",
+        "methods": {
+          "getState": {
+            "params": [],
+            "returns": "any"
+          },
+          "setState": {
+            "params": [
+              {
+                "name": "updater",
+                "type": "any"
+              }
+            ],
+            "returns": "void"
+          },
+          "subscribe": {
+            "params": [
+              {
+                "name": "listener",
+                "type": "Function"
+              }
+            ],
+            "returns": "() => void"
+          },
+          "subscriberCount": {
+            "params": [],
+            "returns": "number"
+          }
+        }
+      }
+    },
+    "typedefs": {}
+  }
+}

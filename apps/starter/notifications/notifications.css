@@ -1,0 +1,85 @@
+/* @HEADER
+ * @version 0.6.5 | 2026-04-28
+ * @purpose Styles for Notifications in the starter app.
+ * @sidecar notifications.css.header.md
+ * @layer app | @hex _none_ | @ctx _none_
+ * @public false
+ * @edit careful
+ */
+
+/*
+ * Toast notification styles.
+ * Uses theme CSS custom properties.
+ */
+
+.toast-container {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 24rem;
+}
+
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md, 8px);
+  box-shadow: 0 4px 12px var(--color-shadow, rgba(0, 0, 0, 0.08));
+  background-color: var(--color-surface-raised, #ffffff);
+  border-left: 4px solid var(--color-info, #2563eb);
+  animation: toast-slide-in var(--transition-normal, 250ms ease) forwards;
+}
+
+.toast--info {
+  border-left-color: var(--color-info, #2563eb);
+}
+
+.toast--success {
+  border-left-color: var(--color-success, #16a34a);
+}
+
+.toast--error {
+  border-left-color: var(--color-error, #dc2626);
+}
+
+.toast__message {
+  flex: 1;
+  color: var(--color-fg, #1a1a1a);
+}
+
+.toast__close {
+  appearance: none;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  color: var(--color-muted, #737373);
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.toast__close:hover {
+  color: var(--color-fg, #1a1a1a);
+}
+
+@keyframes toast-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    animation: none;
+  }
+}

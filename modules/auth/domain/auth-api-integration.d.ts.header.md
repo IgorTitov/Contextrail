@@ -1,0 +1,34 @@
+---
+fileId: contextrail-template:modules:auth:domain:auth-api-integration.d
+module: modules/auth
+stability: evolving
+steward: shared
+api: file-local
+hexLayer: domain
+boundedContext: auth
+summary: Auth Api Integration.D implementation for the auth module.
+owns: Auth Api Integration.D implementation within the auth module.
+boundaries: Scoped to the auth module. Do not use outside this module boundary.
+invariants: Must remain consistent with the auth module's port contracts.
+notesForLLM: Part of the auth module. Access through public-api.mjs from outside the module.
+allowedDependencies:
+  - ./
+  - "../ports/*"
+  - "../types.*"
+forbiddenDependencies:
+  - "../adapters/**"
+  - "../di/**"
+  - react
+  - next
+  - electron
+  - express
+  - fastify
+  - vite
+  - "node:*"
+  - fs
+  - path
+  - "modules/<other>/**"
+linkedDocs: modules/auth/domain/README.md
+---
+
+# auth-api-integration.d.ts

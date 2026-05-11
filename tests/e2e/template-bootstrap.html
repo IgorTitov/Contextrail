@@ -1,0 +1,32 @@
+<!-- @HEADER
+@version 0.6.5 | 2026-04-28
+@purpose Static local fixture for the template’s Playwright smoke proof.
+@sidecar template-bootstrap.html.header.md
+@layer tests | @hex _none_ | @ctx _none_
+@public false
+@edit careful -->
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Template bootstrap smoke fixture</title>
+    <style>
+      body { font-family: system-ui, sans-serif; margin: 2rem; line-height: 1.5; }
+      .badge { display: inline-block; padding: 0.25rem 0.5rem; border: 1px solid #999; border-radius: 999px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p class="badge" data-testid="status-badge">Template ready</p>
+      <h1>Claude Code template bootstrap</h1>
+      <p>This static fixture exists so the template ships a real Playwright smoke target without needing an app server.</p>
+      <ul data-testid="bootstrap-checklist">
+        <li>Install hooks</li>
+        <li>Run deterministic smoke checks</li>
+        <li>Produce review artifacts</li>
+      </ul>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,97 @@
+{
+  "name": "notifications",
+  "description": "Notification display with DOM and memory adapters",
+  "maturity": "beta",
+  "exports": [
+    "public-api.mjs"
+  ],
+  "dependencies": {
+    "modules": [],
+    "external": [],
+    "builtins": []
+  },
+  "dependents": [],
+  "structure": {
+    "domain": [
+      "notification.mjs"
+    ],
+    "ports": [
+      "notification-port.mjs"
+    ],
+    "adapters": [
+      "dom-adapter.mjs",
+      "memory-adapter.mjs"
+    ],
+    "root": [
+      "public-api.mjs"
+    ]
+  },
+  "testFiles": [
+    "tests/unit/notifications.test.mjs",
+    "tests/contract/notifications-hex-contract.test.mjs",
+    "tests/bdd/notifications.test.mjs"
+  ],
+  "capabilities": {
+    "adapters": [
+      "dom-adapter.mjs",
+      "memory-adapter.mjs"
+    ],
+    "ports": {
+      "NotificationPort": {
+        "kind": "interface",
+        "methods": {
+          "dismiss": {
+            "params": [
+              {
+                "name": "id",
+                "type": "string"
+              }
+            ],
+            "returns": "void"
+          },
+          "getActive": {
+            "params": [],
+            "returns": "Notification[]"
+          },
+          "show": {
+            "params": [
+              {
+                "name": "notification",
+                "type": "Notification"
+              }
+            ],
+            "returns": "void"
+          }
+        }
+      }
+    },
+    "typedefs": {
+      "Notification": {
+        "fields": {
+          "autoDismiss": {
+            "type": "boolean"
+          },
+          "duration": {
+            "type": "number"
+          },
+          "id": {
+            "type": "string"
+          },
+          "level": {
+            "type": "NotificationLevel"
+          },
+          "message": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "number"
+          }
+        }
+      },
+      "NotificationLevel": {
+        "alias": "'info' | 'success' | 'error'",
+        "kind": "alias"
+      }
+    }
+  }
+}

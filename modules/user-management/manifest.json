@@ -1,0 +1,38 @@
+{
+  "name": "user-management",
+  "description": "User lifecycle: registration, profile, invitation, email verification, password reset",
+  "maturity": "beta",
+  "exports": [
+    "public-api.mjs"
+  ],
+  "dependencies": {
+    "modules": [],
+    "external": [],
+    "builtins": []
+  },
+  "dependents": [],
+  "structure": {
+    "domain": [
+      "user-management.mjs"
+    ],
+    "ports": [
+      "user-management-port.mjs"
+    ],
+    "adapters": [
+      "default-adapter.mjs"
+    ],
+    "root": [
+      "public-api.mjs"
+    ]
+  },
+  "testFiles": [
+    "tests/unit/user-management.test.mjs"
+  ],
+  "capabilities": {
+    "adapters": [
+      "default-adapter.mjs"
+    ],
+    "ports": {},
+    "typedefs": {}
+  }
+}

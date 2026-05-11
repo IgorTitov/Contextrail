@@ -1,0 +1,11 @@
+{
+  "generatedAt": "2026-04-11T18:12:24.410Z",
+  "description": "SHA-256 hashes of generated files. Run with --update after sync.mjs to refresh.",
+  "files": {
+    "AGENTS.md": "db75a6fd23ad732ceb8297620c84f779af1510be688f1e8465c741bb8a6f9b66",
+    ".cursorrules": "c3873b274b76d3a2058a3a4c3181ec0ffb7a26f9c81c1ee0d9c86d573129af17",
+    ".agents/README.md": "a6f776493072c9658637a677b9884cc1c2ccb19d93961a1594db1d2b8e01e76c",
+    ".agents/skills/README.md": "79d5bb2cca4091f3fcaf0bac07b44e3a4e61908d48c7d9760c5781e3f1664984",
+    "docs/_generated/dependency-graph.json": "0a6efea05887e7cd261b8a6d1f95370debf8dcb38b31ae0bca17866172979168"
+  }
+}

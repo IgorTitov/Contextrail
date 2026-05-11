@@ -1,0 +1,52 @@
+{
+  "name": "openapi",
+  "description": "Hexagonal OpenAPI 3 module — pure document builder, document-provider port, and adapters for static and route-registry-driven specs",
+  "maturity": "beta",
+  "exports": [
+    "public-api.mjs"
+  ],
+  "dependencies": {
+    "modules": [],
+    "external": [],
+    "builtins": []
+  },
+  "dependents": [],
+  "structure": {
+    "domain": [
+      "build-document.mjs"
+    ],
+    "ports": [
+      "openapi-document-port.mjs"
+    ],
+    "adapters": [
+      "static-document-adapter.mjs",
+      "route-registry-adapter.mjs"
+    ],
+    "root": [
+      "public-api.mjs",
+      "messages.mjs"
+    ]
+  },
+  "testFiles": [
+    "tests/unit/openapi.test.mjs",
+    "tests/contract/openapi-hex-contract.test.mjs"
+  ],
+  "capabilities": {
+    "adapters": [
+      "route-registry-adapter.mjs",
+      "static-document-adapter.mjs"
+    ],
+    "ports": {
+      "OpenApiDocumentPort": {
+        "kind": "interface",
+        "methods": {
+          "getDocument": {
+            "params": [],
+            "returns": "Record<string, unknown>"
+          }
+        }
+      }
+    },
+    "typedefs": {}
+  }
+}

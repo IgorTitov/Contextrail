@@ -1,0 +1,168 @@
+{
+  "name": "i18n",
+  "description": "Internationalization infrastructure with pluggable adapters for message translation, interpolation, pluralization, and Intl formatting",
+  "maturity": "stable",
+  "exports": [
+    "public-api.mjs"
+  ],
+  "dependencies": {
+    "modules": [],
+    "external": [],
+    "builtins": []
+  },
+  "dependents": [],
+  "structure": {
+    "domain": [
+      "interpolation.mjs",
+      "pluralization.mjs",
+      "message-registry.mjs",
+      "locale-resolver.mjs"
+    ],
+    "ports": [
+      "i18n-port.mjs"
+    ],
+    "adapters": [
+      "intl-adapter.mjs",
+      "memory-adapter.mjs"
+    ],
+    "root": [
+      "public-api.mjs",
+      "messages.mjs"
+    ]
+  },
+  "testFiles": [
+    "tests/unit/i18n.test.mjs",
+    "tests/contract/i18n-hex-contract.test.mjs",
+    "tests/bdd/i18n.test.mjs"
+  ],
+  "capabilities": {
+    "adapters": [
+      "intl-adapter.mjs",
+      "memory-adapter.mjs"
+    ],
+    "ports": {
+      "I18nPort": {
+        "kind": "interface",
+        "methods": {
+          "formatCurrency": {
+            "params": [
+              {
+                "name": "amount",
+                "type": "number"
+              },
+              {
+                "name": "currency",
+                "type": "string"
+              },
+              {
+                "name": "opts",
+                "optional": true,
+                "type": "Intl.NumberFormatOptions"
+              }
+            ],
+            "returns": "string"
+          },
+          "formatDate": {
+            "params": [
+              {
+                "name": "d",
+                "type": "Date"
+              },
+              {
+                "name": "opts",
+                "optional": true,
+                "type": "Intl.DateTimeFormatOptions"
+              }
+            ],
+            "returns": "string"
+          },
+          "formatNumber": {
+            "params": [
+              {
+                "name": "n",
+                "type": "number"
+              },
+              {
+                "name": "opts",
+                "optional": true,
+                "type": "Intl.NumberFormatOptions"
+              }
+            ],
+            "returns": "string"
+          },
+          "getAvailableLocales": {
+            "params": [],
+            "returns": "string[]"
+          },
+          "getLocale": {
+            "params": [],
+            "returns": "string"
+          },
+          "registerMessages": {
+            "params": [
+              {
+                "name": "namespace",
+                "type": "string"
+              },
+              {
+                "name": "locale",
+                "type": "string"
+              },
+              {
+                "name": "messages",
+                "type": "Record<string, string>"
+              }
+            ],
+            "returns": "void"
+          },
+          "setLocale": {
+            "params": [
+              {
+                "name": "locale",
+                "type": "string"
+              }
+            ],
+            "returns": "void"
+          },
+          "t": {
+            "params": [
+              {
+                "name": "key",
+                "type": "string"
+              },
+              {
+                "name": "params",
+                "optional": true,
+                "type": "Record<string, string | number>"
+              }
+            ],
+            "returns": "string"
+          },
+          "tp": {
+            "params": [
+              {
+                "name": "key",
+                "type": "string"
+              },
+              {
+                "name": "count",
+                "type": "number"
+              },
+              {
+                "name": "forms",
+                "type": "Record<string, string>"
+              },
+              {
+                "name": "params",
+                "optional": true,
+                "type": "Record<string, string | number>"
+              }
+            ],
+            "returns": "string"
+          }
+        }
+      }
+    },
+    "typedefs": {}
+  }
+}

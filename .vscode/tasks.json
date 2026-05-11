@@ -1,0 +1,45 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Test",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["test"],
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Merge snapshot",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["snapshot"],
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Merge and Zip",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["mergezip"],
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Test and Merge and Zip",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["test:all:mergezip"],
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "E2E (visible)",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["e2e:visible"],
+      "group": "test",
+      "problemMatcher": []
+    }
+  ]
+}

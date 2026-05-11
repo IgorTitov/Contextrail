@@ -1,0 +1,1 @@
+# test-deletion-guard.mjs

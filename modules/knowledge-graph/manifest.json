@@ -1,0 +1,175 @@
+{
+  "name": "knowledge-graph",
+  "description": "GraphRAG foundation with entity extraction, relationship detection, and graph algorithms",
+  "maturity": "beta",
+  "exports": [
+    "public-api.mjs"
+  ],
+  "dependencies": {
+    "modules": [],
+    "external": [],
+    "builtins": []
+  },
+  "dependents": [],
+  "structure": {
+    "domain": [
+      "graph-algorithms.mjs"
+    ],
+    "ports": [
+      "entity-extractor-port.mjs",
+      "graph-store-port.mjs"
+    ],
+    "adapters": [
+      "cooccurrence-relationship-extractor.mjs",
+      "memory-graph-adapter.mjs",
+      "regex-entity-extractor.mjs"
+    ],
+    "root": [
+      "public-api.mjs",
+      "messages.mjs"
+    ]
+  },
+  "testFiles": [
+    "tests/unit/knowledge-graph.test.mjs",
+    "tests/contract/knowledge-graph-hex-contract.test.mjs",
+    "tests/bdd/knowledge-graph.test.mjs"
+  ],
+  "capabilities": {
+    "adapters": [
+      "cooccurrence-relationship-extractor.mjs",
+      "memory-graph-adapter.mjs",
+      "regex-entity-extractor.mjs"
+    ],
+    "ports": {
+      "EntityExtractorPort": {
+        "kind": "interface",
+        "methods": {
+          "extractEntities": {
+            "params": [
+              {
+                "name": "text",
+                "type": "string"
+              }
+            ],
+            "returns": "Entity[]"
+          }
+        }
+      },
+      "GraphStorePort": {
+        "kind": "interface",
+        "methods": {
+          "addEntities": {
+            "params": [
+              {
+                "name": "entities",
+                "type": "Entity[]"
+              }
+            ],
+            "returns": "void"
+          },
+          "addRelationships": {
+            "params": [
+              {
+                "name": "relationships",
+                "type": "Relationship[]"
+              }
+            ],
+            "returns": "void"
+          },
+          "clear": {
+            "params": [],
+            "returns": "void"
+          },
+          "getEntities": {
+            "params": [],
+            "returns": "Entity[]"
+          },
+          "getNeighbors": {
+            "params": [
+              {
+                "name": "entityId",
+                "type": "string"
+              }
+            ],
+            "returns": "Entity[]"
+          },
+          "getRelationships": {
+            "params": [],
+            "returns": "Relationship[]"
+          },
+          "traverse": {
+            "params": [
+              {
+                "name": "startId",
+                "type": "string"
+              },
+              {
+                "name": "maxDepth",
+                "type": "number"
+              }
+            ],
+            "returns": "Entity[]"
+          }
+        }
+      },
+      "RelationshipExtractorPort": {
+        "kind": "interface",
+        "methods": {
+          "extractRelationships": {
+            "params": [
+              {
+                "name": "text",
+                "type": "string"
+              },
+              {
+                "name": "entities",
+                "type": "Entity[]"
+              }
+            ],
+            "returns": "Relationship[]"
+          }
+        }
+      }
+    },
+    "typedefs": {
+      "Entity": {
+        "fields": {
+          "id": {
+            "type": "string"
+          },
+          "metadata": {
+            "optional": true,
+            "type": "object"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        }
+      },
+      "Relationship": {
+        "fields": {
+          "metadata": {
+            "optional": true,
+            "type": "object"
+          },
+          "source": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "weight": {
+            "optional": true,
+            "type": "number"
+          }
+        }
+      }
+    }
+  }
+}

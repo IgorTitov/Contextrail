@@ -1,0 +1,20 @@
+{
+  "id": "clm-ex0002",
+  "agent": "team-beta / repo-architect",
+  "slice": "TPL-EXAMPLE",
+  "created": "2026-04-01T10:00:00Z",
+  "expires": "2026-04-01T18:00:00Z",
+  "status": "completed",
+  "targets": [
+    {
+      "path": "modules/cache/ports/cache-port.mjs",
+      "module": "cache",
+      "surface": "port",
+      "action": "modify",
+      "description": "Add TTL parameter to the get() method signature"
+    }
+  ],
+  "strategy": "modify-in-place",
+  "dependsOn": [],
+  "notes": "EXAMPLE CLAIM — demonstrates a modify-in-place claim. This claim changes an existing port contract method signature, which cannot be done additively. Pre-commit enforcement blocks other modify/replace claims on the same file while this is active."
+}

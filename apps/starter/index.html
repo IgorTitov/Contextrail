@@ -1,0 +1,81 @@
+<!-- @HEADER
+@version 0.6.5 | 2026-04-28
+@purpose Serve as the HTML5 entry point for the starter app, providing semantic landmarks, CSS stylesheet links, and ES module bootstrapping of app.mjs with a conditional PWA service-worker registration stub.
+@sidecar index.html.header.md
+@layer app | @hex _none_ | @ctx _none_
+@public true
+@edit careful -->
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#2563eb" />
+    <!-- Set content="pwa" to activate PWA mode (service worker + install prompt) -->
+    <!-- <meta name="app-mode" content="pwa" /> -->
+    <title>Starter App</title>
+    <link rel="manifest" href="manifest.json" />
+
+    <!-- Design system: reset, tokens, theme, components -->
+    <link rel="stylesheet" href="design/reset.css" />
+    <link rel="stylesheet" href="design/tokens.css" />
+    <link rel="stylesheet" href="theme-toggle/theme-variables.css" />
+    <link rel="stylesheet" href="design/components.css" />
+    <!-- Layout skeleton (CSS Grid, mobile-first) -->
+    <link rel="stylesheet" href="layout/layout.css" />
+    <!-- Navigation (skip-link, focus indicators) -->
+    <link rel="stylesheet" href="navigation/navigation.css" />
+    <!-- Notifications (toast styles) -->
+    <link rel="stylesheet" href="notifications/notifications.css" />
+    <!-- Loading states (skeleton shimmer, spinner, overlay) -->
+    <link rel="stylesheet" href="loading-states/loading-states.css" />
+    <!-- Error boundary (fallback UI) -->
+    <link rel="stylesheet" href="error-boundary/error-boundary.css" />
+
+    <style>
+      /* Utilities */
+      .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0; }
+    </style>
+  </head>
+  <body>
+    <!-- Skip to content -->
+    <a href="#main-content" class="skip-link" data-testid="skip-to-content">Skip to content</a>
+
+    <!-- Header -->
+    <header class="site-header" data-testid="site-header" role="banner">
+      <nav class="site-header__nav" aria-label="Menu">
+        <strong>Starter App</strong>
+      </nav>
+      <div class="site-header__controls" data-testid="site-header-controls">
+        <!-- Language picker and theme toggle are wired by app.mjs -->
+      </div>
+    </header>
+
+    <!-- Main -->
+    <main id="main-content" class="site-main" data-testid="site-main" role="main" tabindex="-1">
+      <p data-testid="status-text">Loading&hellip;</p>
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer" data-testid="site-footer" role="contentinfo">&copy; 2026 Project</footer>
+
+    <!-- Toast container (ARIA live region) -->
+    <div class="toast-container" data-testid="toast-container" role="status" aria-live="polite" aria-atomic="false"></div>
+
+    <script type="module">
+      import { initApp } from './app.mjs';
+
+      initApp(document.body).then((app) => {
+        const status = document.querySelector('[data-testid="status-text"]');
+        if (status) status.textContent = 'Ready';
+        console.log('[starter] App initialized in mode:', app.ctx.mode);
+      }).catch((err) => {
+        console.error('[starter] Init failed:', err);
+      });
+
+      // Service worker registration is handled by pwa-register.mjs via app.mjs
+      // when mode is PWA. See apps/starter/pwa/pwa-register.mjs.
+    </script>
+  </body>
+</html>

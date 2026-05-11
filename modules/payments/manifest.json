@@ -1,0 +1,207 @@
+{
+  "name": "payments",
+  "description": "Hexagonal payments module — pure money + payment-intent + webhook-verify domain behind a narrow PaymentsPort, memory adapter, zero external deps",
+  "maturity": "stable",
+  "exports": [
+    "public-api.mjs"
+  ],
+  "dependencies": {
+    "modules": [],
+    "external": [],
+    "builtins": [
+      "node:crypto"
+    ]
+  },
+  "dependents": [],
+  "structure": {
+    "domain": [
+      "money.mjs",
+      "payment-intent.mjs",
+      "webhook-event.mjs"
+    ],
+    "ports": [
+      "payments-port.mjs"
+    ],
+    "adapters": [
+      "memory-payments-adapter.mjs",
+      "node-webhook-verifier.mjs"
+    ],
+    "root": [
+      "public-api.mjs",
+      "messages.mjs"
+    ]
+  },
+  "testFiles": [
+    "tests/unit/payments.test.mjs",
+    "tests/contract/payments-hex-contract.test.mjs"
+  ],
+  "capabilities": {
+    "adapters": [
+      "memory-payments-adapter.mjs",
+      "node-webhook-verifier.mjs"
+    ],
+    "ports": {
+      "PaymentsPort": {
+        "kind": "interface",
+        "methods": {
+          "clear": {
+            "params": [],
+            "returns": "void"
+          },
+          "confirmPaymentIntent": {
+            "params": [
+              {
+                "name": "id",
+                "type": "string"
+              },
+              {
+                "name": "options",
+                "type": "ConfirmOptions"
+              }
+            ],
+            "returns": "Promise<PaymentIntent>"
+          },
+          "createCustomer": {
+            "params": [
+              {
+                "name": "input",
+                "type": "CustomerInput"
+              }
+            ],
+            "returns": "Promise<Customer>"
+          },
+          "createPaymentIntent": {
+            "params": [
+              {
+                "name": "input",
+                "type": "PaymentIntentInput"
+              }
+            ],
+            "returns": "Promise<PaymentIntent>"
+          },
+          "listIntents": {
+            "params": [
+              {
+                "name": "filter",
+                "optional": true,
+                "type": "IntentFilter"
+              }
+            ],
+            "returns": "PaymentIntent[]"
+          },
+          "refund": {
+            "params": [
+              {
+                "name": "intentId",
+                "type": "string"
+              },
+              {
+                "name": "options",
+                "optional": true,
+                "type": "RefundOptions"
+              }
+            ],
+            "returns": "Promise<Refund>"
+          },
+          "verifyWebhook": {
+            "params": [
+              {
+                "name": "rawBody",
+                "type": "string"
+              },
+              {
+                "name": "signature",
+                "type": "string"
+              },
+              {
+                "name": "secret",
+                "type": "string"
+              }
+            ],
+            "returns": "true"
+          }
+        }
+      }
+    },
+    "typedefs": {
+      "ConfirmOptions": {
+        "fields": {
+          "paymentMethod": {
+            "type": "string"
+          }
+        }
+      },
+      "Customer": {
+        "fields": {
+          "createdAt": {
+            "type": "number"
+          },
+          "email": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "metadata": {
+            "type": "Record<string, string>"
+          },
+          "name": {
+            "optional": true,
+            "type": "string"
+          }
+        }
+      },
+      "CustomerInput": {
+        "fields": {
+          "email": {
+            "type": "string"
+          },
+          "metadata": {
+            "optional": true,
+            "type": "Record<string, string>"
+          },
+          "name": {
+            "optional": true,
+            "type": "string"
+          }
+        }
+      },
+      "IntentFilter": {
+        "fields": {
+          "customerId": {
+            "optional": true,
+            "type": "string"
+          },
+          "status": {
+            "optional": true,
+            "type": "PaymentIntentStatus"
+          }
+        }
+      },
+      "Refund": {
+        "fields": {
+          "amount": {
+            "type": "Money"
+          },
+          "createdAt": {
+            "type": "number"
+          },
+          "id": {
+            "type": "string"
+          },
+          "intentId": {
+            "type": "string"
+          }
+        }
+      },
+      "RefundOptions": {
+        "fields": {
+          "amount": {
+            "optional": true,
+            "type": "Money"
+          }
+        }
+      }
+    }
+  }
+}

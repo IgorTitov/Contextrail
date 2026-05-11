@@ -1,0 +1,105 @@
+{
+  "name": "prerender",
+  "description": "Hexagonal prerender module — pure SSG primitive that walks a route manifest, invokes a render function per route, and writes the rendered HTML through a StaticOutputPort. RenderFunctionPort typedef + StaticOutputPort struct port + in-memory output adapter + sequential runner. Zero external deps, framework-agnostic — adapters own filesystem, CDN, or in-memory persistence.",
+  "maturity": "beta",
+  "exports": [
+    "public-api.mjs"
+  ],
+  "dependencies": {
+    "modules": [],
+    "external": [],
+    "builtins": []
+  },
+  "dependents": [],
+  "structure": {
+    "domain": [
+      "route-manifest.mjs",
+      "render-result.mjs",
+      "prerender-plan.mjs"
+    ],
+    "ports": [
+      "render-function-port.mjs",
+      "static-output-port.mjs"
+    ],
+    "adapters": [
+      "memory-static-output.mjs",
+      "sequential-prerender-runner.mjs"
+    ],
+    "root": [
+      "public-api.mjs",
+      "messages.mjs"
+    ]
+  },
+  "testFiles": [
+    "tests/unit/prerender.test.mjs",
+    "tests/contract/prerender-hex-contract.test.mjs"
+  ],
+  "capabilities": {
+    "adapters": [
+      "memory-static-output.mjs",
+      "sequential-prerender-runner.mjs"
+    ],
+    "ports": {
+      "RenderFunctionPort": {
+        "kind": "interface",
+        "methods": {}
+      },
+      "StaticOutputPort": {
+        "kind": "interface",
+        "methods": {
+          "clear": {
+            "params": [],
+            "returns": "void"
+          },
+          "list": {
+            "params": [],
+            "returns": "ReadonlyArray<StaticOutputRecord>"
+          },
+          "write": {
+            "params": [
+              {
+                "name": "path",
+                "type": "string"
+              },
+              {
+                "name": "html",
+                "type": "string"
+              }
+            ],
+            "returns": "Promise<StaticOutputRecord>"
+          }
+        }
+      }
+    },
+    "typedefs": {
+      "RenderFunctionResult": {
+        "fields": {
+          "headers": {
+            "optional": true,
+            "type": "Record<string, string>"
+          },
+          "html": {
+            "type": "string"
+          },
+          "status": {
+            "optional": true,
+            "type": "number"
+          }
+        }
+      },
+      "StaticOutputRecord": {
+        "fields": {
+          "path": {
+            "type": "string"
+          },
+          "publishedAt": {
+            "type": "number"
+          },
+          "size": {
+            "type": "number"
+          }
+        }
+      }
+    }
+  }
+}

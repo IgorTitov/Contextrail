@@ -1,0 +1,76 @@
+{
+  "name": "user-preferences",
+  "description": "User preferences storage with localStorage, IndexedDB, and memory adapters",
+  "maturity": "beta",
+  "exports": [
+    "public-api.mjs"
+  ],
+  "dependencies": {
+    "modules": [],
+    "external": [],
+    "builtins": []
+  },
+  "dependents": [
+    "state"
+  ],
+  "structure": {
+    "domain": [
+      "preferences.mjs"
+    ],
+    "ports": [
+      "storage-port.mjs"
+    ],
+    "adapters": [
+      "indexeddb-adapter.mjs",
+      "local-storage-adapter.mjs",
+      "memory-adapter.mjs"
+    ],
+    "root": [
+      "public-api.mjs"
+    ]
+  },
+  "testFiles": [
+    "tests/unit/user-preferences.test.mjs",
+    "tests/contract/user-preferences-hex-contract.test.mjs",
+    "tests/bdd/user-preferences.test.mjs"
+  ],
+  "capabilities": {
+    "adapters": [
+      "indexeddb-adapter.mjs",
+      "local-storage-adapter.mjs",
+      "memory-adapter.mjs"
+    ],
+    "ports": {
+      "StoragePort": {
+        "kind": "interface",
+        "methods": {
+          "load": {
+            "params": [],
+            "returns": "PreferencesState | null"
+          },
+          "save": {
+            "params": [
+              {
+                "name": "state",
+                "type": "PreferencesState"
+              }
+            ],
+            "returns": "void"
+          }
+        }
+      }
+    },
+    "typedefs": {
+      "PreferencesState": {
+        "fields": {
+          "locale": {
+            "type": "string"
+          },
+          "theme": {
+            "type": "'light' | 'dark' | 'system'"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,11 @@
+node_modules/
+.backups/
+dist/
+test-results/
+coverage/
+.git/
+*.md
+!README.md
+.claude/
+.agents/
+.vscode/

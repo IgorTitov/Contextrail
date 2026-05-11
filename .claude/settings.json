@@ -1,0 +1,55 @@
+{
+  "permissions": {
+    "allow": [
+      "Edit(/.claude/skills/header-sidecar/**)",
+      "Edit(/.claude/skills/trunk-bba/**)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/run-dangerous-command-blocker.mjs"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/run-dangerous-command-blocker.mjs"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/run-claim-guard.mjs"
+          }
+        ]
+      },
+      {
+        "matcher": "Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/cockpit-agent-marker.mjs"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|Bash|Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/cockpit-telemetry.mjs"
+          }
+        ]
+      }
+    ]
+  },
+  "disableAllHooks": false
+}

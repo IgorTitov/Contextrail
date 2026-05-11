@@ -1,0 +1,101 @@
+{
+  "name": "event-bus",
+  "description": "Typed synchronous in-process pub/sub event bus",
+  "maturity": "stable",
+  "exports": [
+    "public-api.mjs"
+  ],
+  "dependencies": {
+    "modules": [],
+    "external": [],
+    "builtins": []
+  },
+  "dependents": [],
+  "structure": {
+    "domain": [
+      "event-emitter.mjs"
+    ],
+    "ports": [
+      "event-bus-port.mjs"
+    ],
+    "adapters": [
+      "memory-event-bus.mjs",
+      "node-eventemitter-adapter.mjs"
+    ],
+    "root": [
+      "public-api.mjs"
+    ]
+  },
+  "testFiles": [
+    "tests/unit/event-bus.test.mjs",
+    "tests/contract/event-bus-hex-contract.test.mjs",
+    "tests/bdd/event-bus.test.mjs"
+  ],
+  "capabilities": {
+    "adapters": [
+      "memory-event-bus.mjs",
+      "node-eventemitter-adapter.mjs"
+    ],
+    "ports": {
+      "EventBusPort": {
+        "kind": "interface",
+        "methods": {
+          "clear": {
+            "params": [],
+            "returns": "void"
+          },
+          "emit": {
+            "params": [
+              {
+                "name": "event",
+                "type": "string"
+              },
+              {
+                "name": "args",
+                "rest": true,
+                "type": "any[]"
+              }
+            ],
+            "returns": "void"
+          },
+          "listenerCount": {
+            "params": [
+              {
+                "name": "event",
+                "type": "string"
+              }
+            ],
+            "returns": "number"
+          },
+          "off": {
+            "params": [
+              {
+                "name": "event",
+                "type": "string"
+              },
+              {
+                "name": "handler",
+                "type": "Function"
+              }
+            ],
+            "returns": "void"
+          },
+          "on": {
+            "params": [
+              {
+                "name": "event",
+                "type": "string"
+              },
+              {
+                "name": "handler",
+                "type": "Function"
+              }
+            ],
+            "returns": "void"
+          }
+        }
+      }
+    },
+    "typedefs": {}
+  }
+}

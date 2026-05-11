@@ -1,0 +1,154 @@
+{
+  "name": "log",
+  "description": "Structured logging with console, JSON, no-op, and remote adapters",
+  "maturity": "stable",
+  "exports": [
+    "public-api.mjs"
+  ],
+  "dependencies": {
+    "modules": [],
+    "external": [],
+    "builtins": []
+  },
+  "dependents": [],
+  "structure": {
+    "domain": [
+      "log-levels.mjs"
+    ],
+    "ports": [
+      "log-port.mjs"
+    ],
+    "adapters": [
+      "console-adapter.mjs",
+      "structured-json-adapter.mjs",
+      "no-op-adapter.mjs",
+      "remote-adapter.mjs",
+      "file-adapter.mjs"
+    ],
+    "root": [
+      "public-api.mjs",
+      "messages.mjs"
+    ]
+  },
+  "testFiles": [
+    "tests/unit/log.test.mjs",
+    "tests/contract/log-hex-contract.test.mjs",
+    "tests/bdd/log.test.mjs"
+  ],
+  "capabilities": {
+    "adapters": [
+      "console-adapter.mjs",
+      "file-adapter.mjs",
+      "no-op-adapter.mjs",
+      "remote-adapter.mjs",
+      "structured-json-adapter.mjs"
+    ],
+    "ports": {
+      "LogPort": {
+        "kind": "interface",
+        "methods": {
+          "child": {
+            "params": [
+              {
+                "name": "scope",
+                "type": "string"
+              }
+            ],
+            "returns": "LogPort"
+          },
+          "debug": {
+            "params": [
+              {
+                "name": "msg",
+                "type": "string"
+              },
+              {
+                "name": "data",
+                "optional": true,
+                "type": "*"
+              }
+            ],
+            "returns": "void"
+          },
+          "error": {
+            "params": [
+              {
+                "name": "msg",
+                "type": "string"
+              },
+              {
+                "name": "data",
+                "optional": true,
+                "type": "*"
+              }
+            ],
+            "returns": "void"
+          },
+          "info": {
+            "params": [
+              {
+                "name": "msg",
+                "type": "string"
+              },
+              {
+                "name": "data",
+                "optional": true,
+                "type": "*"
+              }
+            ],
+            "returns": "void"
+          },
+          "warn": {
+            "params": [
+              {
+                "name": "msg",
+                "type": "string"
+              },
+              {
+                "name": "data",
+                "optional": true,
+                "type": "*"
+              }
+            ],
+            "returns": "void"
+          }
+        }
+      }
+    },
+    "typedefs": {
+      "LogEntry": {
+        "fields": {
+          "data": {
+            "optional": true,
+            "type": "*"
+          },
+          "level": {
+            "type": "LogLevel"
+          },
+          "message": {
+            "type": "string"
+          },
+          "scope": {
+            "optional": true,
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "number"
+          }
+        }
+      },
+      "LogLevel": {
+        "alias": "'debug' | 'info' | 'warn' | 'error'",
+        "kind": "alias"
+      },
+      "LogPortOptions": {
+        "fields": {
+          "minLevel": {
+            "optional": true,
+            "type": "LogLevel"
+          }
+        }
+      }
+    }
+  }
+}

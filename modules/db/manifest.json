@@ -1,0 +1,102 @@
+{
+  "name": "db",
+  "description": "Hexagonal database module with memory, generic SQL driver, and node:sqlite adapters",
+  "maturity": "stable",
+  "exports": [
+    "public-api.mjs"
+  ],
+  "dependencies": {
+    "modules": [],
+    "external": [],
+    "builtins": []
+  },
+  "dependents": [],
+  "structure": {
+    "domain": [
+      "query-builder.mjs"
+    ],
+    "ports": [
+      "database-port.mjs"
+    ],
+    "adapters": [
+      "memory-adapter.mjs",
+      "sql-driver-adapter.mjs",
+      "node-sqlite-adapter.mjs"
+    ],
+    "root": [
+      "public-api.mjs",
+      "messages.mjs"
+    ]
+  },
+  "testFiles": [
+    "tests/unit/db.test.mjs",
+    "tests/contract/db-hex-contract.test.mjs"
+  ],
+  "capabilities": {
+    "adapters": [
+      "memory-adapter.mjs",
+      "node-sqlite-adapter.mjs",
+      "sql-driver-adapter.mjs"
+    ],
+    "ports": {
+      "DatabasePort": {
+        "kind": "interface",
+        "methods": {
+          "close": {
+            "params": [],
+            "returns": "void"
+          },
+          "execute": {
+            "params": [
+              {
+                "name": "sql",
+                "type": "string"
+              },
+              {
+                "name": "params",
+                "optional": true,
+                "type": "unknown[]"
+              }
+            ],
+            "returns": "QueryResult"
+          },
+          "query": {
+            "params": [
+              {
+                "name": "sql",
+                "type": "string"
+              },
+              {
+                "name": "params",
+                "optional": true,
+                "type": "unknown[]"
+              }
+            ],
+            "returns": "QueryResult"
+          },
+          "transaction": {
+            "params": [
+              {
+                "name": "fn",
+                "type": "(tx: { query: Function, execute: Function }) => void"
+              }
+            ],
+            "returns": "void"
+          }
+        }
+      }
+    },
+    "typedefs": {
+      "QueryResult": {
+        "fields": {
+          "rowCount": {
+            "type": "number"
+          },
+          "rows": {
+            "type": "Array<Record<string, unknown>>"
+          }
+        }
+      }
+    }
+  }
+}

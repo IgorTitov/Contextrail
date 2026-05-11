@@ -1,0 +1,174 @@
+{
+  "name": "ai-chat",
+  "description": "Pluggable AI chat abstraction with echo and HTTP API adapters",
+  "maturity": "stable",
+  "exports": [
+    "public-api.mjs"
+  ],
+  "dependencies": {
+    "modules": [
+      "api-client"
+    ],
+    "external": [],
+    "builtins": []
+  },
+  "dependents": [
+    "local-llm"
+  ],
+  "structure": {
+    "domain": [
+      "message-history.mjs"
+    ],
+    "ports": [
+      "ai-chat-port.mjs"
+    ],
+    "adapters": [
+      "echo-adapter.mjs",
+      "http-api-adapter.mjs"
+    ],
+    "root": [
+      "public-api.mjs",
+      "messages.mjs"
+    ]
+  },
+  "testFiles": [
+    "tests/unit/ai-chat.test.mjs",
+    "tests/unit/ai-chat-ui.test.mjs",
+    "tests/contract/ai-chat-hex-contract.test.mjs",
+    "tests/bdd/ai-chat.test.mjs"
+  ],
+  "capabilities": {
+    "adapters": [
+      "echo-adapter.mjs",
+      "http-api-adapter.mjs"
+    ],
+    "ports": {
+      "AiChatPort": {
+        "kind": "interface",
+        "methods": {
+          "clearHistory": {
+            "params": [],
+            "returns": "void"
+          },
+          "getHistory": {
+            "params": [],
+            "returns": "AiChatMessage[]"
+          },
+          "offMessage": {
+            "params": [
+              {
+                "name": "listener",
+                "type": "(message: AiChatMessage) => void"
+              }
+            ],
+            "returns": "void"
+          },
+          "onMessage": {
+            "params": [
+              {
+                "name": "listener",
+                "type": "(message: AiChatMessage) => void"
+              }
+            ],
+            "returns": "void"
+          },
+          "sendMessage": {
+            "params": [
+              {
+                "name": "message",
+                "type": "string"
+              },
+              {
+                "name": "options",
+                "optional": true,
+                "type": "AiChatOptions"
+              }
+            ],
+            "returns": "Promise<AiChatResponse>"
+          },
+          "streamMessage": {
+            "params": [
+              {
+                "name": "message",
+                "type": "string"
+              },
+              {
+                "name": "options",
+                "optional": true,
+                "type": "AiChatOptions"
+              }
+            ],
+            "returns": "AsyncIterable<AiChatStreamChunk>"
+          }
+        }
+      }
+    },
+    "typedefs": {
+      "AiChatMessage": {
+        "fields": {
+          "content": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "role": {
+            "type": "'user' | 'assistant' | 'system'"
+          },
+          "timestamp": {
+            "type": "number"
+          }
+        }
+      },
+      "AiChatOptions": {
+        "fields": {
+          "maxTokens": {
+            "optional": true,
+            "type": "number"
+          },
+          "model": {
+            "optional": true,
+            "type": "string"
+          },
+          "systemPrompt": {
+            "optional": true,
+            "type": "string"
+          },
+          "temperature": {
+            "optional": true,
+            "type": "number"
+          }
+        }
+      },
+      "AiChatResponse": {
+        "fields": {
+          "message": {
+            "type": "AiChatMessage"
+          },
+          "model": {
+            "optional": true,
+            "type": "string"
+          },
+          "usage": {
+            "optional": true,
+            "type": "{ promptTokens: number, completionTokens: number, totalTokens: number }"
+          }
+        }
+      },
+      "AiChatStreamChunk": {
+        "fields": {
+          "delta": {
+            "type": "string"
+          },
+          "done": {
+            "type": "boolean"
+          },
+          "message": {
+            "optional": true,
+            "type": "AiChatMessage"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,106 @@
+/* @HEADER
+ * @version 0.6.5 | 2026-04-28
+ * @purpose Provide visual styles for the Local LLM panel, using CSS custom properties for theming and scoped class names matching the component's DOM output.
+ * @sidecar local-llm-panel.css.header.md
+ * @layer app | @hex _none_ | @ctx _none_
+ * @public false
+ * @edit careful
+ */
+
+/**
+ * Styles for the Local LLM panel.
+ * Uses CSS custom properties (design tokens) for theming.
+ *
+ * SpecRefs: TPL-085
+ */
+
+.local-llm-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm, 0.5rem);
+  padding: var(--spacing-md, 1rem);
+  border: 1px solid var(--color-border, #e0e0e0);
+  border-radius: var(--radius-md, 0.5rem);
+  background: var(--color-surface, #ffffff);
+  font-family: var(--font-family-base, system-ui, sans-serif);
+}
+
+.local-llm-selector-row {
+  display: flex;
+  gap: var(--spacing-sm, 0.5rem);
+  align-items: center;
+}
+
+.local-llm-model-selector {
+  flex: 1;
+  padding: var(--spacing-xs, 0.25rem) var(--spacing-sm, 0.5rem);
+  border: 1px solid var(--color-border, #e0e0e0);
+  border-radius: var(--radius-sm, 0.25rem);
+  font-size: var(--font-size-sm, 0.875rem);
+  background: var(--color-surface, #ffffff);
+  color: var(--color-text, #1a1a1a);
+}
+
+.local-llm-load-button {
+  padding: var(--spacing-xs, 0.25rem) var(--spacing-md, 1rem);
+  border: none;
+  border-radius: var(--radius-sm, 0.25rem);
+  background: var(--color-primary, #2563eb);
+  color: var(--color-on-primary, #ffffff);
+  font-size: var(--font-size-sm, 0.875rem);
+  cursor: pointer;
+}
+
+.local-llm-load-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.local-llm-status {
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--color-text-secondary, #666666);
+}
+
+.local-llm-progress-bar {
+  width: 100%;
+  height: 0.5rem;
+  background: var(--color-surface-alt, #f0f0f0);
+  border-radius: var(--radius-sm, 0.25rem);
+  overflow: hidden;
+}
+
+.local-llm-progress-fill {
+  height: 100%;
+  background: var(--color-primary, #2563eb);
+  transition: width 0.2s ease;
+  width: 0%;
+}
+
+.local-llm-storage-usage {
+  font-size: var(--font-size-xs, 0.75rem);
+  color: var(--color-text-secondary, #666666);
+}
+
+.local-llm-clear-cache {
+  align-self: flex-start;
+  padding: var(--spacing-xs, 0.25rem) var(--spacing-sm, 0.5rem);
+  border: 1px solid var(--color-border, #e0e0e0);
+  border-radius: var(--radius-sm, 0.25rem);
+  background: transparent;
+  color: var(--color-text-secondary, #666666);
+  font-size: var(--font-size-xs, 0.75rem);
+  cursor: pointer;
+}
+
+.local-llm-clear-cache:hover {
+  background: var(--color-surface-alt, #f0f0f0);
+}
+
+.local-llm-capability-warning {
+  padding: var(--spacing-md, 1rem);
+  background: var(--color-warning-surface, #fff3cd);
+  border: 1px solid var(--color-warning-border, #ffc107);
+  border-radius: var(--radius-sm, 0.25rem);
+  color: var(--color-warning-text, #856404);
+  font-size: var(--font-size-sm, 0.875rem);
+}

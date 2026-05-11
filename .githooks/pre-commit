@@ -1,0 +1,399 @@
+#!/usr/bin/env bash
+# @HEADER
+# @version 0.8.7 | 2026-05-11
+# @purpose Run deterministic pre-commit sync and validation steps, then stage their resulting repository updates.
+# @sidecar pre-commit.header.md
+# @layer git-hooks | @hex _none_ | @ctx _none_
+# @public false
+# @edit careful
+
+set -uo pipefail
+
+# Phases that MUST run regardless of COA_GATE / COA_SKIP_GATES. R1
+# test-isolation (Phase 2.5, ADR-0015), R9 test-deletion-guard (Phase 2.6,
+# ADR-0041), and R2 transport-branch (Phase 2.7, ADR-0017) are on this list
+# because each closes a load-bearing failure mode — letting any bypass
+# shortcut them would re-open the exact incident classes they defend.
+# Phase 7 (heavy gates: tests + changelog-sync) is non-skippable to prevent
+# ceremony bypass via COA_SKIP_GATES. (TPL-241)
+# Phase 1.0 (R8.2 hook integrity) is non-skippable — security-critical:
+# a hook that can skip its own integrity check provides no protection.
+# Phase 0 (R5 main-worktree guard) is non-skippable — it must run before
+# any other phase so bypass via COA_SKIP_GATES is closed (TPL-276).
+NON_SKIPPABLE_PHASES="0,1.0,2.5,2.6,2.7,7"
+
+failures=()
+
+# Snapshot originally-staged files BEFORE any fix/sync operations modify them.
+# This prevents `git add` at the end from accidentally staging changes made
+# by other parallel Claude sessions working in the same worktree.
+ORIG_STAGED=$(git diff --cached --name-only)
+
+# Signal to fix scripts that they're running from pre-commit
+# (allows repo-wide operation without --scope requirement)
+export COA_PRE_COMMIT=1
+
+# Helper: run commands in parallel, return non-zero if any fails
+run_parallel() {
+  local pids=()
+  local cmds=()
+  for cmd in "$@"; do
+    $cmd &
+    pids+=($!)
+    cmds+=("$cmd")
+  done
+  local rc=0
+  for i in "${!pids[@]}"; do
+    if ! wait "${pids[$i]}"; then
+      echo "  FAIL: ${cmds[$i]}" >&2
+      rc=1
+    fi
+  done
+  return $rc
+}
+
+# Helper: run commands sequentially, return non-zero if any fails
+run_sequential() {
+  local rc=0
+  for cmd in "$@"; do
+    if ! $cmd; then
+      echo "  FAIL: $cmd" >&2
+      rc=1
+    fi
+  done
+  return $rc
+}
+
+# --- Gate level ---
+GATE="${COA_GATE:-full}"
+SKIP_PHASES="${COA_SKIP_GATES:-}"
+
+# --- Scope detection ---
+if [ -n "${COA_SCOPE:-}" ]; then
+  SCOPE="$COA_SCOPE"
+else
+  # Auto-detect changed modules from staged files
+  SCOPE=$(git diff --cached --name-only \
+    | sed -n 's|^\(modules/[^/]*\)/.*|\1|p' \
+    | sort -u \
+    | paste -sd ',' -)
+fi
+if [ -n "$SCOPE" ]; then
+  echo "Pre-commit: scoped to $SCOPE" >&2
+fi
+
+# Auto-detect docs-only changes (only if COA_GATE not explicitly set)
+if [ "$GATE" = "full" ] && [ -z "${COA_GATE+x}" ]; then
+  staged=$(git diff --cached --name-only)
+  if [ -n "$staged" ]; then
+    docs_only=true
+    while IFS= read -r file; do
+      case "$file" in
+        docs/*|*.md|*.txt) ;;
+        *) docs_only=false; break ;;
+      esac
+    done <<< "$staged"
+    if [ "$docs_only" = true ]; then
+      echo "Pre-commit: docs-only change detected, using fast path" >&2
+      GATE="fast"
+    fi
+  fi
+fi
+
+# Check whether a phase should run given current GATE and SKIP_PHASES.
+# Phases listed in NON_SKIPPABLE_PHASES are immune to COA_SKIP_GATES and
+# also run during fast-path commits — they encode invariants that must
+# hold for every commit (R1 test-isolation, ADR-0015).
+should_run() {
+  local phase="$1"
+  if [[ ",$NON_SKIPPABLE_PHASES," == *",$phase,"* ]]; then
+    return 0
+  fi
+  if [[ ",$SKIP_PHASES," == *",$phase,"* ]]; then
+    echo "Pre-commit: skipping Phase $phase (COA_SKIP_GATES)" >&2
+    return 1
+  fi
+  if [ "$GATE" = "fast" ] && [ "$phase" != "6" ]; then
+    return 1
+  fi
+  return 0
+}
+
+# Phase 0 — Main-worktree guard (non-skippable, R5 / TPL-276, updated TPL-329)
+# Blocks git commit when cwd is the main repository worktree rather than a
+# tx-<slice> transport worktree. Emergency override requires a one-shot
+# .coa/r5-override.json rationale file (ADR-0047). COA_OPERATOR=1 alone
+# does NOT bypass R5 — see docs/guides/r5-override-emergency.md.
+if should_run 0; then
+  echo "[pre-commit] Phase 0: main-worktree-guard (R5, non-skippable)"
+  node scripts/checks/main-worktree-guard.mjs
+  if [ $? -ne 0 ]; then
+    echo "[pre-commit] FATAL: main-worktree guard blocked commit" >&2
+    exit 1
+  fi
+fi
+
+# Phase 0.5 — Main-worktree dirt audit (skippable, W1 / TPL-283)
+# Warn-only: emits warnings when untracked files exist in key dirs of the main
+# worktree. Silently exits from tx-* transport worktrees. Never blocks.
+if should_run 0.5; then
+  echo "[pre-commit] Phase 0.5: main-worktree-dirt-audit (W1, warn-only)"
+  node scripts/checks/main-worktree-dirt-audit.mjs --warn-only \
+    || echo "  WARN: main-worktree dirt audit emitted findings (commit will still proceed)" >&2
+fi
+
+# Phase 1.0 — Hook integrity check (non-skippable, R8.2 / TPL-256)
+# Verifies sha256 fingerprints of .githooks/* match the committed registry.
+# Non-skippable — a hook that bypasses its own integrity check provides no
+# protection. Pre-push also runs this check as a catch-net when pre-commit
+# itself is the tampered hook.
+if should_run 1.0; then
+  echo "[pre-commit] Phase 1.0: hook-integrity-check (R8.2, non-skippable)"
+  node scripts/checks/hook-integrity-check.mjs
+  if [ $? -ne 0 ]; then
+    echo "[pre-commit] FATAL: hook integrity check failed — refusing commit" >&2
+    exit 1
+  fi
+fi
+
+# Phase 1 — Independent read-only checks (parallel)
+if should_run 1; then
+  run_parallel \
+    "node scripts/checks/spec-check.mjs" \
+    "node scripts/checks/product-docs-check.mjs" \
+    "node scripts/checks/product-data-check.mjs" \
+    "node scripts/checks/usm-check.mjs" \
+    "node scripts/checks/design-docs-check.mjs" \
+    || failures+=("Phase 1: read-only checks")
+fi
+
+# Phase 2 — Syncs that write files (sequential, may depend on phase 1)
+if should_run 2; then
+  run_sequential \
+    "node scripts/checks/spec-sync.mjs" \
+    "node scripts/checks/backlog-sync.mjs" \
+    || failures+=("Phase 2: syncs")
+fi
+
+# Phase 2.5 — R1 test-isolation enforcement (ADR-0015) — non-skippable.
+# Self-test runs FIRST so a tampered check fails its own meta-validation
+# before scanning the real codebase. This phase is in NON_SKIPPABLE_PHASES
+# above; COA_SKIP_GATES cannot suppress it.
+if should_run 2.5; then
+  echo "[pre-commit] Phase 2.5: test-isolation-check (R1, non-skippable)"
+  run_sequential \
+    "node scripts/checks/test-isolation-check.mjs --self-test" \
+    "node scripts/checks/test-isolation-check.mjs" \
+    || failures+=("Phase 2.5: test-isolation-check (R1)")
+fi
+
+# Phase 2.6 — R9 test-deletion-guard enforcement (ADR-0041) — non-skippable.
+# Counts net test()/it() block-count change in staged tests/** files; refuses
+# net deletion unless COA_OPERATOR=1 AND `Allow-test-deletion: <reason>` line
+# appears in the commit-message body. Closes the F8 silent-test-removal class
+# surfaced during the D6 BYO-LLM Variant B run. (TPL-314)
+if should_run 2.6; then
+  echo "[pre-commit] Phase 2.6: test-deletion-guard (R9, non-skippable)"
+  run_sequential \
+    "node scripts/checks/test-deletion-guard.mjs" \
+    || failures+=("Phase 2.6: test-deletion-guard (R9)")
+fi
+
+# Phase 3 — Claims pipeline (sequential, order-dependent)
+# Auto-complete is intentionally NOT here. It runs at the end, after all
+# phases pass, so that a failed Phase 4-7 does not prematurely mark the
+# committer's claim as completed and force a re-acquire on retry. (TPL-206)
+if should_run 3; then
+  run_sequential \
+    "node scripts/checks/claim-check.mjs --auto-expire" \
+    "node scripts/checks/claim-check.mjs --enforce --staged" \
+    || failures+=("Phase 3: claims pipeline")
+fi
+
+# Phase 4 — Pre-implementation gate
+if should_run 4; then
+  run_sequential \
+    "node scripts/checks/pre-impl-gate.mjs" \
+    || failures+=("Phase 4: pre-implementation gate")
+fi
+
+# Phase 5 — Fix/sync operations (parallel, independent of each other)
+# dependency-graph.mjs (no flags) regenerates docs/_generated/dependency-graph.json
+# so Phase 6's --check sees a fresh file. Without this, a sibling worktree that
+# committed first and updated the graph causes our Phase 6 check to fail on
+# stale local state. (TPL-220 — D2/E6/E7)
+#
+# header-fix uses --since=HEAD instead of --changed so it walks ONLY the files
+# actually differing from HEAD. --changed silently falls back to the entire
+# repo when its own diff is empty (~1968 files re-stamped per commit, hundreds
+# of dirty files in `git status` post-commit). --since=HEAD has no fallback —
+# empty diff means zero work. (TPL-231)
+#
+# --use-current-version reads VERSION (already bumped by ceremony at this
+# point) and stamps @version preemptively on slim-header files in --since=HEAD
+# scope, then git-adds those files so the stamp lands in the commit blob —
+# eliminating the post-commit cascade residue (TPL-246 / ADR-0014 Revision).
+# Phase 5 still handles structural work (new files, legacy/sidecar format
+# drift) alongside the preemptive version stamp. (TPL-231, TPL-246)
+if should_run 5; then
+  run_parallel \
+    "node scripts/agent-contract/sync.mjs" \
+    "node scripts/checks/readme-fix.mjs" \
+    "node scripts/checks/header-fix.mjs --since=HEAD --use-current-version" \
+    "node scripts/checks/dependency-graph.mjs" \
+    || failures+=("Phase 5: fix/sync operations")
+fi
+
+# Hook-integrity post-stamp regen (TPL-287 — relocated from end-of-hook).
+# Phase 5's header-fix --use-current-version stamps a new @version on
+# .githooks/pre-commit / pre-push when those files are in the staged set.
+# This invalidates the fingerprint registry captured before Phase 5.
+# Re-run --update immediately after Phase 5 completes (run_parallel is
+# fully synchronous — all parallel commands finish before this block runs)
+# and re-stage the registry so fingerprints are consistent even if Phase 6
+# or Phase 7 fails and aborts the commit. On retry, Phase 1.0 sees a
+# consistent registry and passes without manual --update. (TPL-287)
+# Skipped when no .githooks/ files were in the original staged set.
+if [ -n "$ORIG_STAGED" ] && echo "$ORIG_STAGED" | grep -q '^\.githooks/'; then
+  node scripts/checks/hook-integrity-check.mjs --update \
+    --from-pre-commit-hook 2>/dev/null \
+    || echo "  WARN: hook-integrity --update failed (commit will still proceed)" >&2
+  git add .githooks/.fingerprints.json 2>/dev/null
+fi
+
+# Phase 6 — Validation checks (parallel, all read-only)
+if should_run 6; then
+  run_parallel \
+    "node scripts/checks/architecture-check.mjs${SCOPE:+ --scope=$SCOPE}" \
+    "node scripts/checks/delivery-flow-check.mjs" \
+    "node scripts/checks/control-plane-check.mjs" \
+    "node scripts/agent-contract/check.mjs" \
+    "node scripts/checks/changeset-size-check.mjs" \
+    "node scripts/checks/capabilities-sync.mjs --check" \
+    "node scripts/checks/dependency-graph.mjs --check" \
+    "node scripts/checks/instruction-integrity-check.mjs" \
+    "node scripts/checks/module-fit-check.mjs --warn-only" \
+    || failures+=("Phase 6: validation checks")
+
+  # Phase 6 advisory — R10 sidecar-referents-check (TPL-316 / ADR-0042).
+  # Verifies sidecar `fileId` matches the canonical derivation, `tests:`
+  # entries exist on disk, and `module:` references an existing directory.
+  # Defends finding F9 (sidecar metadata hallucination) surfaced during the
+  # D6 BYO-LLM cross-variant work — Devstral 24B fabricated synthetic
+  # kebab-case fileIds and nonexistent test paths. Advisory by default
+  # (warning-only, exit 0); promote to hard-fail with
+  # `COA_OPERATOR_PROMOTE_SIDECAR_CHECK=1` once trunk baseline is clean.
+  echo "[pre-commit] Phase 6 advisory: sidecar-referents-check (R10)"
+  node scripts/checks/sidecar-referents-check.mjs \
+    || failures+=("Phase 6 advisory: sidecar-referents-check (R10)")
+fi
+
+# Phase 7 — Heavy gates (sequential)
+# Unset worktree-specific git plumbing vars before the test runner starts.
+# When git executes a pre-commit hook inside a worktree it sets GIT_DIR,
+# GIT_INDEX_FILE, and GIT_COMMON_DIR to absolute paths that point at real
+# directories — the same pattern the R1 no-live-git runtime guard was
+# designed to block. The guard cannot distinguish "set by git for hook
+# execution" from "poisoned parent shell", so it refuses to start. By
+# Phase 7 the hook is done with git operations (Phases 1–6 are complete),
+# so unsetting these vars is safe.
+# GIT_COMMON_DIR added in TPL-274: git sets this in linked-worktree hook
+# contexts to point at the common .git dir; without unsetting it, test
+# fixture git commits write objects/refs into the live repo.
+if should_run 7; then
+  unset GIT_DIR GIT_INDEX_FILE GIT_OBJECT_DIRECTORY GIT_ALTERNATE_OBJECT_DIRECTORIES GIT_WORK_TREE GIT_COMMON_DIR 2>/dev/null || true
+  run_sequential \
+    "node scripts/checks/test-gate.mjs" \
+    "node scripts/checks/changelog-sync.mjs" \
+    "node scripts/checks/changelog-sync.mjs --check-uniqueness" \
+    || failures+=("Phase 7: heavy gates")
+fi
+
+# Phase 8 — Merge-ceremony drift check (warn-only, R6)
+# Runs 6 post-hoc audit checks. Warn-only so false positives do not block
+# commits during the initial stabilization period. Promotion to hard-error
+# is tracked in CG-R6-1. (TPL-245)
+if should_run 8; then
+  echo "[pre-commit] Phase 8: merge-ceremony-drift-check (R6, warn-only)"
+  node scripts/checks/merge-ceremony-drift-check.mjs --warn-only || true
+fi
+
+# Final report
+if [ ${#failures[@]} -gt 0 ]; then
+  echo "" >&2
+  echo "Pre-commit: ${#failures[@]} phase(s) failed:" >&2
+  for f in "${failures[@]}"; do echo "  - $f" >&2; done
+  exit 1
+fi
+
+# TPL-258 R8.4: record which phases ran for bypass audit.
+# Written after all phases pass so a failed pre-commit never produces a
+# dangling temp file that could be consumed by a later --no-verify post-commit.
+# Deletes any leftover temp file from a previous failed run first.
+_REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)"
+_BYPASS_TMP="${_REPO_ROOT}/.claims/coa-phases-ran.tmp"
+_BYPASS_LOG="${_REPO_ROOT}/.claims/commit-audit.log"
+rm -f "$_BYPASS_TMP" 2>/dev/null
+# Compute which phases ran vs were skipped based on current GATE + SKIP_PHASES.
+# We call should_run() again at the end to derive the lists — calling it with
+# stderr suppressed (2>/dev/null) avoids duplicate "skipping Phase X" messages.
+_PHASES_RAN=""
+_PHASES_SKIPPED=""
+for _p in "0.5" "1.0" "1" "2" "2.5" "3" "4" "5" "6" "7" "8"; do
+  if should_run "$_p" 2>/dev/null; then
+    _PHASES_RAN="${_PHASES_RAN:+$_PHASES_RAN,}\"$_p\""
+  else
+    _PHASES_SKIPPED="${_PHASES_SKIPPED:+$_PHASES_SKIPPED,}\"$_p\""
+  fi
+done
+_TS="$(date -u +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || echo 'unknown')"
+_SKIP_REASON="${COA_SKIP_GATES:-}"
+mkdir -p "$(dirname "$_BYPASS_TMP")" 2>/dev/null
+printf '{"ts":"%s","phases":[%s],"skipped":[%s],"skipReason":"%s","commitSha":null}\n' \
+  "$_TS" "$_PHASES_RAN" "$_PHASES_SKIPPED" "$_SKIP_REASON" > "$_BYPASS_TMP"
+
+# All phases passed — auto-complete claims whose targets are in the staged
+# set. Moved here from Phase 3 so a failed Phase 4-7 leaves the committer's
+# claim "active" and ready for retry instead of prematurely "completed".
+# (TPL-206)
+#
+# TPL-223 — pass `--from-pre-commit-hook` so claim-check.mjs trusts the hook
+# environment as proof of the commit-about-to-happen and bypasses the
+# HEAD-verification gate that would otherwise reject pre-commit context
+# (HEAD has not yet moved). The hook does NOT pass --agent: claim-check
+# auto-derives it from $COA_AGENT (when set by coa-merge or operator) or
+# from the most recent active claim covering the staged set.
+node scripts/checks/claim-check.mjs --auto-complete --staged \
+  --from-pre-commit-hook || \
+  echo "  WARN: claim-check --auto-complete failed (commit will still proceed)" >&2
+
+# Re-stage only the files that were originally staged (captured at top).
+# Phase 5 fix/sync operations may have modified these files (header-fix,
+# readme-fix, spec-sync, etc.). We re-add ONLY those files, not everything.
+# This prevents accidentally staging changes from parallel Claude sessions.
+echo "$ORIG_STAGED" | while IFS= read -r f; do
+  [ -n "$f" ] && git add "$f" 2>/dev/null
+done
+
+# Auto-stage regenerated _generated artefacts (TPL-220 — D2/E6/E7).
+# These are deterministic outputs of Phase 2 syncs and Phase 5
+# dependency-graph regeneration. Listed explicitly (no globs) so the
+# staging surface stays auditable and we never sweep unrelated files
+# from docs/_generated/. If a path is unchanged, `git add` is a no-op.
+git add docs/_generated/dependency-graph.json 2>/dev/null
+git add docs/_generated/spec-index.json 2>/dev/null
+git add docs/backlog/_generated/index.md 2>/dev/null
+git add docs/backlog/_generated/backlog.json 2>/dev/null
+
+# Auto-stage sync.mjs outputs (TPL-278). These are regenerated by Phase 5
+# agent-contract/sync.mjs with REPO_VERSION and adapter content embedded;
+# without explicit staging they sit dirty in the working tree post-commit
+# (manifested in TPL-277 chore-adapters cleanup, AIC-DEV-137 leftover).
+# Listed explicitly (no broad globs) so parallel-session WIP cannot leak.
+git add AGENTS.md 2>/dev/null
+git add .cursorrules 2>/dev/null
+git add .agents/README.md 2>/dev/null
+git add .agents/skills/README.md 2>/dev/null
+for f in .agents/skills/*/SKILL.md; do
+  [ -f "$f" ] && git add "$f" 2>/dev/null
+done

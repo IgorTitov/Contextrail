@@ -1,0 +1,29 @@
+{
+  "name": "form-validation",
+  "description": "Pure domain module for field and form-level validation rules",
+  "maturity": "beta",
+  "exports": [
+    "public-api.mjs"
+  ],
+  "dependencies": {
+    "modules": [],
+    "external": [],
+    "builtins": []
+  },
+  "dependents": [],
+  "structure": {
+    "domain": [
+      "rules.mjs",
+      "validate-form.mjs"
+    ],
+    "root": [
+      "public-api.mjs",
+      "messages.mjs"
+    ]
+  },
+  "testFiles": [
+    "tests/unit/form-validation.test.mjs",
+    "tests/contract/form-validation-hex-contract.test.mjs",
+    "tests/bdd/form-validation.test.mjs"
+  ]
+}

@@ -1,0 +1,176 @@
+{
+  "name": "analytics",
+  "description": "Privacy-first analytics with consent-gated behavioral tracking (clicks, scroll, visibility, mouse heatmap)",
+  "maturity": "beta",
+  "exports": [
+    "public-api.mjs"
+  ],
+  "dependencies": {
+    "modules": [],
+    "external": [],
+    "builtins": []
+  },
+  "dependents": [],
+  "structure": {
+    "domain": [
+      "session-manager.mjs",
+      "consent.mjs",
+      "mouse-collector.mjs"
+    ],
+    "ports": [
+      "analytics-port.mjs"
+    ],
+    "adapters": [
+      "console-adapter.mjs",
+      "no-op-adapter.mjs",
+      "behavioral-adapter.mjs"
+    ],
+    "root": [
+      "public-api.mjs",
+      "messages.mjs"
+    ]
+  },
+  "testFiles": [
+    "tests/unit/analytics.test.mjs",
+    "tests/contract/analytics-hex-contract.test.mjs",
+    "tests/bdd/analytics.test.mjs"
+  ],
+  "capabilities": {
+    "adapters": [
+      "behavioral-adapter.mjs",
+      "console-adapter.mjs",
+      "no-op-adapter.mjs"
+    ],
+    "ports": {
+      "AnalyticsPort": {
+        "kind": "interface",
+        "methods": {
+          "getConsent": {
+            "params": [],
+            "returns": "ConsentState"
+          },
+          "identify": {
+            "params": [
+              {
+                "name": "userId",
+                "type": "string"
+              },
+              {
+                "name": "traits",
+                "optional": true,
+                "type": "Record<string, any>"
+              }
+            ],
+            "returns": "void"
+          },
+          "page": {
+            "params": [
+              {
+                "name": "pageName",
+                "optional": true,
+                "type": "string"
+              },
+              {
+                "name": "properties",
+                "optional": true,
+                "type": "Record<string, any>"
+              }
+            ],
+            "returns": "void"
+          },
+          "reset": {
+            "params": [],
+            "returns": "void"
+          },
+          "setConsent": {
+            "params": [
+              {
+                "name": "consent",
+                "type": "Partial<ConsentState>"
+              }
+            ],
+            "returns": "void"
+          },
+          "setProperties": {
+            "params": [
+              {
+                "name": "properties",
+                "type": "Record<string, any>"
+              }
+            ],
+            "returns": "void"
+          },
+          "track": {
+            "params": [
+              {
+                "name": "eventName",
+                "type": "string"
+              },
+              {
+                "name": "properties",
+                "optional": true,
+                "type": "Record<string, any>"
+              }
+            ],
+            "returns": "void"
+          }
+        }
+      }
+    },
+    "typedefs": {
+      "AnalyticsEvent": {
+        "fields": {
+          "name": {
+            "type": "string"
+          },
+          "properties": {
+            "optional": true,
+            "type": "Record<string, any>"
+          },
+          "timestamp": {
+            "type": "number"
+          }
+        }
+      },
+      "BehavioralEvent": {
+        "fields": {
+          "data": {
+            "type": "Record<string, any>"
+          },
+          "timestamp": {
+            "type": "number"
+          },
+          "type": {
+            "type": "'click'|'scroll'|'visibility'|'mouse'"
+          }
+        }
+      },
+      "ConsentState": {
+        "fields": {
+          "analytics": {
+            "type": "boolean"
+          },
+          "behavioral": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SessionInfo": {
+        "fields": {
+          "lastActivity": {
+            "type": "number"
+          },
+          "pageViews": {
+            "type": "number"
+          },
+          "sessionId": {
+            "type": "string"
+          },
+          "startedAt": {
+            "type": "number"
+          }
+        }
+      }
+    }
+  }
+}

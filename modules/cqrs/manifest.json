@@ -1,0 +1,183 @@
+{
+  "name": "cqrs",
+  "description": "Hexagonal cqrs module — pure Command/Query/DomainEvent value objects + aggregate replay helpers + CommandBusPort + QueryBusPort + EventStorePort with optimistic concurrency + in-memory adapters, zero external deps",
+  "maturity": "stable",
+  "exports": [
+    "public-api.mjs"
+  ],
+  "dependencies": {
+    "modules": [],
+    "external": [],
+    "builtins": []
+  },
+  "dependents": [],
+  "structure": {
+    "domain": [
+      "command.mjs",
+      "query.mjs",
+      "event.mjs",
+      "aggregate.mjs"
+    ],
+    "ports": [
+      "command-bus-port.mjs",
+      "query-bus-port.mjs",
+      "event-store-port.mjs"
+    ],
+    "adapters": [
+      "memory-command-bus.mjs",
+      "memory-query-bus.mjs",
+      "memory-event-store.mjs"
+    ],
+    "root": [
+      "public-api.mjs",
+      "messages.mjs"
+    ]
+  },
+  "testFiles": [
+    "tests/unit/cqrs.test.mjs",
+    "tests/contract/cqrs-hex-contract.test.mjs"
+  ],
+  "capabilities": {
+    "adapters": [
+      "memory-command-bus.mjs",
+      "memory-event-store.mjs",
+      "memory-query-bus.mjs"
+    ],
+    "ports": {
+      "CommandBusPort": {
+        "kind": "interface",
+        "methods": {
+          "clear": {
+            "params": [],
+            "returns": "void"
+          },
+          "dispatch": {
+            "params": [
+              {
+                "name": "command",
+                "type": "Command"
+              }
+            ],
+            "returns": "Promise<unknown>"
+          },
+          "register": {
+            "params": [
+              {
+                "name": "commandType",
+                "type": "string"
+              },
+              {
+                "name": "handler",
+                "type": "(command: Command, context: object) => Promise<unknown> | unknown"
+              }
+            ],
+            "returns": "void"
+          }
+        }
+      },
+      "EventStorePort": {
+        "kind": "interface",
+        "methods": {
+          "append": {
+            "params": [
+              {
+                "name": "aggregateId",
+                "type": "string"
+              },
+              {
+                "name": "expectedVersion",
+                "type": "number"
+              },
+              {
+                "name": "events",
+                "type": "DomainEvent[]"
+              }
+            ],
+            "returns": "Promise<DomainEvent[]>"
+          },
+          "clear": {
+            "params": [],
+            "returns": "void"
+          },
+          "load": {
+            "params": [
+              {
+                "name": "aggregateId",
+                "type": "string"
+              }
+            ],
+            "returns": "Promise<DomainEvent[]>"
+          },
+          "loadAll": {
+            "params": [
+              {
+                "name": "filter",
+                "optional": true,
+                "type": "EventStoreFilter"
+              }
+            ],
+            "returns": "DomainEvent[]"
+          },
+          "subscribe": {
+            "params": [
+              {
+                "name": "listener",
+                "type": "EventStoreListener"
+              }
+            ],
+            "returns": "(() => void)"
+          }
+        }
+      },
+      "QueryBusPort": {
+        "kind": "interface",
+        "methods": {
+          "ask": {
+            "params": [
+              {
+                "name": "query",
+                "type": "Query"
+              }
+            ],
+            "returns": "Promise<unknown>"
+          },
+          "clear": {
+            "params": [],
+            "returns": "void"
+          },
+          "register": {
+            "params": [
+              {
+                "name": "queryType",
+                "type": "string"
+              },
+              {
+                "name": "handler",
+                "type": "(query: Query, context: object) => Promise<unknown> | unknown"
+              }
+            ],
+            "returns": "void"
+          }
+        }
+      }
+    },
+    "typedefs": {
+      "EventStoreFilter": {
+        "fields": {
+          "aggregateId": {
+            "optional": true,
+            "type": "string"
+          },
+          "type": {
+            "optional": true,
+            "type": "string"
+          }
+        }
+      },
+      "EventStoreListener": {
+        "alias": "(event: DomainEvent) => void",
+        "kind": "alias"
+      }
+    }
+  }
+}

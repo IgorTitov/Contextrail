@@ -1,0 +1,16 @@
+{
+  "$schema": "https://capacitorjs.com/docs/config",
+  "appId": "com.example.{{PROJECT_NAME}}",
+  "appName": "{{PROJECT_NAME}}",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "backgroundColor": "#ffffff",
+      "showSpinner": false
+    }
+  }
+}

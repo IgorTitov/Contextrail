@@ -1,0 +1,165 @@
+{
+  "name": "monitoring",
+  "description": "Monitoring bounded context: exception tracking, structured messages, metrics, and spans behind a single port with swappable backends.",
+  "maturity": "beta",
+  "exports": [
+    "public-api.mjs"
+  ],
+  "dependencies": {
+    "modules": [],
+    "external": [],
+    "builtins": []
+  },
+  "dependents": [],
+  "structure": {
+    "domain": [
+      "monitoring.mjs"
+    ],
+    "ports": [
+      "monitoring-port.mjs"
+    ],
+    "adapters": [
+      "memory-adapter.mjs",
+      "console-adapter.mjs",
+      "no-op-adapter.mjs"
+    ],
+    "root": [
+      "public-api.mjs"
+    ]
+  },
+  "testFiles": [
+    "tests/unit/monitoring.test.mjs"
+  ],
+  "capabilities": {
+    "adapters": [
+      "console-adapter.mjs",
+      "memory-adapter.mjs",
+      "no-op-adapter.mjs"
+    ],
+    "ports": {
+      "MonitoringPort": {
+        "kind": "interface",
+        "methods": {
+          "captureException": {
+            "params": [
+              {
+                "name": "error",
+                "type": "unknown"
+              },
+              {
+                "name": "context",
+                "optional": true,
+                "type": "MonitoringContext"
+              }
+            ],
+            "returns": "ExceptionEvent | null"
+          },
+          "captureMessage": {
+            "params": [
+              {
+                "name": "message",
+                "type": "string"
+              },
+              {
+                "name": "severity",
+                "optional": true,
+                "type": "Severity"
+              },
+              {
+                "name": "context",
+                "optional": true,
+                "type": "MonitoringContext"
+              }
+            ],
+            "returns": "MessageEvent | null"
+          },
+          "flush": {
+            "params": [],
+            "returns": "void"
+          },
+          "gauge": {
+            "params": [
+              {
+                "name": "name",
+                "type": "string"
+              },
+              {
+                "name": "value",
+                "type": "number"
+              },
+              {
+                "name": "tags",
+                "optional": true,
+                "type": "Record<string, unknown>"
+              }
+            ],
+            "returns": "Metric"
+          },
+          "histogram": {
+            "params": [
+              {
+                "name": "name",
+                "type": "string"
+              },
+              {
+                "name": "value",
+                "type": "number"
+              },
+              {
+                "name": "tags",
+                "optional": true,
+                "type": "Record<string, unknown>"
+              }
+            ],
+            "returns": "Metric"
+          },
+          "increment": {
+            "params": [
+              {
+                "name": "name",
+                "type": "string"
+              },
+              {
+                "name": "value",
+                "optional": true,
+                "type": "number"
+              },
+              {
+                "name": "tags",
+                "optional": true,
+                "type": "Record<string, unknown>"
+              }
+            ],
+            "returns": "Metric"
+          },
+          "startSpan": {
+            "params": [
+              {
+                "name": "name",
+                "type": "string"
+              },
+              {
+                "name": "attributes",
+                "optional": true,
+                "type": "Record<string, unknown>"
+              }
+            ],
+            "returns": "PendingSpan"
+          }
+        }
+      }
+    },
+    "typedefs": {
+      "PendingSpan": {
+        "fields": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

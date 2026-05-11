@@ -1,0 +1,15 @@
+{
+  "all": true,
+  "src": ["modules/"],
+  "exclude": [
+    "node_modules/**",
+    "tests/**",
+    "scripts/**",
+    "apps/**",
+    ".backups/**",
+    "dist/**",
+    "coverage/**"
+  ],
+  "reporter": ["text", "html"],
+  "report-dir": "coverage"
+}

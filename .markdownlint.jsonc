@@ -1,0 +1,17 @@
+// Repository-wide markdownlint configuration.
+//
+// Why this file exists: running `npx markdownlint-cli2 CHANGELOG.md` reports
+// duplicate `### Added` / `### Changed` headings (MD024) and long lines
+// (MD013). Both are intentional — Keep-a-Changelog prescribes repeating
+// section names under each version, and changelog entries are often longer
+// than 80 columns. Codify the exception here instead of rewriting history.
+{
+  "default": true,
+  // Allow duplicate sub-headings as long as they sit under different
+  // parents. `### Added` under `## [0.4.0]` and `### Added` under
+  // `## [0.3.0]` are not duplicates in any meaningful sense.
+  "MD024": { "siblings_only": true },
+  // Don't enforce line length on the changelog — entries describe slices
+  // and reference long paths.
+  "MD013": false
+}

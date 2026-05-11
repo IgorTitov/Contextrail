@@ -1,0 +1,20 @@
+{
+  "id": "clm-ex0001",
+  "agent": "team-alpha / feature-implementer",
+  "slice": "TPL-EXAMPLE",
+  "created": "2026-04-01T09:00:00Z",
+  "expires": "2026-04-01T17:00:00Z",
+  "status": "completed",
+  "targets": [
+    {
+      "path": "modules/auth/public-api.mjs",
+      "module": "auth",
+      "surface": "public-api",
+      "action": "extend",
+      "description": "Add OAuth2 PKCE token refresh export behind BBA seam"
+    }
+  ],
+  "strategy": "bba-additive",
+  "dependsOn": [],
+  "notes": "EXAMPLE CLAIM — demonstrates a BBA-additive extension. This claim adds a new export without modifying existing ones, so it merges cleanly with other additive claims on the same file."
+}

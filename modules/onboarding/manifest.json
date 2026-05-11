@@ -1,0 +1,110 @@
+{
+  "name": "onboarding",
+  "description": "Guided walkthrough tours with spotlight overlay and step-by-step popovers for new-user onboarding",
+  "maturity": "beta",
+  "exports": [
+    "public-api.mjs"
+  ],
+  "dependencies": {
+    "modules": [],
+    "external": [],
+    "builtins": []
+  },
+  "dependents": [],
+  "structure": {
+    "domain": [
+      "tour-step.mjs",
+      "tour-state.mjs"
+    ],
+    "ports": [
+      "onboarding-port.mjs"
+    ],
+    "adapters": [
+      "dom-adapter.mjs",
+      "memory-adapter.mjs"
+    ],
+    "root": [
+      "public-api.mjs",
+      "messages.mjs"
+    ]
+  },
+  "testFiles": [
+    "tests/unit/onboarding.test.mjs",
+    "tests/contract/onboarding-hex-contract.test.mjs",
+    "tests/bdd/onboarding.test.mjs"
+  ],
+  "capabilities": {
+    "adapters": [
+      "dom-adapter.mjs",
+      "memory-adapter.mjs"
+    ],
+    "ports": {
+      "OnboardingPort": {
+        "kind": "interface",
+        "methods": {
+          "destroy": {
+            "params": [],
+            "returns": "void"
+          },
+          "endTour": {
+            "params": [],
+            "returns": "void"
+          },
+          "getCurrentIndex": {
+            "params": [],
+            "returns": "number"
+          },
+          "isActive": {
+            "params": [],
+            "returns": "boolean"
+          },
+          "nextStep": {
+            "params": [],
+            "returns": "void"
+          },
+          "previousStep": {
+            "params": [],
+            "returns": "void"
+          },
+          "startTour": {
+            "params": [
+              {
+                "name": "steps",
+                "type": "TourStep[]"
+              }
+            ],
+            "returns": "void"
+          }
+        }
+      }
+    },
+    "typedefs": {
+      "PopoverPosition": {
+        "alias": "'top' | 'bottom' | 'left' | 'right'",
+        "kind": "alias"
+      },
+      "TourStep": {
+        "fields": {
+          "description": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "order": {
+            "type": "number"
+          },
+          "position": {
+            "type": "PopoverPosition"
+          },
+          "target": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,189 @@
+{
+  "name": "realtime",
+  "description": "Primus-style transparent transport selection with WebSocket, SSE, long-polling, and WebRTC adapters",
+  "maturity": "beta",
+  "exports": [
+    "public-api.mjs"
+  ],
+  "dependencies": {
+    "modules": [],
+    "external": [],
+    "builtins": []
+  },
+  "dependents": [],
+  "structure": {
+    "domain": [
+      "channel-router.mjs",
+      "connection-state.mjs",
+      "reconnection.mjs",
+      "heartbeat.mjs",
+      "transport-manager.mjs"
+    ],
+    "ports": [
+      "realtime-port.mjs",
+      "transport-port.mjs"
+    ],
+    "adapters": [
+      "websocket-transport.mjs",
+      "sse-transport.mjs",
+      "long-polling-transport.mjs",
+      "webrtc-transport.mjs",
+      "ws-server-transport.mjs"
+    ],
+    "root": [
+      "public-api.mjs",
+      "messages.mjs"
+    ]
+  },
+  "testFiles": [
+    "tests/unit/realtime.test.mjs",
+    "tests/contract/realtime-hex-contract.test.mjs",
+    "tests/bdd/realtime.test.mjs"
+  ],
+  "capabilities": {
+    "adapters": [
+      "long-polling-transport.mjs",
+      "sse-transport.mjs",
+      "webrtc-transport.mjs",
+      "websocket-transport.mjs",
+      "ws-server-transport.mjs"
+    ],
+    "ports": {
+      "RealtimePort": {
+        "kind": "interface",
+        "methods": {
+          "connect": {
+            "params": [
+              {
+                "name": "url",
+                "type": "string"
+              },
+              {
+                "name": "options",
+                "optional": true,
+                "type": "object"
+              }
+            ],
+            "returns": "Promise<void>"
+          },
+          "disconnect": {
+            "params": [],
+            "returns": "Promise<void>"
+          },
+          "getState": {
+            "params": [],
+            "returns": "string"
+          },
+          "onConnectionChange": {
+            "params": [
+              {
+                "name": "callback",
+                "type": "Function"
+              }
+            ],
+            "returns": "void"
+          },
+          "send": {
+            "params": [
+              {
+                "name": "channel",
+                "type": "string"
+              },
+              {
+                "name": "data",
+                "type": "unknown"
+              }
+            ],
+            "returns": "void"
+          },
+          "subscribe": {
+            "params": [
+              {
+                "name": "channel",
+                "type": "string"
+              },
+              {
+                "name": "callback",
+                "type": "Function"
+              }
+            ],
+            "returns": "void"
+          },
+          "unsubscribe": {
+            "params": [
+              {
+                "name": "channel",
+                "type": "string"
+              },
+              {
+                "name": "callback",
+                "optional": true,
+                "type": "Function"
+              }
+            ],
+            "returns": "void"
+          }
+        }
+      },
+      "TransportPort": {
+        "kind": "interface",
+        "methods": {
+          "close": {
+            "params": [],
+            "returns": "Promise<void>"
+          },
+          "getState": {
+            "params": [],
+            "returns": "string"
+          },
+          "isSupported": {
+            "params": [],
+            "returns": "boolean"
+          },
+          "onMessage": {
+            "params": [
+              {
+                "name": "callback",
+                "type": "Function"
+              }
+            ],
+            "returns": "void"
+          },
+          "onStateChange": {
+            "params": [
+              {
+                "name": "callback",
+                "type": "Function"
+              }
+            ],
+            "returns": "void"
+          },
+          "open": {
+            "params": [
+              {
+                "name": "url",
+                "type": "string"
+              },
+              {
+                "name": "options",
+                "optional": true,
+                "type": "object"
+              }
+            ],
+            "returns": "Promise<void>"
+          },
+          "send": {
+            "params": [
+              {
+                "name": "data",
+                "type": "unknown"
+              }
+            ],
+            "returns": "void"
+          }
+        }
+      }
+    },
+    "typedefs": {}
+  }
+}

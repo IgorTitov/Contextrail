@@ -1,0 +1,114 @@
+{
+  "name": "search",
+  "description": "Hexagonal full-text search module — pure tokenizer + inverted-index domain, memory adapter behind SearchPort, zero external deps",
+  "maturity": "stable",
+  "exports": [
+    "public-api.mjs"
+  ],
+  "dependencies": {
+    "modules": [],
+    "external": [],
+    "builtins": []
+  },
+  "dependents": [],
+  "structure": {
+    "domain": [
+      "search-document.mjs",
+      "tokenize.mjs",
+      "highlight.mjs"
+    ],
+    "ports": [
+      "search-port.mjs"
+    ],
+    "adapters": [
+      "memory-search-adapter.mjs"
+    ],
+    "root": [
+      "public-api.mjs",
+      "messages.mjs"
+    ]
+  },
+  "testFiles": [
+    "tests/unit/search.test.mjs",
+    "tests/contract/search-hex-contract.test.mjs"
+  ],
+  "capabilities": {
+    "adapters": [
+      "memory-search-adapter.mjs"
+    ],
+    "ports": {
+      "SearchPort": {
+        "kind": "interface",
+        "methods": {
+          "clear": {
+            "params": [],
+            "returns": "void"
+          },
+          "index": {
+            "params": [
+              {
+                "name": "document",
+                "type": "SearchDocumentInput"
+              }
+            ],
+            "returns": "Promise<SearchDocument>"
+          },
+          "indexBatch": {
+            "params": [
+              {
+                "name": "documents",
+                "type": "SearchDocumentInput[]"
+              }
+            ],
+            "returns": "Promise<SearchDocument[]>"
+          },
+          "remove": {
+            "params": [
+              {
+                "name": "id",
+                "type": "string"
+              }
+            ],
+            "returns": "Promise<boolean>"
+          },
+          "search": {
+            "params": [
+              {
+                "name": "query",
+                "type": "string"
+              },
+              {
+                "name": "options",
+                "optional": true,
+                "type": "SearchOptions"
+              }
+            ],
+            "returns": "Promise<SearchResult>"
+          }
+        }
+      }
+    },
+    "typedefs": {
+      "SearchOptions": {
+        "fields": {
+          "filters": {
+            "optional": true,
+            "type": "Record<string, string | string[]>"
+          },
+          "highlight": {
+            "optional": true,
+            "type": "boolean"
+          },
+          "limit": {
+            "optional": true,
+            "type": "number"
+          },
+          "offset": {
+            "optional": true,
+            "type": "number"
+          }
+        }
+      }
+    }
+  }
+}

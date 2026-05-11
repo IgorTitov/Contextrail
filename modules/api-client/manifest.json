@@ -1,0 +1,197 @@
+{
+  "name": "api-client",
+  "description": "HTTP client abstraction with native fetch adapter",
+  "maturity": "beta",
+  "exports": [
+    "public-api.mjs"
+  ],
+  "dependencies": {
+    "modules": [],
+    "external": [],
+    "builtins": []
+  },
+  "dependents": [
+    "auth",
+    "ai-chat"
+  ],
+  "structure": {
+    "domain": [],
+    "ports": [
+      "api-client-port.mjs"
+    ],
+    "adapters": [
+      "fetch-adapter.mjs"
+    ],
+    "root": [
+      "public-api.mjs",
+      "messages.mjs"
+    ]
+  },
+  "testFiles": [
+    "tests/unit/api-client.test.mjs",
+    "tests/contract/api-client-hex-contract.test.mjs",
+    "tests/bdd/api-client.test.mjs"
+  ],
+  "capabilities": {
+    "adapters": [
+      "fetch-adapter.mjs"
+    ],
+    "ports": {
+      "ApiClientPort": {
+        "kind": "interface",
+        "methods": {
+          "delete": {
+            "params": [
+              {
+                "name": "url",
+                "type": "string"
+              },
+              {
+                "name": "options",
+                "optional": true,
+                "type": "ApiRequestOptions"
+              }
+            ],
+            "returns": "Promise<ApiResponse>"
+          },
+          "get": {
+            "params": [
+              {
+                "name": "url",
+                "type": "string"
+              },
+              {
+                "name": "options",
+                "optional": true,
+                "type": "ApiRequestOptions"
+              }
+            ],
+            "returns": "Promise<ApiResponse>"
+          },
+          "post": {
+            "params": [
+              {
+                "name": "url",
+                "type": "string"
+              },
+              {
+                "name": "body",
+                "optional": true,
+                "type": "any"
+              },
+              {
+                "name": "options",
+                "optional": true,
+                "type": "ApiRequestOptions"
+              }
+            ],
+            "returns": "Promise<ApiResponse>"
+          },
+          "put": {
+            "params": [
+              {
+                "name": "url",
+                "type": "string"
+              },
+              {
+                "name": "body",
+                "optional": true,
+                "type": "any"
+              },
+              {
+                "name": "options",
+                "optional": true,
+                "type": "ApiRequestOptions"
+              }
+            ],
+            "returns": "Promise<ApiResponse>"
+          },
+          "removeHeader": {
+            "params": [
+              {
+                "name": "name",
+                "type": "string"
+              }
+            ],
+            "returns": "void"
+          },
+          "setBaseUrl": {
+            "params": [
+              {
+                "name": "url",
+                "type": "string"
+              }
+            ],
+            "returns": "void"
+          },
+          "setHeader": {
+            "params": [
+              {
+                "name": "name",
+                "type": "string"
+              },
+              {
+                "name": "value",
+                "type": "string"
+              }
+            ],
+            "returns": "void"
+          }
+        }
+      }
+    },
+    "typedefs": {
+      "ApiError": {
+        "fields": {
+          "data": {
+            "type": "any"
+          },
+          "headers": {
+            "type": "Record<string, string>"
+          },
+          "message": {
+            "type": "string"
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "number"
+          }
+        }
+      },
+      "ApiRequestOptions": {
+        "fields": {
+          "headers": {
+            "optional": true,
+            "type": "Record<string, string>"
+          },
+          "params": {
+            "optional": true,
+            "type": "Record<string, string | number>"
+          },
+          "timeout": {
+            "optional": true,
+            "type": "number"
+          }
+        }
+      },
+      "ApiResponse": {
+        "fields": {
+          "data": {
+            "type": "any"
+          },
+          "headers": {
+            "type": "Record<string, string>"
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "number"
+          }
+        }
+      }
+    }
+  }
+}

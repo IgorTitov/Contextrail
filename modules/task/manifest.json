@@ -1,0 +1,171 @@
+{
+  "name": "task",
+  "description": "Hexagonal task execution with Web Worker pool and main-thread adapters",
+  "maturity": "beta",
+  "exports": [
+    "public-api.mjs"
+  ],
+  "dependencies": {
+    "modules": [],
+    "external": [],
+    "builtins": []
+  },
+  "dependents": [],
+  "structure": {
+    "domain": [
+      "task-lifecycle.mjs",
+      "serialize.mjs"
+    ],
+    "ports": [
+      "task-port.mjs"
+    ],
+    "adapters": [
+      "web-worker-adapter.mjs",
+      "main-thread-adapter.mjs"
+    ],
+    "root": [
+      "public-api.mjs",
+      "messages.mjs"
+    ]
+  },
+  "testFiles": [
+    "tests/unit/task.test.mjs",
+    "tests/contract/task-hex-contract.test.mjs",
+    "tests/bdd/task.test.mjs"
+  ],
+  "capabilities": {
+    "adapters": [
+      "main-thread-adapter.mjs",
+      "web-worker-adapter.mjs"
+    ],
+    "ports": {
+      "TaskPort": {
+        "kind": "interface",
+        "methods": {
+          "cancel": {
+            "params": [
+              {
+                "name": "taskId",
+                "type": "string"
+              }
+            ],
+            "returns": "void"
+          },
+          "drain": {
+            "params": [],
+            "returns": "Promise<void>"
+          },
+          "enqueue": {
+            "params": [
+              {
+                "name": "fn",
+                "type": "Function"
+              },
+              {
+                "name": "options",
+                "optional": true,
+                "type": "TaskOptions"
+              }
+            ],
+            "returns": "TaskHandle"
+          },
+          "getStatus": {
+            "params": [
+              {
+                "name": "taskId",
+                "type": "string"
+              }
+            ],
+            "returns": "TaskStatus | undefined"
+          },
+          "onComplete": {
+            "params": [
+              {
+                "name": "taskId",
+                "type": "string"
+              },
+              {
+                "name": "callback",
+                "type": "(r: TaskResult) => void"
+              }
+            ],
+            "returns": "void"
+          },
+          "onProgress": {
+            "params": [
+              {
+                "name": "taskId",
+                "type": "string"
+              },
+              {
+                "name": "callback",
+                "type": "(p: TaskProgress) => void"
+              }
+            ],
+            "returns": "void"
+          }
+        }
+      }
+    },
+    "typedefs": {
+      "TaskHandle": {
+        "fields": {
+          "id": {
+            "type": "string"
+          },
+          "result": {
+            "type": "Promise<TaskResult>"
+          }
+        }
+      },
+      "TaskOptions": {
+        "fields": {
+          "timeout": {
+            "optional": true,
+            "type": "number"
+          },
+          "transferables": {
+            "optional": true,
+            "type": "Transferable[]"
+          }
+        }
+      },
+      "TaskProgress": {
+        "fields": {
+          "message": {
+            "optional": true,
+            "type": "string"
+          },
+          "progress": {
+            "type": "number"
+          },
+          "taskId": {
+            "type": "string"
+          }
+        }
+      },
+      "TaskResult": {
+        "fields": {
+          "error": {
+            "optional": true,
+            "type": "string"
+          },
+          "result": {
+            "optional": true,
+            "type": "*"
+          },
+          "status": {
+            "type": "TaskStatus"
+          },
+          "taskId": {
+            "type": "string"
+          }
+        }
+      },
+      "TaskStatus": {
+        "alias": "'pending' | 'running' | 'completed' | 'failed' | 'cancelled'",
+        "kind": "alias"
+      }
+    }
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "name": "email",
+  "description": "Hexagonal outbound email module — pure message domain, memory + console adapters behind EmailPort, zero external deps",
+  "maturity": "beta",
+  "exports": [
+    "public-api.mjs"
+  ],
+  "dependencies": {
+    "modules": [],
+    "external": [],
+    "builtins": []
+  },
+  "dependents": [],
+  "structure": {
+    "domain": [
+      "email-message.mjs"
+    ],
+    "ports": [
+      "email-port.mjs"
+    ],
+    "adapters": [
+      "memory-email-adapter.mjs",
+      "console-email-adapter.mjs"
+    ],
+    "root": [
+      "public-api.mjs",
+      "messages.mjs"
+    ]
+  },
+  "testFiles": [
+    "tests/unit/email.test.mjs",
+    "tests/contract/email-hex-contract.test.mjs"
+  ],
+  "capabilities": {
+    "adapters": [
+      "console-email-adapter.mjs",
+      "memory-email-adapter.mjs"
+    ],
+    "ports": {
+      "EmailPort": {
+        "kind": "interface",
+        "methods": {
+          "clear": {
+            "params": [],
+            "returns": "void"
+          },
+          "list": {
+            "params": [
+              {
+                "name": "status",
+                "optional": true,
+                "type": "EmailStatus"
+              }
+            ],
+            "returns": "EmailRecord[]"
+          },
+          "send": {
+            "params": [
+              {
+                "name": "message",
+                "type": "EmailMessageInput"
+              }
+            ],
+            "returns": "Promise<EmailRecord>"
+          }
+        }
+      }
+    },
+    "typedefs": {}
+  }
+}

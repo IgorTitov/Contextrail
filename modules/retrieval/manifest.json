@@ -1,0 +1,489 @@
+{
+  "name": "retrieval",
+  "description": "RAG retrieval with chunkers, tokenizers, embedders, hybrid search, re-rankers, document loaders, and query transformers",
+  "maturity": "stable",
+  "exports": [
+    "public-api.mjs"
+  ],
+  "dependencies": {
+    "modules": [],
+    "external": [],
+    "builtins": []
+  },
+  "dependents": [],
+  "structure": {
+    "domain": [
+      "augment-prompt.mjs",
+      "chunker.mjs",
+      "character-chunker.mjs",
+      "recursive-character-chunker.mjs",
+      "sentence-chunker.mjs",
+      "markdown-chunker.mjs"
+    ],
+    "ports": [
+      "chunker-port.mjs",
+      "document-loader-port.mjs",
+      "embedder-port.mjs",
+      "query-transformer-port.mjs",
+      "reranker-port.mjs",
+      "retrieval-port.mjs",
+      "tokenizer-port.mjs"
+    ],
+    "adapters": [
+      "approx-tiktoken-tokenizer.mjs",
+      "bm25-adapter.mjs",
+      "char-count-tokenizer.mjs",
+      "echo-embedder.mjs",
+      "html-loader.mjs",
+      "hybrid-search-adapter.mjs",
+      "markdown-loader.mjs",
+      "multi-query-transformer.mjs",
+      "passthrough-transformer.mjs",
+      "plain-text-loader.mjs",
+      "score-threshold-reranker.mjs",
+      "vector-local-adapter.mjs"
+    ],
+    "root": [
+      "public-api.mjs",
+      "messages.mjs"
+    ]
+  },
+  "testFiles": [
+    "tests/unit/retrieval.test.mjs",
+    "tests/unit/retrieval-chunker-port.test.mjs",
+    "tests/unit/retrieval-tokenizer-embedder.test.mjs",
+    "tests/unit/retrieval-hybrid-reranker.test.mjs",
+    "tests/unit/retrieval-loaders-query.test.mjs",
+    "tests/contract/retrieval-hex-contract.test.mjs",
+    "tests/bdd/retrieval.test.mjs"
+  ],
+  "capabilities": {
+    "adapters": [
+      "approx-tiktoken-tokenizer.mjs",
+      "bm25-adapter.mjs",
+      "char-count-tokenizer.mjs",
+      "echo-embedder.mjs",
+      "html-loader.mjs",
+      "hybrid-search-adapter.mjs",
+      "markdown-loader.mjs",
+      "multi-query-transformer.mjs",
+      "passthrough-transformer.mjs",
+      "plain-text-loader.mjs",
+      "score-threshold-reranker.mjs",
+      "vector-local-adapter.mjs"
+    ],
+    "ports": {
+      "ChunkerPort": {
+        "kind": "interface",
+        "methods": {
+          "chunk": {
+            "params": [
+              {
+                "name": "text",
+                "type": "string"
+              },
+              {
+                "name": "documentId",
+                "type": "string"
+              }
+            ],
+            "returns": "RetrievalChunk[]"
+          }
+        }
+      },
+      "DocumentLoaderPort": {
+        "kind": "interface",
+        "methods": {
+          "load": {
+            "params": [
+              {
+                "name": "source",
+                "type": "string"
+              }
+            ],
+            "returns": "RetrievalDocument[]"
+          }
+        }
+      },
+      "EmbedderPort": {
+        "kind": "interface",
+        "methods": {
+          "embed": {
+            "params": [
+              {
+                "name": "texts",
+                "type": "string[]"
+              }
+            ],
+            "returns": "Promise<Float32Array[]>"
+          }
+        }
+      },
+      "QueryTransformerPort": {
+        "kind": "interface",
+        "methods": {
+          "transform": {
+            "params": [
+              {
+                "name": "query",
+                "type": "string"
+              }
+            ],
+            "returns": "string | string[]"
+          }
+        }
+      },
+      "ReRankerPort": {
+        "kind": "interface",
+        "methods": {
+          "rerank": {
+            "params": [
+              {
+                "name": "query",
+                "type": "string"
+              },
+              {
+                "name": "results",
+                "type": "RetrievalResult[]"
+              }
+            ],
+            "returns": "Promise<RetrievalResult[]>"
+          }
+        }
+      },
+      "RetrievalPort": {
+        "kind": "interface",
+        "methods": {
+          "addDocuments": {
+            "params": [
+              {
+                "name": "docs",
+                "type": "RetrievalDocument[]"
+              }
+            ],
+            "returns": "Promise<string[]>"
+          },
+          "clear": {
+            "params": [],
+            "returns": "Promise<void>"
+          },
+          "removeDocuments": {
+            "params": [
+              {
+                "name": "ids",
+                "type": "string[]"
+              }
+            ],
+            "returns": "Promise<number>"
+          },
+          "search": {
+            "params": [
+              {
+                "name": "query",
+                "type": "string"
+              },
+              {
+                "name": "options",
+                "optional": true,
+                "type": "RetrievalSearchOptions"
+              }
+            ],
+            "returns": "Promise<RetrievalResult[]>"
+          }
+        }
+      },
+      "TokenizerPort": {
+        "kind": "interface",
+        "methods": {
+          "countTokens": {
+            "params": [
+              {
+                "name": "text",
+                "type": "string"
+              }
+            ],
+            "returns": "number"
+          },
+          "truncateToTokens": {
+            "params": [
+              {
+                "name": "text",
+                "type": "string"
+              },
+              {
+                "name": "maxTokens",
+                "type": "number"
+              }
+            ],
+            "returns": "string"
+          }
+        }
+      }
+    },
+    "typedefs": {
+      "ApproxTiktokenOptions": {
+        "fields": {
+          "charsPerToken": {
+            "optional": true,
+            "type": "number"
+          }
+        }
+      },
+      "AugmentPrompt": {
+        "methods": {
+          "augment": {
+            "params": [
+              {
+                "name": "query",
+                "type": "string"
+              },
+              {
+                "name": "results",
+                "type": "RetrievalResult[]"
+              }
+            ],
+            "returns": "string"
+          }
+        }
+      },
+      "AugmentPromptOptions": {
+        "fields": {
+          "includeMetadata": {
+            "optional": true,
+            "type": "boolean"
+          },
+          "maxContextLength": {
+            "optional": true,
+            "type": "number"
+          },
+          "maxContextTokens": {
+            "optional": true,
+            "type": "number"
+          },
+          "separator": {
+            "optional": true,
+            "type": "string"
+          },
+          "template": {
+            "optional": true,
+            "type": "string"
+          },
+          "tokenizer": {
+            "optional": true,
+            "type": "TokenizerPort"
+          }
+        }
+      },
+      "Bm25AdapterOptions": {
+        "fields": {
+          "b": {
+            "optional": true,
+            "type": "number"
+          },
+          "k1": {
+            "optional": true,
+            "type": "number"
+          }
+        }
+      },
+      "CharCountTokenizerOptions": {
+        "fields": {}
+      },
+      "Chunker": {
+        "methods": {
+          "chunk": {
+            "params": [
+              {
+                "name": "text",
+                "type": "string"
+              },
+              {
+                "name": "documentId",
+                "type": "string"
+              }
+            ],
+            "returns": "RetrievalChunk[]"
+          }
+        }
+      },
+      "ChunkerOptions": {
+        "fields": {
+          "chunkOverlap": {
+            "optional": true,
+            "type": "number"
+          },
+          "chunkSize": {
+            "optional": true,
+            "type": "number"
+          },
+          "separator": {
+            "optional": true,
+            "type": "string | RegExp"
+          }
+        }
+      },
+      "EchoEmbedderOptions": {
+        "fields": {
+          "dimensions": {
+            "optional": true,
+            "type": "number"
+          }
+        }
+      },
+      "HybridSearchOptions": {
+        "fields": {
+          "k": {
+            "optional": true,
+            "type": "number"
+          },
+          "sources": {
+            "type": "RetrievalPort[]"
+          }
+        }
+      },
+      "MarkdownChunkerOptions": {
+        "fields": {
+          "maxChunkSize": {
+            "optional": true,
+            "type": "number"
+          }
+        }
+      },
+      "MultiQueryTransformerOptions": {
+        "fields": {
+          "templates": {
+            "optional": true,
+            "type": "string[]"
+          }
+        }
+      },
+      "RecursiveCharacterChunkerOptions": {
+        "fields": {
+          "chunkSize": {
+            "optional": true,
+            "type": "number"
+          },
+          "separators": {
+            "optional": true,
+            "type": "string[]"
+          }
+        }
+      },
+      "RetrievalChunk": {
+        "fields": {
+          "chunkIndex": {
+            "type": "number"
+          },
+          "content": {
+            "type": "string"
+          },
+          "documentId": {
+            "type": "string"
+          },
+          "endOffset": {
+            "type": "number"
+          },
+          "metadata": {
+            "type": "Record<string, unknown>"
+          },
+          "startOffset": {
+            "type": "number"
+          }
+        }
+      },
+      "RetrievalDocument": {
+        "fields": {
+          "content": {
+            "type": "string"
+          },
+          "id": {
+            "optional": true,
+            "type": "string"
+          },
+          "metadata": {
+            "optional": true,
+            "type": "Record<string, unknown>"
+          }
+        }
+      },
+      "RetrievalResult": {
+        "fields": {
+          "chunkIndex": {
+            "optional": true,
+            "type": "number"
+          },
+          "content": {
+            "type": "string"
+          },
+          "documentId": {
+            "type": "string"
+          },
+          "metadata": {
+            "type": "Record<string, unknown>"
+          },
+          "score": {
+            "type": "number"
+          }
+        }
+      },
+      "RetrievalSearchOptions": {
+        "fields": {
+          "filter": {
+            "optional": true,
+            "type": "Record<string, unknown>"
+          },
+          "minScore": {
+            "optional": true,
+            "type": "number"
+          },
+          "queryEmbedding": {
+            "optional": true,
+            "type": "Float32Array | number[]"
+          },
+          "topK": {
+            "optional": true,
+            "type": "number"
+          }
+        }
+      },
+      "ScoreThresholdReRankerOptions": {
+        "fields": {
+          "minScore": {
+            "optional": true,
+            "type": "number"
+          },
+          "topK": {
+            "optional": true,
+            "type": "number"
+          }
+        }
+      },
+      "SentenceChunkerOptions": {
+        "fields": {
+          "maxChunkSize": {
+            "optional": true,
+            "type": "number"
+          }
+        }
+      },
+      "VectorLocalAdapterOptions": {
+        "fields": {}
+      },
+      "WeightedHybridOptions": {
+        "fields": {
+          "k": {
+            "optional": true,
+            "type": "number"
+          },
+          "sources": {
+            "type": "RetrievalPort[]"
+          },
+          "weights": {
+            "optional": true,
+            "type": "number[]"
+          }
+        }
+      }
+    }
+  }
+}

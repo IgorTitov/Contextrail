@@ -1,0 +1,103 @@
+{
+  "name": "tenancy",
+  "description": "Hexagonal tenancy module — pure Tenant value object + header/subdomain resolvers + TenantStorePort + memory store + AsyncLocalStorage context adapter, zero external deps",
+  "maturity": "beta",
+  "exports": [
+    "public-api.mjs"
+  ],
+  "dependencies": {
+    "modules": [],
+    "external": [],
+    "builtins": [
+      "node:async_hooks"
+    ]
+  },
+  "dependents": [],
+  "structure": {
+    "domain": [
+      "tenant.mjs",
+      "tenant-context.mjs",
+      "tenant-resolver.mjs"
+    ],
+    "ports": [
+      "tenant-store-port.mjs"
+    ],
+    "adapters": [
+      "memory-tenant-store.mjs",
+      "als-tenant-context.mjs"
+    ],
+    "root": [
+      "public-api.mjs",
+      "messages.mjs"
+    ]
+  },
+  "testFiles": [
+    "tests/unit/tenancy.test.mjs",
+    "tests/contract/tenancy-hex-contract.test.mjs"
+  ],
+  "capabilities": {
+    "adapters": [
+      "als-tenant-context.mjs",
+      "memory-tenant-store.mjs"
+    ],
+    "ports": {
+      "TenantStorePort": {
+        "kind": "interface",
+        "methods": {
+          "clear": {
+            "params": [],
+            "returns": "void"
+          },
+          "createTenant": {
+            "params": [
+              {
+                "name": "input",
+                "type": "TenantInput"
+              }
+            ],
+            "returns": "Promise<Tenant>"
+          },
+          "deleteTenant": {
+            "params": [
+              {
+                "name": "id",
+                "type": "string"
+              }
+            ],
+            "returns": "Promise<boolean>"
+          },
+          "getTenant": {
+            "params": [
+              {
+                "name": "id",
+                "type": "string"
+              }
+            ],
+            "returns": "Promise<Tenant | null>"
+          },
+          "listTenants": {
+            "params": [],
+            "returns": "Tenant[]"
+          }
+        }
+      }
+    },
+    "typedefs": {
+      "TenantInput": {
+        "fields": {
+          "id": {
+            "type": "string"
+          },
+          "metadata": {
+            "optional": true,
+            "type": "Record<string, string>"
+          },
+          "name": {
+            "optional": true,
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

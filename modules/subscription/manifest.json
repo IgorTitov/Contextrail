@@ -1,0 +1,38 @@
+{
+  "name": "subscription",
+  "description": "Subscription lifecycle, plan tiers, entitlements, and usage metering",
+  "maturity": "beta",
+  "exports": [
+    "public-api.mjs"
+  ],
+  "dependencies": {
+    "modules": [],
+    "external": [],
+    "builtins": []
+  },
+  "dependents": [],
+  "structure": {
+    "domain": [
+      "subscription.mjs"
+    ],
+    "ports": [
+      "subscription-port.mjs"
+    ],
+    "adapters": [
+      "default-adapter.mjs"
+    ],
+    "root": [
+      "public-api.mjs"
+    ]
+  },
+  "testFiles": [
+    "tests/unit/subscription.test.mjs"
+  ],
+  "capabilities": {
+    "adapters": [
+      "default-adapter.mjs"
+    ],
+    "ports": {},
+    "typedefs": {}
+  }
+}

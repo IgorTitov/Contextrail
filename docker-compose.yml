@@ -1,0 +1,37 @@
+# @HEADER
+# @version 0.6.5 | 2026-04-28
+# @purpose Docker Compose for development, testing, and CI environments.
+# @sidecar docker-compose.yml.header.md
+# @layer root | @hex _none_ | @ctx _none_
+# @public false
+# @edit careful
+
+services:
+  # Local development — mounts source, watches for changes
+  dev:
+    build:
+      context: .
+      target: dev
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+
+  # Run all 2100+ tests (unit + integration + contract + BDD)
+  test:
+    build:
+      context: .
+      target: test
+    environment:
+      - NODE_ENV=test
+
+  # Run ESLint + Prettier checks
+  lint:
+    build:
+      context: .
+      target: lint
+    environment:
+      - NODE_ENV=development

@@ -1,0 +1,50 @@
+/* @HEADER
+ * @version 0.6.5 | 2026-04-28
+ * @purpose Styles for Navigation in the starter app.
+ * @sidecar navigation.css.header.md
+ * @layer app | @hex _none_ | @ctx _none_
+ * @public false
+ * @edit careful
+ */
+
+/*
+ * Accessible navigation styles.
+ * Skip-link is visually hidden until focused.
+ * Focus indicators are clear and high-contrast.
+ */
+
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 0;
+  z-index: 1000;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--color-primary, #2563eb);
+  color: var(--color-primary-fg, #ffffff);
+  text-decoration: none;
+  font-weight: 600;
+  transition: top var(--transition-fast, 150ms ease);
+}
+
+.skip-link:focus {
+  top: 0;
+  outline: 3px solid var(--color-primary, #2563eb);
+  outline-offset: 2px;
+}
+
+/* Global focus-visible indicator */
+:focus-visible {
+  outline: 2px solid var(--color-primary, #2563eb);
+  outline-offset: 2px;
+}
+
+/* Remove outline for mouse clicks */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skip-link {
+    transition: none;
+  }
+}

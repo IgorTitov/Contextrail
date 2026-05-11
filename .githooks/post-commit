@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# @HEADER
+# @version 0.7.70 | 2026-05-03
+# @purpose Post-commit hook: no-mutation; warns when HEAD bumped VERSION but .backups/ snapshot is missing (TPL-260).
+# @sidecar post-commit.header.md
+# @layer git-hooks | @hex _none_ | @ctx _none_
+# @public false
+# @edit careful
+
+# TPL-246 — @version stamping deprecated from post-commit.
+# Pre-commit Phase 5 now stamps @version preemptively via header-fix
+# --since=HEAD --use-current-version, then git-adds the results so they
+# land in the same commit blob. No residue, no working-tree dirt.
+# This hook is read-only — it never mutates files or the git index.
+#
+# TPL-260 — narrow second exception: warn (not block) when HEAD bumped
+# VERSION but .backups/ lacks the matching .txt/.zip snapshot. The snapshot
+# for the new VERSION can only be created AFTER the commit lands, so this
+# is correctly post-commit rather than pre-commit. Operators see the warning
+# immediately after any commit that bypasses coa-merge step 9b.
+# Hook stays under 1 second; exits 0 always.
+# See docs/adr/0014-per-file-version-semantics.md — Revision (TPL-260).
+
+REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)"
+if [ -n "$REPO_ROOT" ] && [ -f "$REPO_ROOT/scripts/checks/post-commit-snapshot-warn.mjs" ]; then
+  node "$REPO_ROOT/scripts/checks/post-commit-snapshot-warn.mjs" 2>/dev/null || true
+fi
+
+# TPL-258 R8.4: finalize the phases-ran temp record with the commit SHA.
+# Pre-commit writes .claims/coa-phases-ran.tmp; we attach HEAD's SHA and
+# append a complete record to .claims/commit-audit.log, then delete the tmp.
+# Runs silently (2>/dev/null) so a missing node or missing tmp never blocks.
+if [ -n "$REPO_ROOT" ]; then
+  _BYPASS_TMP="${REPO_ROOT}/.claims/coa-phases-ran.tmp"
+  _BYPASS_LOG="${REPO_ROOT}/.claims/commit-audit.log"
+  if [ -f "$_BYPASS_TMP" ]; then
+    _COMMIT_SHA="$(git rev-parse HEAD 2>/dev/null)"
+    if [ -n "$_COMMIT_SHA" ]; then
+      # Replace "commitSha":null with the real SHA using sed (available in Git Bash).
+      sed "s/\"commitSha\":null/\"commitSha\":\"${_COMMIT_SHA}\"/" \
+        "$_BYPASS_TMP" >> "$_BYPASS_LOG" 2>/dev/null || true
+    fi
+    rm -f "$_BYPASS_TMP" 2>/dev/null
+  fi
+fi
+
+exit 0

@@ -1,0 +1,103 @@
+{
+  "name": "seo",
+  "description": "Hexagonal SEO module — pure meta-tag descriptor + sitemap + robots.txt renderers with safe attribute/XML escaping + SeoPublisherPort + in-memory adapter, zero external deps",
+  "maturity": "beta",
+  "exports": [
+    "public-api.mjs"
+  ],
+  "dependencies": {
+    "modules": [],
+    "external": [],
+    "builtins": []
+  },
+  "dependents": [],
+  "structure": {
+    "domain": [
+      "meta-tags.mjs",
+      "sitemap.mjs",
+      "robots.mjs"
+    ],
+    "ports": [
+      "seo-publisher-port.mjs"
+    ],
+    "adapters": [
+      "memory-seo-publisher.mjs"
+    ],
+    "root": [
+      "public-api.mjs",
+      "messages.mjs"
+    ]
+  },
+  "testFiles": [
+    "tests/unit/seo.test.mjs",
+    "tests/contract/seo-hex-contract.test.mjs"
+  ],
+  "capabilities": {
+    "adapters": [
+      "memory-seo-publisher.mjs"
+    ],
+    "ports": {
+      "SeoPublisherPort": {
+        "kind": "interface",
+        "methods": {
+          "clear": {
+            "params": [],
+            "returns": "void"
+          },
+          "publishMeta": {
+            "params": [
+              {
+                "name": "pageId",
+                "type": "string"
+              },
+              {
+                "name": "html",
+                "type": "string"
+              }
+            ],
+            "returns": "Promise<SeoAssetRecord>"
+          },
+          "publishRobots": {
+            "params": [
+              {
+                "name": "text",
+                "type": "string"
+              }
+            ],
+            "returns": "Promise<SeoAssetRecord>"
+          },
+          "publishSitemap": {
+            "params": [
+              {
+                "name": "xml",
+                "type": "string"
+              }
+            ],
+            "returns": "Promise<SeoAssetRecord>"
+          }
+        }
+      }
+    },
+    "typedefs": {
+      "SeoAssetRecord": {
+        "fields": {
+          "contentType": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "'sitemap'|'robots'|'meta'"
+          },
+          "path": {
+            "type": "string"
+          },
+          "publishedAt": {
+            "type": "number"
+          },
+          "size": {
+            "type": "number"
+          }
+        }
+      }
+    }
+  }
+}

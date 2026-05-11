@@ -1,0 +1,248 @@
+<!-- @HEADER
+@version 0.6.5 | 2026-04-28
+@purpose Describe the role of starter-app in this repository.
+@sidecar starter-app.html.header.md
+@layer tests | @hex _none_ | @ctx _none_
+@public false
+@edit careful -->
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Starter App — All Features</title>
+    <style>
+      /* === Theme variables (from theme-toggle/theme-variables.css) === */
+      :root {
+        --color-bg: #ffffff; --color-fg: #1a1a1a; --color-primary: #2563eb;
+        --color-primary-fg: #ffffff; --color-surface: #f5f5f5; --color-surface-raised: #ffffff;
+        --color-border: #d4d4d4; --color-muted: #737373; --color-success: #16a34a;
+        --color-error: #dc2626; --color-info: #2563eb; --color-shadow: rgba(0,0,0,0.08);
+        --radius-sm: 4px; --radius-md: 8px; --radius-full: 999px;
+        --transition-fast: 150ms ease; --transition-normal: 250ms ease;
+      }
+      [data-theme="dark"] {
+        --color-bg: #0a0a0a; --color-fg: #e5e5e5; --color-primary: #3b82f6;
+        --color-surface: #171717; --color-surface-raised: #262626;
+        --color-border: #404040; --color-muted: #a3a3a3; --color-success: #22c55e;
+        --color-error: #ef4444; --color-info: #3b82f6; --color-shadow: rgba(0,0,0,0.3);
+      }
+      /* === Layout === */
+      *, *::before, *::after { box-sizing: border-box; }
+      body { margin:0; min-height:100vh; display:grid; grid-template-rows:auto 1fr auto;
+        font-family:system-ui,sans-serif; line-height:1.5;
+        color:var(--color-fg); background:var(--color-bg);
+        transition: color var(--transition-normal), background var(--transition-normal); }
+      .site-header { display:flex; align-items:center; justify-content:space-between; gap:1rem;
+        padding:0.75rem 1.5rem; background:var(--color-surface); border-bottom:1px solid var(--color-border); }
+      .site-header__nav { display:flex; align-items:center; gap:0.75rem; }
+      .site-header__controls { display:flex; align-items:center; gap:0.5rem; }
+      .site-main { padding:1.5rem; max-width:64rem; margin-inline:auto; width:100%; }
+      .site-footer { padding:1rem 1.5rem; text-align:center; font-size:0.875rem;
+        color:var(--color-muted); border-top:1px solid var(--color-border); background:var(--color-surface); }
+      /* === Navigation / skip-link === */
+      .skip-link { position:absolute; top:-100%; left:0; z-index:1000; padding:0.75rem 1.5rem;
+        background:var(--color-primary); color:var(--color-primary-fg); text-decoration:none; font-weight:600; }
+      .skip-link:focus { top:0; }
+      :focus-visible { outline:2px solid var(--color-primary); outline-offset:2px; }
+      /* === Toast notifications === */
+      .toast-container { position:fixed; top:1rem; right:1rem; z-index:9999; display:flex; flex-direction:column; gap:0.5rem; max-width:24rem; }
+      .toast { display:flex; align-items:flex-start; gap:0.75rem; padding:0.75rem 1rem; border-radius:var(--radius-md);
+        box-shadow:0 4px 12px var(--color-shadow); background:var(--color-surface-raised); border-left:4px solid var(--color-info); }
+      .toast--info { border-left-color:var(--color-info); }
+      .toast--success { border-left-color:var(--color-success); }
+      .toast--error { border-left-color:var(--color-error); }
+      .toast__message { flex:1; color:var(--color-fg); }
+      .toast__close { appearance:none; border:none; background:none; cursor:pointer; padding:0.25rem; color:var(--color-muted); font-size:1.25rem; }
+      /* === Loading states === */
+      .loading-spinner { display:inline-block; width:1.5rem; height:1.5rem;
+        border:2px solid var(--color-border); border-top-color:var(--color-primary); border-radius:50%;
+        animation:spinner-rotate 0.6s linear infinite; }
+      .skeleton { position:relative; overflow:hidden; background:var(--color-surface); border-radius:var(--radius-sm); }
+      .skeleton::after { content:''; position:absolute; inset:0;
+        background:linear-gradient(90deg,transparent 0%,var(--color-surface-raised) 50%,transparent 100%);
+        animation:skeleton-shimmer 1.5s ease-in-out infinite; }
+      .skeleton--text { height:1em; width:80%; margin-bottom:0.5rem; }
+      .skeleton--heading { height:1.5em; width:60%; margin-bottom:1rem; }
+      .loading-overlay { position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+        background:var(--color-bg, rgba(255,255,255,0.8)); z-index:10; }
+      @keyframes spinner-rotate { to { transform:rotate(360deg); } }
+      @keyframes skeleton-shimmer { from { transform:translateX(-100%); } to { transform:translateX(100%); } }
+      /* === Error boundary === */
+      .error-fallback { display:flex; flex-direction:column; align-items:center; justify-content:center;
+        gap:1rem; padding:3rem 1.5rem; text-align:center; min-height:50vh; }
+      .error-fallback__title { margin:0; font-size:1.5rem; color:var(--color-error); }
+      .error-fallback__description { margin:0; color:var(--color-muted); max-width:32rem; }
+      .error-fallback__retry { padding:0.5rem 1.5rem; border:1px solid var(--color-border); border-radius:var(--radius-md);
+        background:var(--color-surface-raised); color:var(--color-fg); cursor:pointer; font-size:1rem; }
+      /* === Utilities === */
+      .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0; }
+      .demo-section { margin-bottom:2rem; }
+      .demo-section h2 { margin-top:0; }
+      @media (prefers-reduced-motion:reduce) { * { transition-duration:0.01ms!important; animation:none!important; } }
+    </style>
+  </head>
+  <body>
+    <!-- Skip to content -->
+    <a href="#main-content" class="skip-link" data-testid="skip-to-content">Skip to content</a>
+
+    <!-- Header -->
+    <header class="site-header" data-testid="site-header" role="banner">
+      <nav class="site-header__nav" aria-label="Menu">
+        <strong>Starter App</strong>
+      </nav>
+      <div class="site-header__controls" data-testid="site-header-controls">
+        <!-- Language picker -->
+        <select data-testid="language-picker-select" aria-label="Language" id="lang-picker">
+          <option value="en" selected>English</option>
+          <option value="ru">Russian</option>
+        </select>
+        <!-- Theme toggle -->
+        <button data-testid="theme-toggle-button" type="button" id="theme-toggle">System</button>
+      </div>
+    </header>
+
+    <!-- Main -->
+    <main id="main-content" class="site-main" data-testid="site-main" role="main" tabindex="-1">
+      <section class="demo-section">
+        <h2>Hello, World!</h2>
+        <p data-testid="status-text">Ready</p>
+      </section>
+
+      <!-- Loading states -->
+      <section class="demo-section">
+        <h2>Loading States</h2>
+        <div data-testid="skeleton-demo">
+          <div class="skeleton skeleton--heading" data-testid="loading-skeleton" aria-hidden="true"></div>
+          <div class="skeleton skeleton--text" data-testid="loading-skeleton" aria-hidden="true"></div>
+          <div class="skeleton skeleton--text" data-testid="loading-skeleton" aria-hidden="true"></div>
+        </div>
+        <div data-testid="spinner-demo" style="position:relative;height:4rem" aria-busy="true">
+          Content behind overlay
+          <div class="loading-overlay" data-testid="loading-overlay">
+            <div class="loading-spinner" data-testid="loading-spinner" role="status">
+              <span class="sr-only">Content is loading</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Notifications -->
+      <section class="demo-section">
+        <h2>Notifications</h2>
+        <button data-testid="notif-info" id="btn-info">Show info</button>
+        <button data-testid="notif-success" id="btn-success">Show success</button>
+        <button data-testid="notif-error" id="btn-error">Show error</button>
+      </section>
+
+      <!-- Error boundary -->
+      <section class="demo-section">
+        <h2>Error Boundary</h2>
+        <div data-testid="error-demo" id="error-demo" style="position:relative;min-height:8rem;border:1px dashed var(--color-border);border-radius:var(--radius-md)">
+          <p>Click the button below to simulate an error.</p>
+          <button data-testid="trigger-error" id="trigger-error">Trigger Error</button>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer" data-testid="site-footer" role="contentinfo">&copy; 2026 Project</footer>
+
+    <!-- Toast container (ARIA live region) -->
+    <div class="toast-container" data-testid="toast-container" role="status" aria-live="polite" aria-atomic="false" id="toast-container"></div>
+
+    <script>
+      // Theme toggle
+      (function() {
+        var themes = ['system', 'light', 'dark'];
+        var labels = { system: 'System', light: 'Light', dark: 'Dark' };
+        var idx = 0;
+        var btn = document.getElementById('theme-toggle');
+        btn.addEventListener('click', function() {
+          idx = (idx + 1) % themes.length;
+          var theme = themes[idx];
+          btn.textContent = labels[theme];
+          btn.setAttribute('aria-label', 'Theme: ' + labels[theme]);
+          if (theme === 'system') {
+            document.documentElement.removeAttribute('data-theme');
+          } else {
+            document.documentElement.setAttribute('data-theme', theme);
+          }
+        });
+      })();
+
+      // Notifications
+      (function() {
+        var container = document.getElementById('toast-container');
+        var counter = 0;
+        function showToast(message, level) {
+          var id = 'toast-' + (++counter);
+          var toast = document.createElement('div');
+          toast.className = 'toast toast--' + level;
+          toast.setAttribute('data-testid', 'toast');
+          toast.setAttribute('data-notification-id', id);
+          var msg = document.createElement('span');
+          msg.className = 'toast__message';
+          msg.textContent = message;
+          toast.appendChild(msg);
+          var close = document.createElement('button');
+          close.className = 'toast__close';
+          close.setAttribute('aria-label', 'Close');
+          close.setAttribute('data-testid', 'toast-close');
+          close.textContent = '\u00d7';
+          close.addEventListener('click', function() { toast.remove(); });
+          toast.appendChild(close);
+          container.appendChild(toast);
+          if (level !== 'error') {
+            setTimeout(function() { if (toast.parentNode) toast.remove(); }, 5000);
+          }
+        }
+        document.getElementById('btn-info').addEventListener('click', function() { showToast('This is a info notification', 'info'); });
+        document.getElementById('btn-success').addEventListener('click', function() { showToast('This is a success notification', 'success'); });
+        document.getElementById('btn-error').addEventListener('click', function() { showToast('This is a error notification', 'error'); });
+      })();
+
+      // Error boundary
+      (function() {
+        document.getElementById('trigger-error').addEventListener('click', function() {
+          var demo = document.getElementById('error-demo');
+          demo.innerHTML = '';
+          var wrapper = document.createElement('div');
+          wrapper.className = 'error-fallback';
+          wrapper.setAttribute('data-testid', 'error-fallback');
+          wrapper.setAttribute('role', 'alert');
+          var title = document.createElement('h2');
+          title.className = 'error-fallback__title';
+          title.setAttribute('data-testid', 'error-fallback-title');
+          title.textContent = 'Something went wrong';
+          wrapper.appendChild(title);
+          var desc = document.createElement('p');
+          desc.className = 'error-fallback__description';
+          desc.textContent = 'An unexpected error occurred. Please try again.';
+          wrapper.appendChild(desc);
+          var retry = document.createElement('button');
+          retry.className = 'error-fallback__retry';
+          retry.setAttribute('data-testid', 'error-retry-button');
+          retry.textContent = 'Try again';
+          retry.addEventListener('click', function() { demo.innerHTML = '<p>Recovered! Content restored.</p>'; });
+          wrapper.appendChild(retry);
+          demo.appendChild(wrapper);
+        });
+      })();
+
+      // Skip link
+      (function() {
+        var link = document.querySelector('.skip-link');
+        var main = document.getElementById('main-content');
+        link.addEventListener('click', function(e) { e.preventDefault(); main.focus(); });
+      })();
+
+      // Auto-remove loading overlay after 2s
+      setTimeout(function() {
+        var demo = document.querySelector('[data-testid="spinner-demo"]');
+        if (demo) { demo.removeAttribute('aria-busy'); var overlay = demo.querySelector('.loading-overlay'); if (overlay) overlay.remove(); }
+      }, 2000);
+    </script>
+  </body>
+</html>

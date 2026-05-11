@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# @HEADER
+# @version 0.6.5 | 2026-04-28
+# @purpose Validate commit message shape so repository history keeps conventional commits plus the project’s work-item requirement.
+# @sidecar commit-msg.header.md
+# @layer git-hooks | @hex _none_ | @ctx _none_
+# @public false
+# @edit careful
+
+set -euo pipefail
+MESSAGE_FILE="$1"
+
+# Delegate to the testable Node validator. Rules and allowed types live there.
+node scripts/checks/commit-msg-check.mjs "$MESSAGE_FILE"

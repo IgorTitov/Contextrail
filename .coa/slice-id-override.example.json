@@ -1,0 +1,7 @@
+{
+  "slice_id": "TPL-123",
+  "timestamp": "2026-05-11T10:00:00.000Z",
+  "ttl_seconds": 60,
+  "reason": "Recovering from failed ceremony — slice TPL-123 was committed but the worktree was corrupted before merge. Re-running the same slice commit.",
+  "category": "history-restoration"
+}

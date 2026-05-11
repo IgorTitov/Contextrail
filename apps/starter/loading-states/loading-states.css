@@ -1,0 +1,98 @@
+/* @HEADER
+ * @version 0.6.5 | 2026-04-28
+ * @purpose Styles for Loading States in the starter app.
+ * @sidecar loading-states.css.header.md
+ * @layer app | @hex _none_ | @ctx _none_
+ * @public false
+ * @edit careful
+ */
+
+/*
+ * Loading and skeleton state styles.
+ * Shimmer animation for skeleton placeholders, spinner, overlay.
+ */
+
+/* Spinner */
+.loading-spinner {
+  display: inline-block;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 2px solid var(--color-border, #d4d4d4);
+  border-top-color: var(--color-primary, #2563eb);
+  border-radius: 50%;
+  animation: spinner-rotate 0.6s linear infinite;
+}
+
+/* Skeleton shimmer */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--color-surface, #f5f5f5);
+  border-radius: var(--radius-sm, 4px);
+}
+
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--color-surface-raised, rgba(255, 255, 255, 0.4)) 50%,
+    transparent 100%
+  );
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+}
+
+.skeleton--text {
+  height: 1em;
+  width: 80%;
+  margin-bottom: 0.5rem;
+}
+
+.skeleton--heading {
+  height: 1.5em;
+  width: 60%;
+  margin-bottom: 1rem;
+}
+
+.skeleton--avatar {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+}
+
+.skeleton--block {
+  height: 6rem;
+  width: 100%;
+}
+
+/* Loading overlay */
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-bg, rgba(255, 255, 255, 0.8));
+  z-index: 10;
+}
+
+@keyframes spinner-rotate {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes skeleton-shimmer {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loading-spinner {
+    animation: none;
+    opacity: 0.7;
+  }
+  .skeleton::after {
+    animation: none;
+  }
+}

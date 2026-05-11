@@ -1,0 +1,19 @@
+# @HEADER
+# @version 0.6.5 | 2026-04-28
+# @purpose Gitleaks secret scanning configuration.
+# @sidecar .gitleaks.toml.header.md
+# @layer root | @hex _none_ | @ctx _none_
+# @public false
+# @edit careful
+
+title = "Contextrail gitleaks config"
+
+[allowlist]
+description = "Global allowlist"
+paths = [
+  '''node_modules/''',
+  '''\.backups/''',
+  '''coverage/''',
+  '''dist/''',
+  '''\.git/''',
+]

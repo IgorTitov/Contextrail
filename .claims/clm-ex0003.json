@@ -1,0 +1,22 @@
+{
+  "id": "clm-ex0003",
+  "agent": "team-gamma / hex-architect",
+  "slice": "TPL-EXAMPLE",
+  "created": "2026-04-01T11:00:00Z",
+  "expires": "2026-04-01T19:00:00Z",
+  "status": "completed",
+  "targets": [
+    {
+      "path": "modules/cache/ports/cache-port.mjs",
+      "module": "cache",
+      "surface": "port",
+      "action": "modify",
+      "description": "Refactor cache port to support namespace isolation"
+    }
+  ],
+  "strategy": "negotiate",
+  "priority": "medium",
+  "counterTo": "clm-ex0002",
+  "dependsOn": ["clm-ex0002"],
+  "notes": "EXAMPLE CLAIM — demonstrates a counter-claim with negotiate strategy. This claim targets the same file as clm-ex0002 and uses dependsOn to wait for it to complete first. The counterTo field links to the original claim for audit trail."
+}

@@ -1,0 +1,72 @@
+# @HEADER
+# @version 0.8.12 | 2026-05-11
+# @purpose Keep local artifacts, dependencies, and generated outputs out of version control without hiding real repository problems.
+# @sidecar .gitignore.header.md
+# @layer root | @hex _none_ | @ctx _none_
+# @public false
+# @edit careful
+
+.backups/
+.claims/.locks/
+.claims/audit.log
+.claims/commit-audit.log
+.claims/coa-phases-ran.tmp
+
+# R5 rationale-file override — ephemeral input, gitignored. The consumed
+# archive in .coa/r5-override-log/ IS tracked. (ADR-0047 / TPL-329)
+.coa/r5-override.json
+
+# Slice-ID uniqueness override — ephemeral input, gitignored. The consumed
+# archive in .coa/slice-id-override-log/ IS tracked. (ADR-0049 / TPL-333)
+.coa/slice-id-override.json
+.claims/clm-*.json
+.claims/clm-*.json.header.md
+.claims/teardown-stale-marker-*.json
+.cockpit/
+node_modules/
+test-results/
+playwright-report/
+/reports/
+dist/
+
+# Operator-only audit trails for one-shot migrations (TPL-233 / ADR-0014).
+# The backfill report rewrites whenever someone reruns header-backfill.mjs;
+# keeping it out of git avoids merge churn. The committed migration is the
+# header-fix changes themselves, not the report.
+docs/_generated/header-backfill-report.json
+
+# Local-tier harness configs — operator-local copies of the committed templates.
+# The .template files ARE tracked. The un-suffixed copies are private to each
+# contributor (model picks, endpoints, personal rules, possibly real API keys).
+.aider.conf.yml
+.continue/config.json
+
+# Secrets and private keys — never commit these
+.env
+.env.*
+!.env.example
+!.env.example.header.md
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+credentials.json
+**/service-account*.json
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# Coverage output (c8)
+coverage/
+
+# Internal planning and analysis docs (stay on disk for Claude, not shipped)
+docs/plans/
+docs/quality-assessment-*.md
+docs/quality-audit-criteria.md
+docs/analysis/*.md
+!docs/analysis/README.md
+!docs/analysis/README.md.header.md
+!docs/analysis/benchmark-plan.md
+!docs/analysis/benchmark-plan.md.header.md

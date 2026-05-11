@@ -1,0 +1,270 @@
+{
+  "name": "auth",
+  "description": "Pluggable authentication with anonymous, local-password, OAuth (Google, GitHub, memory, stub), and JWT adapters",
+  "maturity": "stable",
+  "exports": [
+    "public-api.mjs"
+  ],
+  "dependencies": {
+    "modules": [
+      "api-client"
+    ],
+    "external": [
+      "jose"
+    ],
+    "builtins": [
+      "node:crypto"
+    ]
+  },
+  "dependents": [
+    "permission"
+  ],
+  "structure": {
+    "domain": [
+      "auth-api-integration.mjs",
+      "auth-state.mjs",
+      "oauth-flow.mjs",
+      "route-guard.mjs"
+    ],
+    "ports": [
+      "auth-port.mjs",
+      "oauth-provider-port.mjs"
+    ],
+    "adapters": [
+      "anonymous-adapter.mjs",
+      "github-oauth-provider.mjs",
+      "google-oauth-provider.mjs",
+      "jwt-adapter.mjs",
+      "jwt-test-helpers.mjs",
+      "local-password-adapter.mjs",
+      "memory-oauth-provider.mjs",
+      "node-oauth-crypto.mjs",
+      "oauth-stub-adapter.mjs",
+      "server-session-adapter.mjs"
+    ],
+    "root": [
+      "public-api.mjs",
+      "messages.mjs"
+    ]
+  },
+  "testFiles": [
+    "tests/unit/auth.test.mjs",
+    "tests/unit/auth-oauth.test.mjs",
+    "tests/contract/auth-hex-contract.test.mjs",
+    "tests/bdd/auth-login.test.mjs"
+  ],
+  "capabilities": {
+    "adapters": [
+      "anonymous-adapter.mjs",
+      "github-oauth-provider.mjs",
+      "google-oauth-provider.mjs",
+      "jwt-adapter.mjs",
+      "jwt-test-helpers.mjs",
+      "local-password-adapter.mjs",
+      "memory-oauth-provider.mjs",
+      "node-oauth-crypto.mjs",
+      "oauth-stub-adapter.mjs",
+      "server-session-adapter.mjs"
+    ],
+    "ports": {
+      "AuthPort": {
+        "kind": "interface",
+        "methods": {
+          "getUser": {
+            "params": [],
+            "returns": "AuthUser | null"
+          },
+          "isAuthenticated": {
+            "params": [],
+            "returns": "boolean"
+          },
+          "login": {
+            "params": [
+              {
+                "name": "credentials",
+                "optional": true,
+                "type": "AuthCredentials"
+              }
+            ],
+            "returns": "Promise<AuthResult>"
+          },
+          "logout": {
+            "params": [],
+            "returns": "Promise<void>"
+          },
+          "offAuthChange": {
+            "params": [
+              {
+                "name": "listener",
+                "type": "(event: AuthChangeEvent) => void"
+              }
+            ],
+            "returns": "void"
+          },
+          "onAuthChange": {
+            "params": [
+              {
+                "name": "listener",
+                "type": "(event: AuthChangeEvent) => void"
+              }
+            ],
+            "returns": "void"
+          }
+        }
+      },
+      "OAuthProviderPort": {
+        "kind": "interface",
+        "methods": {
+          "buildAuthorizationUrl": {
+            "params": [
+              {
+                "name": "params",
+                "type": "OAuthAuthorizeParams"
+              }
+            ],
+            "returns": "string"
+          },
+          "exchangeCode": {
+            "params": [
+              {
+                "name": "params",
+                "type": "OAuthExchangeParams"
+              }
+            ],
+            "returns": "Promise<OAuthTokenBundle>"
+          },
+          "fetchUserInfo": {
+            "params": [
+              {
+                "name": "tokens",
+                "type": "OAuthTokenBundle"
+              }
+            ],
+            "returns": "Promise<AuthUser>"
+          }
+        }
+      }
+    },
+    "typedefs": {
+      "AuthChangeEvent": {
+        "fields": {
+          "type": {
+            "type": "'login' | 'logout'"
+          },
+          "user": {
+            "type": "AuthUser | null"
+          }
+        }
+      },
+      "AuthCredentials": {
+        "fields": {
+          "password": {
+            "optional": true,
+            "type": "string"
+          },
+          "provider": {
+            "optional": true,
+            "type": "string"
+          },
+          "token": {
+            "optional": true,
+            "type": "string"
+          },
+          "username": {
+            "optional": true,
+            "type": "string"
+          }
+        }
+      },
+      "AuthResult": {
+        "fields": {
+          "error": {
+            "optional": true,
+            "type": "string"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "user": {
+            "optional": true,
+            "type": "AuthUser"
+          }
+        }
+      },
+      "AuthUser": {
+        "fields": {
+          "accessToken": {
+            "optional": true,
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "refreshToken": {
+            "optional": true,
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          }
+        }
+      },
+      "OAuthAuthorizeParams": {
+        "fields": {
+          "codeChallenge": {
+            "type": "string"
+          },
+          "redirectUri": {
+            "type": "string"
+          },
+          "scope": {
+            "optional": true,
+            "type": "string[]"
+          },
+          "state": {
+            "type": "string"
+          }
+        }
+      },
+      "OAuthExchangeParams": {
+        "fields": {
+          "code": {
+            "type": "string"
+          },
+          "codeVerifier": {
+            "type": "string"
+          },
+          "redirectUri": {
+            "type": "string"
+          }
+        }
+      },
+      "OAuthTokenBundle": {
+        "fields": {
+          "accessToken": {
+            "type": "string"
+          },
+          "expiresIn": {
+            "optional": true,
+            "type": "number"
+          },
+          "refreshToken": {
+            "optional": true,
+            "type": "string"
+          },
+          "scope": {
+            "optional": true,
+            "type": "string"
+          },
+          "tokenType": {
+            "optional": true,
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

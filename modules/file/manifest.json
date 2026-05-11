@@ -1,0 +1,228 @@
+{
+  "name": "file",
+  "description": "File operations with browser Blob and Node.js filesystem adapters",
+  "maturity": "beta",
+  "exports": [
+    "public-api.mjs"
+  ],
+  "dependencies": {
+    "modules": [],
+    "external": [],
+    "builtins": [
+      "node:fs/promises",
+      "node:path"
+    ]
+  },
+  "dependents": [],
+  "structure": {
+    "domain": [
+      "mime-detection.mjs",
+      "file-validation.mjs",
+      "file-utils.mjs"
+    ],
+    "ports": [
+      "file-port.mjs"
+    ],
+    "adapters": [
+      "blob-adapter.mjs",
+      "file-system-adapter.mjs"
+    ],
+    "root": [
+      "public-api.mjs",
+      "messages.mjs"
+    ]
+  },
+  "testFiles": [
+    "tests/unit/file.test.mjs",
+    "tests/contract/file-hex-contract.test.mjs",
+    "tests/bdd/file.test.mjs"
+  ],
+  "capabilities": {
+    "adapters": [
+      "blob-adapter.mjs",
+      "file-system-adapter.mjs"
+    ],
+    "ports": {
+      "FilePort": {
+        "kind": "interface",
+        "methods": {
+          "download": {
+            "params": [
+              {
+                "name": "url",
+                "type": "string"
+              },
+              {
+                "name": "options",
+                "optional": true,
+                "type": "FileOptions"
+              }
+            ],
+            "returns": "Promise<FileResult>"
+          },
+          "getMetadata": {
+            "params": [
+              {
+                "name": "file",
+                "type": "any"
+              }
+            ],
+            "returns": "FileMetadata"
+          },
+          "list": {
+            "params": [
+              {
+                "name": "path",
+                "optional": true,
+                "type": "string"
+              },
+              {
+                "name": "options",
+                "optional": true,
+                "type": "object"
+              }
+            ],
+            "returns": "Promise<FileHandle[]>"
+          },
+          "preview": {
+            "params": [
+              {
+                "name": "file",
+                "type": "any"
+              }
+            ],
+            "returns": "string"
+          },
+          "read": {
+            "params": [
+              {
+                "name": "file",
+                "type": "any"
+              },
+              {
+                "name": "format",
+                "optional": true,
+                "type": "'text' | 'arrayBuffer' | 'dataUrl'"
+              }
+            ],
+            "returns": "Promise<any>"
+          },
+          "upload": {
+            "params": [
+              {
+                "name": "file",
+                "type": "any"
+              },
+              {
+                "name": "options",
+                "optional": true,
+                "type": "FileOptions"
+              }
+            ],
+            "returns": "Promise<FileResult>"
+          }
+        }
+      }
+    },
+    "typedefs": {
+      "FileHandle": {
+        "fields": {
+          "id": {
+            "type": "string"
+          },
+          "metadata": {
+            "type": "FileMetadata"
+          },
+          "url": {
+            "optional": true,
+            "type": "string"
+          }
+        }
+      },
+      "FileMetadata": {
+        "fields": {
+          "extension": {
+            "optional": true,
+            "type": "string"
+          },
+          "lastModified": {
+            "optional": true,
+            "type": "number"
+          },
+          "mimeType": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "size": {
+            "type": "number"
+          }
+        }
+      },
+      "FileOptions": {
+        "fields": {
+          "chunkSize": {
+            "optional": true,
+            "type": "number"
+          },
+          "endpoint": {
+            "optional": true,
+            "type": "string"
+          },
+          "headers": {
+            "optional": true,
+            "type": "Record<string, string>"
+          }
+        }
+      },
+      "FileProgress": {
+        "fields": {
+          "fileId": {
+            "type": "string"
+          },
+          "loaded": {
+            "type": "number"
+          },
+          "percent": {
+            "type": "number"
+          },
+          "total": {
+            "type": "number"
+          }
+        }
+      },
+      "FileResult": {
+        "fields": {
+          "error": {
+            "optional": true,
+            "type": "string"
+          },
+          "handle": {
+            "optional": true,
+            "type": "FileHandle"
+          },
+          "success": {
+            "type": "boolean"
+          }
+        }
+      },
+      "FileValidationOptions": {
+        "fields": {
+          "allowedExtensions": {
+            "optional": true,
+            "type": "string[]"
+          },
+          "allowedMimeTypes": {
+            "optional": true,
+            "type": "string[]"
+          },
+          "maxSize": {
+            "optional": true,
+            "type": "number"
+          }
+        }
+      }
+    }
+  }
+}

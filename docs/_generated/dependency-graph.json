@@ -1,0 +1,858 @@
+{
+  "_generated": "2026-05-11T10:48:51.122Z",
+  "_description": "Auto-generated merged dependency graph. Do not edit manually. Run: node scripts/checks/dependency-graph.mjs",
+  "moduleCount": 40,
+  "consumerEdgeCount": 133,
+  "maxDependencyDepth": 2,
+  "modules": {
+    "ai-chat": {
+      "description": "Pluggable AI chat abstraction with echo and HTTP API adapters",
+      "dependsOn": [
+        "api-client"
+      ],
+      "transitiveDeps": [
+        "api-client"
+      ],
+      "dependedBy": [
+        "local-llm"
+      ],
+      "consumers": [
+        "apps/starter/ai-chat/ai-chat-init.mjs",
+        "apps/starter/ai-chat/chat-panel.mjs",
+        "tests/bdd/ai-chat.test.mjs",
+        "tests/unit/ai-chat.test.mjs",
+        "tests/unit/local-llm.test.mjs"
+      ],
+      "depthFromLeaf": 1,
+      "layer": 1,
+      "structure": {
+        "domain": 1,
+        "ports": 1,
+        "adapters": 2
+      }
+    },
+    "analytics": {
+      "description": "Privacy-first analytics with consent-gated behavioral tracking (clicks, scroll, visibility, mouse heatmap)",
+      "dependsOn": [],
+      "transitiveDeps": [],
+      "dependedBy": [],
+      "consumers": [
+        "apps/starter/app.mjs",
+        "tests/bdd/analytics.test.mjs",
+        "tests/unit/analytics-behavioral.test.mjs",
+        "tests/unit/analytics-mouse-collector.test.mjs",
+        "tests/unit/analytics.test.mjs"
+      ],
+      "depthFromLeaf": 0,
+      "layer": 0,
+      "structure": {
+        "domain": 3,
+        "ports": 1,
+        "adapters": 3
+      }
+    },
+    "api-client": {
+      "description": "HTTP client abstraction with native fetch adapter",
+      "dependsOn": [],
+      "transitiveDeps": [],
+      "dependedBy": [
+        "ai-chat",
+        "auth"
+      ],
+      "consumers": [
+        "modules/ai-chat/adapters/http-api-adapter.mjs",
+        "tests/bdd/api-client.test.mjs",
+        "tests/unit/api-client.test.mjs"
+      ],
+      "depthFromLeaf": 0,
+      "layer": 0,
+      "structure": {
+        "domain": 0,
+        "ports": 1,
+        "adapters": 1
+      }
+    },
+    "auth": {
+      "description": "Pluggable authentication with anonymous, local-password, OAuth (Google, GitHub, memory, stub), and JWT adapters",
+      "dependsOn": [
+        "api-client"
+      ],
+      "transitiveDeps": [
+        "api-client"
+      ],
+      "dependedBy": [
+        "permission"
+      ],
+      "consumers": [
+        "apps/api-starter/app.mjs",
+        "apps/api-starter/routes/oauth.mjs",
+        "apps/starter/ai-chat/ai-chat-init.mjs",
+        "tests/bdd/auth-login.test.mjs",
+        "tests/unit/auth-jwt.test.mjs",
+        "tests/unit/auth-oauth.test.mjs",
+        "tests/unit/auth-route-guard.test.mjs",
+        "tests/unit/auth.test.mjs"
+      ],
+      "depthFromLeaf": 1,
+      "layer": 1,
+      "structure": {
+        "domain": 4,
+        "ports": 2,
+        "adapters": 10
+      }
+    },
+    "cache": {
+      "description": "Hexagonal cache module with memory-LRU, localStorage, and IndexedDB adapters",
+      "dependsOn": [],
+      "transitiveDeps": [],
+      "dependedBy": [],
+      "consumers": [
+        "apps/api-starter/app.mjs",
+        "tests/bdd/cache.test.mjs",
+        "tests/unit/cache-storage-adapters.test.mjs",
+        "tests/unit/cache.test.mjs"
+      ],
+      "depthFromLeaf": 0,
+      "layer": 0,
+      "structure": {
+        "domain": 1,
+        "ports": 1,
+        "adapters": 4
+      }
+    },
+    "cqrs": {
+      "description": "Hexagonal cqrs module — pure Command/Query/DomainEvent value objects + aggregate replay helpers + CommandBusPort + QueryBusPort + EventStorePort with optimistic concurrency + in-memory adapters, zero external deps",
+      "dependsOn": [],
+      "transitiveDeps": [],
+      "dependedBy": [],
+      "consumers": [
+        "apps/api-starter/app.mjs",
+        "tests/unit/cqrs.test.mjs"
+      ],
+      "depthFromLeaf": 0,
+      "layer": 0,
+      "structure": {
+        "domain": 4,
+        "ports": 3,
+        "adapters": 3
+      }
+    },
+    "db": {
+      "description": "Hexagonal database module with memory, generic SQL driver, and node:sqlite adapters",
+      "dependsOn": [],
+      "transitiveDeps": [],
+      "dependedBy": [],
+      "consumers": [
+        "apps/api-starter/app.mjs",
+        "tests/bdd/db.test.mjs",
+        "tests/unit/db-node-sqlite.test.mjs",
+        "tests/unit/db.test.mjs"
+      ],
+      "depthFromLeaf": 0,
+      "layer": 0,
+      "structure": {
+        "domain": 1,
+        "ports": 1,
+        "adapters": 3
+      }
+    },
+    "email": {
+      "description": "Hexagonal outbound email module — pure message domain, memory + console adapters behind EmailPort, zero external deps",
+      "dependsOn": [],
+      "transitiveDeps": [],
+      "dependedBy": [],
+      "consumers": [
+        "apps/api-starter/app.mjs",
+        "apps/api-starter/routes/email.mjs",
+        "tests/unit/email.test.mjs"
+      ],
+      "depthFromLeaf": 0,
+      "layer": 0,
+      "structure": {
+        "domain": 1,
+        "ports": 1,
+        "adapters": 2
+      }
+    },
+    "event-bus": {
+      "description": "Typed synchronous in-process pub/sub event bus",
+      "dependsOn": [],
+      "transitiveDeps": [],
+      "dependedBy": [],
+      "consumers": [
+        "apps/api-starter/app.mjs",
+        "tests/bdd/event-bus.test.mjs",
+        "tests/unit/event-bus.test.mjs"
+      ],
+      "depthFromLeaf": 0,
+      "layer": 0,
+      "structure": {
+        "domain": 1,
+        "ports": 1,
+        "adapters": 2
+      }
+    },
+    "example-greeter": {
+      "description": "Minimal example hex module demonstrating port/adapter pattern",
+      "dependsOn": [],
+      "transitiveDeps": [],
+      "dependedBy": [],
+      "consumers": [
+        "apps/starter/examples/greeter-wiring/greeter-app.mjs",
+        "tests/bdd/example-greeter.test.mjs",
+        "tests/unit/example-greeter.test.mjs"
+      ],
+      "depthFromLeaf": 0,
+      "layer": 0,
+      "structure": {
+        "domain": 1,
+        "ports": 1,
+        "adapters": 1
+      }
+    },
+    "feature-seams": {
+      "description": "Branch-by-abstraction feature seam registry with guards",
+      "dependsOn": [],
+      "transitiveDeps": [],
+      "dependedBy": [],
+      "consumers": [
+        "apps/starter/app.mjs",
+        "tests/bdd/feature-seams.test.mjs",
+        "tests/unit/feature-seams-shadow.test.mjs",
+        "tests/unit/feature-seams.test.mjs"
+      ],
+      "depthFromLeaf": 0,
+      "layer": 0,
+      "structure": {
+        "domain": 3,
+        "ports": 2,
+        "adapters": 3
+      }
+    },
+    "file": {
+      "description": "File operations with browser Blob and Node.js filesystem adapters",
+      "dependsOn": [],
+      "transitiveDeps": [],
+      "dependedBy": [],
+      "consumers": [
+        "tests/bdd/file.test.mjs",
+        "tests/unit/file.test.mjs"
+      ],
+      "depthFromLeaf": 0,
+      "layer": 0,
+      "structure": {
+        "domain": 3,
+        "ports": 1,
+        "adapters": 2
+      }
+    },
+    "form-validation": {
+      "description": "Pure domain module for field and form-level validation rules",
+      "dependsOn": [],
+      "transitiveDeps": [],
+      "dependedBy": [],
+      "consumers": [
+        "tests/bdd/form-validation.test.mjs",
+        "tests/unit/form-validation.test.mjs"
+      ],
+      "depthFromLeaf": 0,
+      "layer": 0,
+      "structure": {
+        "domain": 2,
+        "ports": 0,
+        "adapters": 0
+      }
+    },
+    "graphql": {
+      "description": "Hexagonal GraphQL module — pure schema value object, minimal subset query parser, pure executor with error aggregation, GraphqlTransportPort + in-memory transport, zero external deps",
+      "dependsOn": [],
+      "transitiveDeps": [],
+      "dependedBy": [],
+      "consumers": [
+        "apps/api-starter/routes/graphql.mjs",
+        "tests/unit/graphql.test.mjs"
+      ],
+      "depthFromLeaf": 0,
+      "layer": 0,
+      "structure": {
+        "domain": 4,
+        "ports": 1,
+        "adapters": 1
+      }
+    },
+    "i18n": {
+      "description": "Internationalization infrastructure with pluggable adapters for message translation, interpolation, pluralization, and Intl formatting",
+      "dependsOn": [],
+      "transitiveDeps": [],
+      "dependedBy": [],
+      "consumers": [
+        "tests/bdd/i18n.test.mjs",
+        "tests/unit/i18n.test.mjs"
+      ],
+      "depthFromLeaf": 0,
+      "layer": 0,
+      "structure": {
+        "domain": 4,
+        "ports": 1,
+        "adapters": 2
+      }
+    },
+    "job-queue": {
+      "description": "Hexagonal background job queue — pure lifecycle domain, memory adapter with retry/backoff, framework-free worker loop",
+      "dependsOn": [],
+      "transitiveDeps": [],
+      "dependedBy": [],
+      "consumers": [
+        "apps/api-starter/app.mjs",
+        "tests/unit/job-queue.test.mjs"
+      ],
+      "depthFromLeaf": 0,
+      "layer": 0,
+      "structure": {
+        "domain": 2,
+        "ports": 1,
+        "adapters": 1
+      }
+    },
+    "knowledge-graph": {
+      "description": "GraphRAG foundation with entity extraction, relationship detection, and graph algorithms",
+      "dependsOn": [],
+      "transitiveDeps": [],
+      "dependedBy": [],
+      "consumers": [
+        "tests/bdd/knowledge-graph.test.mjs",
+        "tests/unit/knowledge-graph.test.mjs"
+      ],
+      "depthFromLeaf": 0,
+      "layer": 0,
+      "structure": {
+        "domain": 1,
+        "ports": 2,
+        "adapters": 3
+      }
+    },
+    "local-llm": {
+      "description": "In-browser LLM inference with WebLLM and Transformers.js adapters",
+      "dependsOn": [
+        "ai-chat"
+      ],
+      "transitiveDeps": [
+        "ai-chat",
+        "api-client"
+      ],
+      "dependedBy": [],
+      "consumers": [
+        "apps/starter/local-llm/local-llm-init.mjs",
+        "apps/starter/local-llm/local-llm-panel.mjs",
+        "tests/bdd/local-llm.test.mjs",
+        "tests/unit/local-llm.test.mjs"
+      ],
+      "depthFromLeaf": 2,
+      "layer": 2,
+      "structure": {
+        "domain": 1,
+        "ports": 1,
+        "adapters": 2
+      }
+    },
+    "log": {
+      "description": "Structured logging with console, JSON, no-op, and remote adapters",
+      "dependsOn": [],
+      "transitiveDeps": [],
+      "dependedBy": [],
+      "consumers": [
+        "apps/api-starter/app.mjs",
+        "tests/bdd/log.test.mjs",
+        "tests/unit/log.test.mjs"
+      ],
+      "depthFromLeaf": 0,
+      "layer": 0,
+      "structure": {
+        "domain": 1,
+        "ports": 1,
+        "adapters": 5
+      }
+    },
+    "monitoring": {
+      "description": "Monitoring bounded context: exception tracking, structured messages, metrics, and spans behind a single port with swappable backends.",
+      "dependsOn": [],
+      "transitiveDeps": [],
+      "dependedBy": [],
+      "consumers": [
+        "apps/api-starter/app.mjs",
+        "tests/unit/monitoring.test.mjs"
+      ],
+      "depthFromLeaf": 0,
+      "layer": 0,
+      "structure": {
+        "domain": 1,
+        "ports": 1,
+        "adapters": 3
+      }
+    },
+    "notifications": {
+      "description": "Notification display with DOM and memory adapters",
+      "dependsOn": [],
+      "transitiveDeps": [],
+      "dependedBy": [],
+      "consumers": [
+        "apps/starter/app.mjs",
+        "tests/bdd/notifications.test.mjs",
+        "tests/unit/notification-preferences.test.mjs",
+        "tests/unit/notifications.test.mjs"
+      ],
+      "depthFromLeaf": 0,
+      "layer": 0,
+      "structure": {
+        "domain": 1,
+        "ports": 1,
+        "adapters": 2
+      }
+    },
+    "onboarding": {
+      "description": "Guided walkthrough tours with spotlight overlay and step-by-step popovers for new-user onboarding",
+      "dependsOn": [],
+      "transitiveDeps": [],
+      "dependedBy": [],
+      "consumers": [
+        "tests/bdd/onboarding.test.mjs",
+        "tests/unit/onboarding-checklist.test.mjs",
+        "tests/unit/onboarding.test.mjs"
+      ],
+      "depthFromLeaf": 0,
+      "layer": 0,
+      "structure": {
+        "domain": 2,
+        "ports": 1,
+        "adapters": 2
+      }
+    },
+    "openapi": {
+      "description": "Hexagonal OpenAPI 3 module — pure document builder, document-provider port, and adapters for static and route-registry-driven specs",
+      "dependsOn": [],
+      "transitiveDeps": [],
+      "dependedBy": [],
+      "consumers": [
+        "apps/api-starter/app.mjs",
+        "tests/unit/openapi.test.mjs"
+      ],
+      "depthFromLeaf": 0,
+      "layer": 0,
+      "structure": {
+        "domain": 1,
+        "ports": 1,
+        "adapters": 2
+      }
+    },
+    "payments": {
+      "description": "Hexagonal payments module — pure money + payment-intent + webhook-verify domain behind a narrow PaymentsPort, memory adapter, zero external deps",
+      "dependsOn": [],
+      "transitiveDeps": [],
+      "dependedBy": [],
+      "consumers": [
+        "apps/api-starter/app.mjs",
+        "tests/unit/payments.test.mjs"
+      ],
+      "depthFromLeaf": 0,
+      "layer": 0,
+      "structure": {
+        "domain": 3,
+        "ports": 1,
+        "adapters": 2
+      }
+    },
+    "permission": {
+      "description": "Role-based permission checking with static and dynamic adapters",
+      "dependsOn": [
+        "auth"
+      ],
+      "transitiveDeps": [
+        "api-client",
+        "auth"
+      ],
+      "dependedBy": [],
+      "consumers": [
+        "tests/bdd/permission.test.mjs",
+        "tests/unit/entitlement.test.mjs",
+        "tests/unit/permission.test.mjs"
+      ],
+      "depthFromLeaf": 2,
+      "layer": 2,
+      "structure": {
+        "domain": 2,
+        "ports": 1,
+        "adapters": 2
+      }
+    },
+    "prerender": {
+      "description": "Hexagonal prerender module — pure SSG primitive that walks a route manifest, invokes a render function per route, and writes the rendered HTML through a StaticOutputPort. RenderFunctionPort typedef + StaticOutputPort struct port + in-memory output adapter + sequential runner. Zero external deps, framework-agnostic — adapters own filesystem, CDN, or in-memory persistence.",
+      "dependsOn": [],
+      "transitiveDeps": [],
+      "dependedBy": [],
+      "consumers": [
+        "apps/api-starter/app.mjs",
+        "apps/api-starter/routes/prerender.mjs",
+        "tests/unit/prerender.test.mjs"
+      ],
+      "depthFromLeaf": 0,
+      "layer": 0,
+      "structure": {
+        "domain": 3,
+        "ports": 2,
+        "adapters": 2
+      }
+    },
+    "pwa": {
+      "description": "Hexagonal PWA module — pure W3C Web App Manifest value object + cache-strategy descriptors + pure service worker source generator + PwaAssetPort + in-memory asset store, zero external deps",
+      "dependsOn": [],
+      "transitiveDeps": [],
+      "dependedBy": [],
+      "consumers": [
+        "apps/api-starter/app.mjs",
+        "apps/api-starter/routes/pwa.mjs",
+        "tests/unit/pwa.test.mjs"
+      ],
+      "depthFromLeaf": 0,
+      "layer": 0,
+      "structure": {
+        "domain": 3,
+        "ports": 1,
+        "adapters": 1
+      }
+    },
+    "rate-limit": {
+      "description": "Hexagonal rate-limiting module with token-bucket domain + in-memory adapter",
+      "dependsOn": [],
+      "transitiveDeps": [],
+      "dependedBy": [],
+      "consumers": [
+        "apps/api-starter/app.mjs",
+        "tests/unit/rate-limit.test.mjs"
+      ],
+      "depthFromLeaf": 0,
+      "layer": 0,
+      "structure": {
+        "domain": 1,
+        "ports": 1,
+        "adapters": 1
+      }
+    },
+    "realtime": {
+      "description": "Primus-style transparent transport selection with WebSocket, SSE, long-polling, and WebRTC adapters",
+      "dependsOn": [],
+      "transitiveDeps": [],
+      "dependedBy": [],
+      "consumers": [
+        "tests/bdd/realtime.test.mjs",
+        "tests/unit/realtime-server.test.mjs",
+        "tests/unit/realtime-transports.test.mjs",
+        "tests/unit/realtime.test.mjs"
+      ],
+      "depthFromLeaf": 0,
+      "layer": 0,
+      "structure": {
+        "domain": 5,
+        "ports": 2,
+        "adapters": 5
+      }
+    },
+    "retrieval": {
+      "description": "RAG retrieval with chunkers, tokenizers, embedders, hybrid search, re-rankers, document loaders, and query transformers",
+      "dependsOn": [],
+      "transitiveDeps": [],
+      "dependedBy": [],
+      "consumers": [
+        "tests/bdd/retrieval.test.mjs",
+        "tests/unit/retrieval-chunker-port.test.mjs",
+        "tests/unit/retrieval-chunker-recursive.test.mjs",
+        "tests/unit/retrieval-chunker-strategies.test.mjs",
+        "tests/unit/retrieval-hybrid-reranker.test.mjs",
+        "tests/unit/retrieval-loaders-query.test.mjs",
+        "tests/unit/retrieval-tokenizer-embedder.test.mjs",
+        "tests/unit/retrieval.test.mjs"
+      ],
+      "depthFromLeaf": 0,
+      "layer": 0,
+      "structure": {
+        "domain": 6,
+        "ports": 7,
+        "adapters": 12
+      }
+    },
+    "scheduler": {
+      "description": "Hexagonal scheduler with interval, idle-callback, and visibility-aware adapters",
+      "dependsOn": [],
+      "transitiveDeps": [],
+      "dependedBy": [],
+      "consumers": [
+        "tests/bdd/scheduler.test.mjs",
+        "tests/unit/scheduler.test.mjs"
+      ],
+      "depthFromLeaf": 0,
+      "layer": 0,
+      "structure": {
+        "domain": 2,
+        "ports": 1,
+        "adapters": 3
+      }
+    },
+    "search": {
+      "description": "Hexagonal full-text search module — pure tokenizer + inverted-index domain, memory adapter behind SearchPort, zero external deps",
+      "dependsOn": [],
+      "transitiveDeps": [],
+      "dependedBy": [],
+      "consumers": [
+        "apps/api-starter/app.mjs",
+        "apps/api-starter/routes/search.mjs",
+        "tests/unit/search.test.mjs"
+      ],
+      "depthFromLeaf": 0,
+      "layer": 0,
+      "structure": {
+        "domain": 3,
+        "ports": 1,
+        "adapters": 1
+      }
+    },
+    "seo": {
+      "description": "Hexagonal SEO module — pure meta-tag descriptor + sitemap + robots.txt renderers with safe attribute/XML escaping + SeoPublisherPort + in-memory adapter, zero external deps",
+      "dependsOn": [],
+      "transitiveDeps": [],
+      "dependedBy": [],
+      "consumers": [
+        "apps/api-starter/app.mjs",
+        "apps/api-starter/routes/seo.mjs",
+        "tests/unit/seo.test.mjs"
+      ],
+      "depthFromLeaf": 0,
+      "layer": 0,
+      "structure": {
+        "domain": 3,
+        "ports": 1,
+        "adapters": 1
+      }
+    },
+    "state": {
+      "description": "Observable state store with memory and persistent adapters",
+      "dependsOn": [
+        "user-preferences"
+      ],
+      "transitiveDeps": [
+        "user-preferences"
+      ],
+      "dependedBy": [],
+      "consumers": [
+        "tests/bdd/state-store.test.mjs",
+        "tests/unit/state.test.mjs"
+      ],
+      "depthFromLeaf": 1,
+      "layer": 1,
+      "structure": {
+        "domain": 1,
+        "ports": 1,
+        "adapters": 3
+      }
+    },
+    "subscription": {
+      "description": "Subscription lifecycle, plan tiers, entitlements, and usage metering",
+      "dependsOn": [],
+      "transitiveDeps": [],
+      "dependedBy": [],
+      "consumers": [
+        "tests/contract/subscription-hex-contract.test.mjs",
+        "tests/unit/subscription.test.mjs"
+      ],
+      "depthFromLeaf": 0,
+      "layer": 0,
+      "structure": {
+        "domain": 1,
+        "ports": 1,
+        "adapters": 1
+      }
+    },
+    "task": {
+      "description": "Hexagonal task execution with Web Worker pool and main-thread adapters",
+      "dependsOn": [],
+      "transitiveDeps": [],
+      "dependedBy": [],
+      "consumers": [
+        "tests/bdd/task.test.mjs",
+        "tests/unit/task.test.mjs"
+      ],
+      "depthFromLeaf": 0,
+      "layer": 0,
+      "structure": {
+        "domain": 2,
+        "ports": 1,
+        "adapters": 2
+      }
+    },
+    "tenancy": {
+      "description": "Hexagonal tenancy module — pure Tenant value object + header/subdomain resolvers + TenantStorePort + memory store + AsyncLocalStorage context adapter, zero external deps",
+      "dependsOn": [],
+      "transitiveDeps": [],
+      "dependedBy": [],
+      "consumers": [
+        "apps/api-starter/app.mjs",
+        "tests/unit/tenancy.test.mjs"
+      ],
+      "depthFromLeaf": 0,
+      "layer": 0,
+      "structure": {
+        "domain": 3,
+        "ports": 1,
+        "adapters": 2
+      }
+    },
+    "theme": {
+      "description": "Hexagonal theme module — pure color-scheme enum, theme-token value object with CSS custom-property rendering, immutable preference record, ThemePreferenceStorePort + in-memory store, zero external deps",
+      "dependsOn": [],
+      "transitiveDeps": [],
+      "dependedBy": [],
+      "consumers": [
+        "apps/api-starter/app.mjs",
+        "apps/api-starter/routes/theme.mjs",
+        "tests/unit/theme.test.mjs"
+      ],
+      "depthFromLeaf": 0,
+      "layer": 0,
+      "structure": {
+        "domain": 3,
+        "ports": 1,
+        "adapters": 1
+      }
+    },
+    "user-management": {
+      "description": "User lifecycle: registration, profile, invitation, email verification, password reset",
+      "dependsOn": [],
+      "transitiveDeps": [],
+      "dependedBy": [],
+      "consumers": [
+        "tests/contract/user-management-hex-contract.test.mjs",
+        "tests/unit/user-management.test.mjs"
+      ],
+      "depthFromLeaf": 0,
+      "layer": 0,
+      "structure": {
+        "domain": 1,
+        "ports": 1,
+        "adapters": 1
+      }
+    },
+    "user-preferences": {
+      "description": "User preferences storage with localStorage, IndexedDB, and memory adapters",
+      "dependsOn": [],
+      "transitiveDeps": [],
+      "dependedBy": [
+        "state"
+      ],
+      "consumers": [
+        "apps/starter/app.mjs",
+        "apps/starter/language-picker/language-picker.mjs",
+        "apps/starter/platform/adapter-factory.mjs",
+        "apps/starter/theme-toggle/theme-toggle.mjs",
+        "tests/bdd/user-preferences.test.mjs",
+        "tests/unit/adapter-factory.test.mjs",
+        "tests/unit/indexeddb-adapter.test.mjs",
+        "tests/unit/user-preferences.test.mjs"
+      ],
+      "depthFromLeaf": 0,
+      "layer": 0,
+      "structure": {
+        "domain": 1,
+        "ports": 1,
+        "adapters": 3
+      }
+    }
+  },
+  "layers": [
+    [
+      "analytics",
+      "api-client",
+      "cache",
+      "cqrs",
+      "db",
+      "email",
+      "event-bus",
+      "example-greeter",
+      "feature-seams",
+      "file",
+      "form-validation",
+      "graphql",
+      "i18n",
+      "job-queue",
+      "knowledge-graph",
+      "log",
+      "monitoring",
+      "notifications",
+      "onboarding",
+      "openapi",
+      "payments",
+      "prerender",
+      "pwa",
+      "rate-limit",
+      "realtime",
+      "retrieval",
+      "scheduler",
+      "search",
+      "seo",
+      "subscription",
+      "task",
+      "tenancy",
+      "theme",
+      "user-management",
+      "user-preferences"
+    ],
+    [
+      "ai-chat",
+      "auth",
+      "state"
+    ],
+    [
+      "local-llm",
+      "permission"
+    ]
+  ],
+  "safeRemovalOrder": [
+    "analytics",
+    "cache",
+    "cqrs",
+    "db",
+    "email",
+    "event-bus",
+    "example-greeter",
+    "feature-seams",
+    "file",
+    "form-validation",
+    "graphql",
+    "i18n",
+    "job-queue",
+    "knowledge-graph",
+    "local-llm",
+    "log",
+    "monitoring",
+    "notifications",
+    "onboarding",
+    "openapi",
+    "payments",
+    "permission",
+    "prerender",
+    "pwa",
+    "rate-limit",
+    "realtime",
+    "retrieval",
+    "scheduler",
+    "search",
+    "seo",
+    "state",
+    "subscription",
+    "task",
+    "tenancy",
+    "theme",
+    "user-management",
+    "ai-chat",
+    "auth",
+    "user-preferences",
+    "api-client"
+  ]
+}

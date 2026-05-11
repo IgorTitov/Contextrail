@@ -1,0 +1,65 @@
+/* @HEADER
+ * @version 0.7.50 | 2026-05-03
+ * @purpose Russian locale catalog providing translated message keys for the starter app, including PWA strings.
+ * @sidecar ru.mjs.header.md
+ * @layer app | @hex _none_ | @ctx _none_
+ * @public true
+ * @edit careful
+ */
+
+/**
+ * Russian locale catalog for the starter app.
+ */
+export const ru = {
+  // Bootstrap
+  'greeting.hello': '\u041f\u0440\u0438\u0432\u0435\u0442, {name}!',
+  'status.ready': '\u0413\u043e\u0442\u043e\u0432\u043e',
+  'status.loading': '\u0417\u0430\u0433\u0440\u0443\u0437\u043a\u0430\u2026',
+
+  // Language picker
+  'language-picker.label': '\u042f\u0437\u044b\u043a',
+  'language-picker.en': '\u0410\u043d\u0433\u043b\u0438\u0439\u0441\u043a\u0438\u0439',
+  'language-picker.ru': '\u0420\u0443\u0441\u0441\u043a\u0438\u0439',
+
+  // Theme toggle
+  'theme-toggle.label': '\u0422\u0435\u043c\u0430',
+  'theme-toggle.light': '\u0421\u0432\u0435\u0442\u043b\u0430\u044f',
+  'theme-toggle.dark': '\u0422\u0451\u043c\u043d\u0430\u044f',
+  'theme-toggle.system': '\u0421\u0438\u0441\u0442\u0435\u043c\u043d\u0430\u044f',
+
+  // Layout
+  'layout.skip-to-content':
+    '\u041f\u0435\u0440\u0435\u0439\u0442\u0438 \u043a \u0441\u043e\u0434\u0435\u0440\u0436\u0438\u043c\u043e\u043c\u0443',
+  'layout.footer.copyright': '\u00a9 {year} \u041f\u0440\u043e\u0435\u043a\u0442',
+
+  // Navigation
+  'navigation.menu': '\u041c\u0435\u043d\u044e',
+
+  // Notifications
+  'notification.dismiss': '\u0421\u043a\u0440\u044b\u0442\u044c',
+  'notification.close': '\u0417\u0430\u043a\u0440\u044b\u0442\u044c',
+
+  // Loading
+  'loading.text': '\u0417\u0430\u0433\u0440\u0443\u0437\u043a\u0430\u2026',
+  'loading.sr-only':
+    '\u0421\u043e\u0434\u0435\u0440\u0436\u0438\u043c\u043e\u0435 \u0437\u0430\u0433\u0440\u0443\u0436\u0430\u0435\u0442\u0441\u044f',
+
+  // Error boundary
+  'error.title':
+    '\u0427\u0442\u043e-\u0442\u043e \u043f\u043e\u0448\u043b\u043e \u043d\u0435 \u0442\u0430\u043a',
+  'error.description':
+    '\u041f\u0440\u043e\u0438\u0437\u043e\u0448\u043b\u0430 \u043d\u0435\u043f\u0440\u0435\u0434\u0432\u0438\u0434\u0435\u043d\u043d\u0430\u044f \u043e\u0448\u0438\u0431\u043a\u0430. \u041f\u043e\u043f\u0440\u043e\u0431\u0443\u0439\u0442\u0435 \u0435\u0449\u0451 \u0440\u0430\u0437.',
+  'error.retry':
+    '\u041f\u043e\u043f\u0440\u043e\u0431\u043e\u0432\u0430\u0442\u044c \u0441\u043d\u043e\u0432\u0430',
+
+  // PWA
+  'pwa.install':
+    '\u0423\u0441\u0442\u0430\u043d\u043e\u0432\u0438\u0442\u044c \u043f\u0440\u0438\u043b\u043e\u0436\u0435\u043d\u0438\u0435',
+  'pwa.install.description':
+    '\u0423\u0441\u0442\u0430\u043d\u043e\u0432\u0438\u0442\u0435 \u043f\u0440\u0438\u043b\u043e\u0436\u0435\u043d\u0438\u0435 \u0434\u043b\u044f \u043b\u0443\u0447\u0448\u0435\u0433\u043e \u043e\u043f\u044b\u0442\u0430',
+  'pwa.update.available':
+    '\u0414\u043e\u0441\u0442\u0443\u043f\u043d\u043e \u043e\u0431\u043d\u043e\u0432\u043b\u0435\u043d\u0438\u0435',
+  'pwa.update.apply':
+    '\u041f\u0440\u0438\u043c\u0435\u043d\u0438\u0442\u044c \u043e\u0431\u043d\u043e\u0432\u043b\u0435\u043d\u0438\u0435',
+  'pwa.offline': '\u0412\u044b \u043d\u0435 \u0432 \u0441\u0435\u0442\u0438',
+};

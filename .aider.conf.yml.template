@@ -1,0 +1,60 @@
+# @HEADER
+# @version 0.0.0 | 2026-04-27
+# @purpose Aider configuration template targeting an OpenAI-compatible local endpoint (LM Studio / Ollama). Copy to .aider.conf.yml and adjust for your setup; the un-suffixed file is gitignored.
+# @sidecar .aider.conf.yml.template.header.md
+# @layer root | @hex _none_ | @ctx _none_
+# @public true
+# @edit careful
+
+# Contextrail × Aider — local-tier setup
+# ----------------------------------------------------------------------------
+# Copy this file to `.aider.conf.yml` (the un-suffixed name) and adjust the
+# `openai-api-base`, `model`, and `weak-model` lines for your local inference
+# server. The un-suffixed file is gitignored — your local edits stay local.
+#
+# See docs/guides/local-frameworks.md for the full setup recipe and
+# recommended model picks. The slim contract Aider should read each session
+# is LOCAL.md (or MICRO.md for narrow helper tasks).
+# ----------------------------------------------------------------------------
+
+# OpenAI-compatible local endpoint.
+# - LM Studio: http://localhost:1234/v1
+# - Ollama:    http://localhost:11434/v1
+openai-api-base: http://localhost:1234/v1
+
+# Any non-empty string. Local servers ignore the value but Aider requires one.
+openai-api-key: lm-studio
+
+# Main model. Override per-task with `aider --model ...` when needed.
+# Recommended baseline (May 2026, validated via D6 milestone):
+# Qwen3.6-27B-Instruct Q4_K_M. See docs/guides/local-frameworks.md
+# for current alternatives and selection rationale.
+model: openai/qwen3.6-27b-instruct
+
+# Weak model — used for commit-message synthesis and other narrow helper
+# tasks. Same model is fine for a 27B-class local setup; cloud users may
+# point this at a smaller cheaper model.
+weak-model: openai/qwen3.6-27b-instruct
+
+# Always include the slim Contextrail contract in the chat context so the
+# model knows the repo's working rules without burning tokens on AGENTS.md.
+read:
+  - LOCAL.md
+  - MICRO.md
+
+# Diff edit format is safer for small models than `whole`. Aider applies
+# unified-diff patches instead of asking the model to rewrite full files.
+edit-format: diff
+
+# Contextrail owns the commit ceremony (coa-merge handles version bump,
+# CHANGELOG release, claim auto-complete). Disable Aider's auto-commit so
+# it does not race with the ceremony.
+auto-commits: false
+
+# Contextrail manages .gitignore explicitly. Disable Aider's auto-write of
+# its own ignore patterns so the file stays under repo control.
+gitignore: false
+
+# Tests run via the pre-commit hook (Phase 6). Disable Aider's auto-test so
+# the local loop stays fast and the gates stay deterministic.
+auto-test: false

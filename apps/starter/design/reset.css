@@ -1,0 +1,121 @@
+/* @HEADER
+ * @version 0.6.5 | 2026-04-28
+ * @purpose Provide a modern minimal CSS reset — normalize box model, strip default margins, improve text rendering, set accessible defaults, and respect reduced motion preferences.
+ * @sidecar reset.css.header.md
+ * @layer app | @hex _none_ | @ctx _none_
+ * @public true
+ * @edit careful
+ */
+
+/*
+ * Modern CSS reset — minimal, opinionated.
+ *
+ * Goals: normalize box model, strip default margins, improve text rendering,
+ * respect accessibility preferences. No classes — element-only selectors.
+ *
+ * SpecRefs: TPL-056
+ */
+
+/* Box model */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Strip default margins and padding */
+body,
+h1, h2, h3, h4, h5, h6,
+p, figure, blockquote,
+dl, dd, ol, ul,
+fieldset, legend,
+pre {
+  margin: 0;
+  padding: 0;
+}
+
+/* Remove list styles on ul, ol with a list role */
+ul[role="list"],
+ol[role="list"] {
+  list-style: none;
+}
+
+/* Core body defaults */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  min-height: 100vh;
+  line-height: var(--line-height-normal, 1.5);
+  font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Media defaults */
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* Inherit typography for form elements */
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+/* Headings wrap properly */
+h1, h2, h3, h4, h5, h6 {
+  overflow-wrap: break-word;
+}
+
+/* Text wrapping */
+p {
+  overflow-wrap: break-word;
+}
+
+/* Table border collapse */
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* Remove default button styling */
+button {
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+/* Focus visible for keyboard navigation */
+:focus-visible {
+  outline: 2px solid var(--color-primary, #2563eb);
+  outline-offset: var(--focus-ring-offset, 2px);
+}
+
+/* Remove focus outline for mouse users */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

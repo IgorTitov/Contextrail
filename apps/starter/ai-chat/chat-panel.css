@@ -1,0 +1,121 @@
+/* @HEADER
+ * @version 0.6.5 | 2026-04-28
+ * @purpose Styles for Chat Panel in the starter app.
+ * @sidecar chat-panel.css.header.md
+ * @layer app | @hex _none_ | @ctx _none_
+ * @public false
+ * @edit careful
+ */
+
+/**
+ * Chat panel styles using design tokens.
+ *
+ * SpecRefs: TPL-077
+ */
+
+.ai-chat-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 600px;
+  border: 1px solid var(--color-border, #e0e0e0);
+  border-radius: var(--radius-md, 8px);
+  background: var(--color-surface, #ffffff);
+  font-family: var(--font-family-base, system-ui, sans-serif);
+}
+
+.ai-chat-message-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-md, 16px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm, 8px);
+}
+
+.ai-chat-message {
+  max-width: 80%;
+  padding: var(--space-sm, 8px) var(--space-md, 12px);
+  border-radius: var(--radius-md, 8px);
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+
+.ai-chat-message--user {
+  align-self: flex-end;
+  background: var(--color-primary, #0066cc);
+  color: var(--color-on-primary, #ffffff);
+}
+
+.ai-chat-message--assistant {
+  align-self: flex-start;
+  background: var(--color-surface-variant, #f0f0f0);
+  color: var(--color-on-surface, #333333);
+}
+
+.ai-chat-message--system {
+  align-self: center;
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--color-on-surface-muted, #666666);
+  font-style: italic;
+}
+
+.ai-chat-empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-on-surface-muted, #666666);
+  font-size: var(--font-size-sm, 0.875rem);
+  padding: var(--space-lg, 24px);
+}
+
+.ai-chat-typing {
+  padding: var(--space-sm, 8px) var(--space-md, 16px);
+  color: var(--color-on-surface-muted, #666666);
+  font-size: var(--font-size-sm, 0.875rem);
+  font-style: italic;
+}
+
+.ai-chat-input-area {
+  display: flex;
+  gap: var(--space-sm, 8px);
+  padding: var(--space-sm, 8px);
+  border-top: 1px solid var(--color-border, #e0e0e0);
+}
+
+.ai-chat-input {
+  flex: 1;
+  padding: var(--space-sm, 8px) var(--space-md, 12px);
+  border: 1px solid var(--color-border, #e0e0e0);
+  border-radius: var(--radius-sm, 4px);
+  font-family: inherit;
+  font-size: var(--font-size-base, 1rem);
+  background: var(--color-surface, #ffffff);
+  color: var(--color-on-surface, #333333);
+}
+
+.ai-chat-input:focus {
+  outline: 2px solid var(--color-primary, #0066cc);
+  outline-offset: -1px;
+}
+
+.ai-chat-send {
+  padding: var(--space-sm, 8px) var(--space-md, 16px);
+  background: var(--color-primary, #0066cc);
+  color: var(--color-on-primary, #ffffff);
+  border: none;
+  border-radius: var(--radius-sm, 4px);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: var(--font-size-base, 1rem);
+}
+
+.ai-chat-send:hover {
+  opacity: 0.9;
+}
+
+.ai-chat-send:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

@@ -1,0 +1,15 @@
+{
+  "name": "{{PROJECT_NAME}}-electron",
+  "version": "1.0.0",
+  "private": true,
+  "main": "main.mjs",
+  "type": "module",
+  "scripts": {
+    "start": "electron .",
+    "build:app": "node ../../scripts/build-single.mjs --mode electron --out dist --clean",
+    "dev": "npm run build:app && npm run start"
+  },
+  "devDependencies": {
+    "electron": "^35.0.0"
+  }
+}

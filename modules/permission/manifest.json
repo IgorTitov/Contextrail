@@ -1,0 +1,187 @@
+{
+  "name": "permission",
+  "description": "Role-based permission checking with static and dynamic adapters",
+  "maturity": "beta",
+  "exports": [
+    "public-api.mjs"
+  ],
+  "dependencies": {
+    "modules": [
+      "auth"
+    ],
+    "external": [],
+    "builtins": []
+  },
+  "dependents": [],
+  "structure": {
+    "domain": [
+      "role-hierarchy.mjs",
+      "rule-matcher.mjs"
+    ],
+    "ports": [
+      "permission-port.mjs"
+    ],
+    "adapters": [
+      "static-rules-adapter.mjs",
+      "dynamic-adapter.mjs"
+    ],
+    "root": [
+      "public-api.mjs",
+      "messages.mjs"
+    ]
+  },
+  "testFiles": [
+    "tests/unit/permission.test.mjs",
+    "tests/contract/permission-hex-contract.test.mjs",
+    "tests/bdd/permission.test.mjs"
+  ],
+  "capabilities": {
+    "adapters": [
+      "dynamic-adapter.mjs",
+      "static-rules-adapter.mjs"
+    ],
+    "ports": {
+      "PermissionPort": {
+        "kind": "interface",
+        "methods": {
+          "can": {
+            "params": [
+              {
+                "name": "action",
+                "type": "string"
+              },
+              {
+                "name": "resource",
+                "type": "string"
+              },
+              {
+                "name": "conditions",
+                "optional": true,
+                "type": "Record<string, any>"
+              }
+            ],
+            "returns": "boolean"
+          },
+          "cannot": {
+            "params": [
+              {
+                "name": "action",
+                "type": "string"
+              },
+              {
+                "name": "resource",
+                "type": "string"
+              },
+              {
+                "name": "conditions",
+                "optional": true,
+                "type": "Record<string, any>"
+              }
+            ],
+            "returns": "boolean"
+          },
+          "getRulesForRole": {
+            "params": [
+              {
+                "name": "role",
+                "type": "string"
+              }
+            ],
+            "returns": "PermissionRule[]"
+          },
+          "grant": {
+            "params": [
+              {
+                "name": "rule",
+                "type": "PermissionRule"
+              }
+            ],
+            "returns": "void"
+          },
+          "revoke": {
+            "params": [
+              {
+                "name": "action",
+                "type": "string"
+              },
+              {
+                "name": "resource",
+                "type": "string"
+              },
+              {
+                "name": "role",
+                "optional": true,
+                "type": "string"
+              }
+            ],
+            "returns": "void"
+          },
+          "setUser": {
+            "params": [
+              {
+                "name": "user",
+                "type": "{ role: string }"
+              }
+            ],
+            "returns": "void"
+          }
+        }
+      }
+    },
+    "typedefs": {
+      "PermissionCheck": {
+        "fields": {
+          "allowed": {
+            "type": "boolean"
+          },
+          "reason": {
+            "optional": true,
+            "type": "string"
+          },
+          "rule": {
+            "optional": true,
+            "type": "PermissionRule"
+          }
+        }
+      },
+      "PermissionRule": {
+        "fields": {
+          "action": {
+            "type": "string"
+          },
+          "conditions": {
+            "optional": true,
+            "type": "Record<string, any>"
+          },
+          "effect": {
+            "type": "'allow' | 'deny'"
+          },
+          "resource": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          }
+        }
+      },
+      "ResourceAction": {
+        "fields": {
+          "action": {
+            "type": "string"
+          },
+          "conditions": {
+            "optional": true,
+            "type": "Record<string, any>"
+          },
+          "resource": {
+            "type": "string"
+          }
+        }
+      },
+      "RoleHierarchyConfig": {
+        "alias": "Record<string, string[]>",
+        "kind": "alias"
+      }
+    }
+  }
+}

@@ -1,0 +1,55 @@
+/* @HEADER
+ * @version 0.6.5 | 2026-04-28
+ * @purpose Styles for Error Boundary in the starter app.
+ * @sidecar error-boundary.css.header.md
+ * @layer app | @hex _none_ | @ctx _none_
+ * @public false
+ * @edit careful
+ */
+
+/*
+ * Error boundary fallback UI styles.
+ */
+
+.error-fallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 3rem 1.5rem;
+  text-align: center;
+  min-height: 50vh;
+}
+
+.error-fallback__title {
+  margin: 0;
+  font-size: 1.5rem;
+  color: var(--color-error, #dc2626);
+}
+
+.error-fallback__description {
+  margin: 0;
+  color: var(--color-muted, #737373);
+  max-width: 32rem;
+}
+
+.error-fallback__retry {
+  padding: 0.5rem 1.5rem;
+  border: 1px solid var(--color-border, #d4d4d4);
+  border-radius: var(--radius-md, 8px);
+  background-color: var(--color-surface-raised, #ffffff);
+  color: var(--color-fg, #1a1a1a);
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color var(--transition-fast, 150ms ease);
+}
+
+.error-fallback__retry:hover {
+  background-color: var(--color-surface, #f5f5f5);
+}
+
+.error-fallback__retry:focus-visible {
+  outline: 2px solid var(--color-primary, #2563eb);
+  outline-offset: 2px;
+}

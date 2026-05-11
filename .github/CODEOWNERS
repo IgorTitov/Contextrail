@@ -1,0 +1,26 @@
+# @HEADER
+# @version 0.6.0 | 2026-04-11
+# @purpose Assign required reviewers for control-plane and security-sensitive paths.
+# @sidecar CODEOWNERS.header.md
+# @layer github | @hex _none_ | @ctx _none_
+# @public true
+# @edit careful
+
+# --- Control-plane: agent instructions, adapters, and rules ---
+/.claude/                    @{{GITHUB_ORG}}
+/.claude/CLAUDE.md           @{{GITHUB_ORG}}
+/.claude/rules/              @{{GITHUB_ORG}}
+/.claude/settings.json       @{{GITHUB_ORG}}
+/.cursorrules                @{{GITHUB_ORG}}
+/AGENTS.md                   @{{GITHUB_ORG}}
+/.agents/                    @{{GITHUB_ORG}}
+
+# --- Git hooks and CI ---
+/.githooks/                  @{{GITHUB_ORG}}
+/scripts/checks/             @{{GITHUB_ORG}}
+/scripts/agent-contract/     @{{GITHUB_ORG}}
+/.github/workflows/          @{{GITHUB_ORG}}
+
+# --- Coordination and contracts ---
+/.claims/config.json         @{{GITHUB_ORG}}
+/docs/agent-contract/        @{{GITHUB_ORG}}

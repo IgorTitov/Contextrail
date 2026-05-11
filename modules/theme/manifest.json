@@ -1,0 +1,74 @@
+{
+  "name": "theme",
+  "description": "Hexagonal theme module — pure color-scheme enum, theme-token value object with CSS custom-property rendering, immutable preference record, ThemePreferenceStorePort + in-memory store, zero external deps",
+  "maturity": "stable",
+  "exports": [
+    "public-api.mjs"
+  ],
+  "dependencies": {
+    "modules": [],
+    "external": [],
+    "builtins": []
+  },
+  "dependents": [],
+  "structure": {
+    "domain": [
+      "color-scheme.mjs",
+      "theme-tokens.mjs",
+      "theme-preference.mjs"
+    ],
+    "ports": [
+      "theme-preference-store-port.mjs"
+    ],
+    "adapters": [
+      "memory-theme-preference-store.mjs"
+    ],
+    "root": [
+      "public-api.mjs",
+      "messages.mjs"
+    ]
+  },
+  "testFiles": [
+    "tests/unit/theme.test.mjs",
+    "tests/contract/theme-hex-contract.test.mjs"
+  ],
+  "capabilities": {
+    "adapters": [
+      "memory-theme-preference-store.mjs"
+    ],
+    "ports": {
+      "ThemePreferenceStorePort": {
+        "kind": "interface",
+        "methods": {
+          "clear": {
+            "params": [],
+            "returns": "void"
+          },
+          "get": {
+            "params": [
+              {
+                "name": "userId",
+                "type": "string"
+              }
+            ],
+            "returns": "Promise<ThemePreference | null>"
+          },
+          "set": {
+            "params": [
+              {
+                "name": "userId",
+                "type": "string"
+              },
+              {
+                "name": "preference",
+                "type": "ThemePreference"
+              }
+            ],
+            "returns": "Promise<ThemePreference>"
+          }
+        }
+      }
+    },
+    "typedefs": {}
+  }
+}

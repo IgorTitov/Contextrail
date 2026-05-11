@@ -1,0 +1,63 @@
+{
+  "name": "graphql",
+  "description": "Hexagonal GraphQL module — pure schema value object, minimal subset query parser, pure executor with error aggregation, GraphqlTransportPort + in-memory transport, zero external deps",
+  "maturity": "stable",
+  "exports": [
+    "public-api.mjs"
+  ],
+  "dependencies": {
+    "modules": [],
+    "external": [],
+    "builtins": []
+  },
+  "dependents": [],
+  "structure": {
+    "domain": [
+      "schema.mjs",
+      "query-parser.mjs",
+      "query-tokens.mjs",
+      "executor.mjs"
+    ],
+    "ports": [
+      "graphql-transport-port.mjs"
+    ],
+    "adapters": [
+      "memory-graphql-transport.mjs"
+    ],
+    "root": [
+      "public-api.mjs",
+      "messages.mjs"
+    ]
+  },
+  "testFiles": [
+    "tests/unit/graphql.test.mjs",
+    "tests/contract/graphql-hex-contract.test.mjs"
+  ],
+  "capabilities": {
+    "adapters": [
+      "memory-graphql-transport.mjs"
+    ],
+    "ports": {
+      "GraphqlTransportPort": {
+        "kind": "interface",
+        "methods": {
+          "handleQuery": {
+            "params": [
+              {
+                "name": "rawQuery",
+                "type": "string"
+              },
+              {
+                "name": "context",
+                "optional": true,
+                "type": "unknown"
+              }
+            ],
+            "returns": "Promise<ExecutionResult>"
+          }
+        }
+      }
+    },
+    "typedefs": {}
+  }
+}

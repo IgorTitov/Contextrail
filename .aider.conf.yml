@@ -1,0 +1,19 @@
+# Aider project configuration
+# See https://aider.chat/docs/config/aider_conf.html
+
+# Read CONVENTIONS.md for project coding standards
+read:
+  - CONVENTIONS.md
+  - docs/SYSTEM_MAP.md
+
+# Auto-commit is off — we manage commits through the delivery flow
+auto-commits: false
+
+# Use .gitignore patterns
+gitignore: true
+
+# Lint command after edits
+lint-cmd: "node scripts/checks/architecture-check.mjs"
+
+# Test command
+test-cmd: "pnpm test:unit"

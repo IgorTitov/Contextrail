@@ -1,0 +1,11 @@
+{
+  "name": "api-starter",
+  "description": "Server-side API app shell demonstrating isomorphic hex module usage",
+  "platform": "server",
+  "runtime": "node",
+  "dependencies": {
+    "modules": ["cache", "log", "event-bus", "db"],
+    "external": [],
+    "builtins": ["node:http"]
+  }
+}

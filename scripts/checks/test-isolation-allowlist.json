@@ -1,0 +1,9 @@
+{
+  "$comment": "R1 — files explicitly allowed to use the live repo's .claims/ dir or invoke git outside the safeGit helper. See ADR-0015 (test-isolation-enforcement) and ADR-0052 (R1.3 claims-dir-leak). Each entry must be paired with a per-file annotation: `// @test-isolation: live-repo-allowed | reason: <text >= 60 chars>`. Growth from the initial list requires a CHANGELOG entry referencing the addition reason.",
+  "files": [
+    "tests/integration/coa-worktree-slice-id-lock.test.mjs",
+    "tests/integration/coa-worktree-slice-id-race.test.mjs",
+    "tests/integration/control-plane-coherence.test.mjs",
+    "tests/integration/no-test-fixture-leaks.test.mjs"
+  ]
+}

@@ -1,0 +1,94 @@
+{
+  "name": "pwa",
+  "description": "Hexagonal PWA module — pure W3C Web App Manifest value object + cache-strategy descriptors + pure service worker source generator + PwaAssetPort + in-memory asset store, zero external deps",
+  "maturity": "beta",
+  "exports": [
+    "public-api.mjs"
+  ],
+  "dependencies": {
+    "modules": [],
+    "external": [],
+    "builtins": []
+  },
+  "dependents": [],
+  "structure": {
+    "domain": [
+      "web-manifest.mjs",
+      "cache-strategy.mjs",
+      "service-worker-source.mjs"
+    ],
+    "ports": [
+      "pwa-asset-port.mjs"
+    ],
+    "adapters": [
+      "memory-pwa-asset-store.mjs"
+    ],
+    "root": [
+      "public-api.mjs",
+      "messages.mjs"
+    ]
+  },
+  "testFiles": [
+    "tests/unit/pwa.test.mjs",
+    "tests/contract/pwa-hex-contract.test.mjs"
+  ],
+  "capabilities": {
+    "adapters": [
+      "memory-pwa-asset-store.mjs"
+    ],
+    "ports": {
+      "PwaAssetPort": {
+        "kind": "interface",
+        "methods": {
+          "clear": {
+            "params": [],
+            "returns": "void"
+          },
+          "listAssets": {
+            "params": [],
+            "returns": "PwaAssetRecord[]"
+          },
+          "writeManifest": {
+            "params": [
+              {
+                "name": "manifest",
+                "type": "WebManifest"
+              }
+            ],
+            "returns": "Promise<PwaAssetRecord>"
+          },
+          "writeServiceWorker": {
+            "params": [
+              {
+                "name": "source",
+                "type": "string"
+              }
+            ],
+            "returns": "Promise<PwaAssetRecord>"
+          }
+        }
+      }
+    },
+    "typedefs": {
+      "PwaAssetRecord": {
+        "fields": {
+          "contentType": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "'manifest'|'service-worker'"
+          },
+          "path": {
+            "type": "string"
+          },
+          "size": {
+            "type": "number"
+          },
+          "writtenAt": {
+            "type": "number"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "version": "1.0",
+  "hooks": {
+    ".githooks/commit-msg": {
+      "sha256": "25f37130ad2f8c9fc8602efdafb12185e0d01606bff01442c3e44a3aea7102d9",
+      "size": 479,
+      "lastUpdated": "2026-05-11T10:32:10.154Z",
+      "lastUpdateSlice": "TPL-278"
+    },
+    ".githooks/post-commit": {
+      "sha256": "1726921ca003881748505af0804b78de9838ac7194758408a861bdb4741c6fa8",
+      "size": 2194,
+      "lastUpdated": "2026-05-11T10:32:10.154Z",
+      "lastUpdateSlice": "TPL-278"
+    },
+    ".githooks/pre-commit": {
+      "sha256": "05a29815314e8c5bc534ff980960e278cd41bce91edc409f85e7144c88ac0fdc",
+      "size": 17214,
+      "lastUpdated": "2026-05-11T10:32:10.154Z",
+      "lastUpdateSlice": "TPL-278"
+    },
+    ".githooks/pre-push": {
+      "sha256": "38adfd392e9c7235d29c57b209b572494c0de2b96822dab7504486303a9ea16c",
+      "size": 5446,
+      "lastUpdated": "2026-05-11T10:32:10.154Z",
+      "lastUpdateSlice": "TPL-278"
+    },
+    ".githooks/README.md": {
+      "sha256": "e0c7b039f4712594d21bdd9b4ec33db0a6ad6c50eb2b05dbf5e924ee0fe6e0a9",
+      "size": 2549,
+      "lastUpdated": "2026-05-11T10:32:10.154Z",
+      "lastUpdateSlice": "TPL-278"
+    }
+  }
+}

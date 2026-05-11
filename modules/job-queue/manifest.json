@@ -1,0 +1,111 @@
+{
+  "name": "job-queue",
+  "description": "Hexagonal background job queue — pure lifecycle domain, memory adapter with retry/backoff, framework-free worker loop",
+  "maturity": "beta",
+  "exports": [
+    "public-api.mjs"
+  ],
+  "dependencies": {
+    "modules": [],
+    "external": [],
+    "builtins": []
+  },
+  "dependents": [],
+  "structure": {
+    "domain": [
+      "job-lifecycle.mjs",
+      "worker.mjs"
+    ],
+    "ports": [
+      "job-queue-port.mjs"
+    ],
+    "adapters": [
+      "memory-job-queue.mjs"
+    ],
+    "root": [
+      "public-api.mjs",
+      "messages.mjs"
+    ]
+  },
+  "testFiles": [
+    "tests/unit/job-queue.test.mjs",
+    "tests/contract/job-queue-hex-contract.test.mjs"
+  ],
+  "capabilities": {
+    "adapters": [
+      "memory-job-queue.mjs"
+    ],
+    "ports": {
+      "JobQueuePort": {
+        "kind": "interface",
+        "methods": {
+          "complete": {
+            "params": [
+              {
+                "name": "id",
+                "type": "string"
+              }
+            ],
+            "returns": "void"
+          },
+          "dequeue": {
+            "params": [],
+            "returns": "Job | null"
+          },
+          "enqueue": {
+            "params": [
+              {
+                "name": "name",
+                "type": "string"
+              },
+              {
+                "name": "payload",
+                "type": "unknown"
+              },
+              {
+                "name": "options",
+                "optional": true,
+                "type": "EnqueueOptions"
+              }
+            ],
+            "returns": "Job"
+          },
+          "fail": {
+            "params": [
+              {
+                "name": "id",
+                "type": "string"
+              },
+              {
+                "name": "error",
+                "type": "string"
+              }
+            ],
+            "returns": "'retry' | 'dead'"
+          },
+          "list": {
+            "params": [
+              {
+                "name": "status",
+                "optional": true,
+                "type": "JobStatus"
+              }
+            ],
+            "returns": "Job[]"
+          },
+          "size": {
+            "params": [
+              {
+                "name": "status",
+                "optional": true,
+                "type": "JobStatus"
+              }
+            ],
+            "returns": "number"
+          }
+        }
+      }
+    },
+    "typedefs": {}
+  }
+}

@@ -1,0 +1,131 @@
+#!/usr/bin/env bash
+# @HEADER
+# @version 0.7.94 | 2026-05-05
+# @purpose Block force-push to trunk (R8.5) and detect snapshot/bypass/integrity violations (R8.1/R8.2/R8.4) before any ref is pushed to a real remote.
+# @sidecar pre-push.header.md
+# @layer git-hooks | @hex _none_ | @ctx _none_
+# @public false
+# @edit careful
+
+set -uo pipefail
+
+# Wrap in a function so header-fix's full-file rewrites cannot truncate
+# the active code path mid-execution. (Same defensive pattern used by
+# .githooks/pre-commit since TPL-246.)
+run_pre_push() {
+  # git pre-push protocol: stdin gives one line per ref being pushed:
+  #   <local-ref> <local-sha> <remote-ref> <remote-sha>
+  # An all-zero sha means "no such ref" (deletion or first push).
+  #
+  # Stdin is consumed exactly once. We save it to REFSPEC_DATA immediately
+  # so every subsequent check can receive it via echo piping or here-string.
+  local zero_sha="0000000000000000000000000000000000000000"
+  local failures=0
+
+  # Capture stdin NOW — before any conditional return — so all checks
+  # downstream can read it from the variable.
+  local REFSPEC_DATA
+  REFSPEC_DATA="$(cat)"
+
+  # Skip for local file-path remotes (coa-merge ff-update pushes to the
+  # main-worktree path; that is internal plumbing, not a real remote push
+  # that could expose missing snapshots to a server). $2 is the remote URL.
+  local remote_url="${2:-}"
+  if [[ "$remote_url" == /* ]] || [[ "$remote_url" =~ ^[A-Za-z]:[\\/] ]] || [[ "$remote_url" == file://* ]]; then
+    return 0
+  fi
+
+  # Trunk integrity check (R8.5 / TPL-259) — FIRST check, fail-fast.
+  # Refuses force-push to trunk unless COA_OPERATOR=1 COA_FORCE_TRUNK=1.
+  # Bail early if script absent (shallow clone / worktree) so the hook
+  # never breaks normal pushes.
+  if [ -f scripts/checks/trunk-integrity-check.mjs ]; then
+    echo "[pre-push] trunk-integrity-check (R8.5)"
+    if ! echo "$REFSPEC_DATA" | node scripts/checks/trunk-integrity-check.mjs; then
+      echo "[pre-push] FATAL: trunk-integrity-check refused force-push to trunk" >&2
+      return 1
+    fi
+  fi
+
+  # Hook integrity check (R8.2 / TPL-256) — catch-net for when pre-commit
+  # itself was the tampered hook. Bail early if the script is absent (shallow
+  # clone / worktree without scripts/) so the hook never breaks normal pushes.
+  if [ -f scripts/checks/hook-integrity-check.mjs ]; then
+    echo "[pre-push] hook-integrity-check (R8.2)"
+    if ! node scripts/checks/hook-integrity-check.mjs; then
+      echo "[pre-push] FATAL: hook integrity check failed — refusing push" >&2
+      return 1
+    fi
+  fi
+
+  # Changelog uniqueness check (C5 / TPL-286) — hard-fail.
+  # Refuses push when CHANGELOG.md contains duplicate versioned section headings.
+  # An operator or external tool editing CHANGELOG.md manually can create a dupe
+  # that pre-commit's idempotency guard (layer 1) would not catch.
+  if [ -f scripts/checks/changelog-sync.mjs ]; then
+    echo "[pre-push] changelog-uniqueness-check (C5)"
+    if ! node scripts/checks/changelog-sync.mjs --check-uniqueness; then
+      echo "[pre-push] FATAL: CHANGELOG.md has duplicate version sections — refusing push" >&2
+      return 1
+    fi
+  fi
+
+  # Bypass audit check (R8.4 / TPL-258, hard-fail since TPL-284) — catch
+  # commits made via --no-verify that have no phases-ran record in
+  # .claims/commit-audit.log. Bootstrap warn-only period ended: 113+ commits
+  # accumulated post-R8.4 without false-positive issues (TPL-284 / ADR-0022).
+  # Bail early if script is absent (shallow clone / worktree without scripts/)
+  # so the hook never breaks normal pushes.
+  if [ -f scripts/checks/bypass-audit-check.mjs ]; then
+    echo "[pre-push] bypass-audit-check (R8.4)"
+    if ! node scripts/checks/bypass-audit-check.mjs; then
+      echo "[pre-push] FATAL: R8.4 bypass-audit failed — refusing push" >&2
+      return 1
+    fi
+  fi
+
+  # The snapshot coverage check; bail early if it is not present (e.g.
+  # shallow clone or a worktree without scripts/) so the hook never breaks
+  # normal pushes.
+  if [ ! -f scripts/checks/snapshot-coverage-check.mjs ]; then
+    return 0
+  fi
+
+  while IFS=' ' read -r local_ref local_sha remote_ref remote_sha; do
+    # Skip branch deletion pushes
+    if [ "$local_sha" = "$zero_sha" ]; then
+      continue
+    fi
+
+    # First push of a new branch: compare against the merge-base with
+    # the local default branch so we still scope to "what this push adds".
+    local since_ref="$remote_sha"
+    if [ "$remote_sha" = "$zero_sha" ]; then
+      since_ref="$(git merge-base "$local_sha" main 2>/dev/null || echo "")"
+    fi
+
+    if [ -z "$since_ref" ]; then
+      # Nothing to compare against — fall back to a full scan.
+      if ! node scripts/checks/snapshot-coverage-check.mjs; then
+        failures=$((failures + 1))
+      fi
+    else
+      if ! node scripts/checks/snapshot-coverage-check.mjs --since="$since_ref"; then
+        failures=$((failures + 1))
+      fi
+    fi
+  done <<< "$REFSPEC_DATA"
+
+  if [ "$failures" -gt 0 ]; then
+    echo "" >&2
+    echo "pre-push: $failures version(s) lack a backup snapshot." >&2
+    echo "  This usually means a commit bypassed coa-merge (git commit --no-verify)." >&2
+    echo "  Recovery options:" >&2
+    echo "    1. check out the commit at the missing version and run 'pnpm mergezip', then re-push" >&2
+    echo "    2. accept the gap and re-push with 'git push --no-verify'" >&2
+    return 1
+  fi
+  return 0
+}
+
+run_pre_push "$@"

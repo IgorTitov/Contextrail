@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions & Discussion
+    url: https://github.com/{{GITHUB_ORG}}/{{GITHUB_REPO}}/discussions
+    about: Ask questions, share ideas, or discuss COA methodology
+  - name: Security Vulnerability
+    url: https://github.com/{{GITHUB_ORG}}/{{GITHUB_REPO}}/security/advisories/new
+    about: Report security vulnerabilities privately

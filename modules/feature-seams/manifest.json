@@ -1,0 +1,171 @@
+{
+  "name": "feature-seams",
+  "description": "Branch-by-abstraction feature seam registry with guards",
+  "maturity": "beta",
+  "exports": [
+    "public-api.mjs"
+  ],
+  "dependencies": {
+    "modules": [],
+    "external": [],
+    "builtins": []
+  },
+  "dependents": [],
+  "structure": {
+    "domain": [
+      "guards.mjs",
+      "seam-registry.mjs",
+      "divergence-tracker.mjs"
+    ],
+    "ports": [
+      "seam-port.mjs",
+      "health-port.mjs"
+    ],
+    "adapters": [
+      "config-seam-adapter.mjs",
+      "memory-seam-adapter.mjs",
+      "health-adapter.mjs"
+    ],
+    "root": [
+      "public-api.mjs"
+    ]
+  },
+  "testFiles": [
+    "tests/unit/feature-seams.test.mjs",
+    "tests/contract/feature-seams-hex-contract.test.mjs",
+    "tests/bdd/feature-seams.test.mjs"
+  ],
+  "capabilities": {
+    "adapters": [
+      "config-seam-adapter.mjs",
+      "health-adapter.mjs",
+      "memory-seam-adapter.mjs"
+    ],
+    "ports": {
+      "SeamPort": {
+        "kind": "interface",
+        "methods": {
+          "disable": {
+            "params": [
+              {
+                "name": "flag",
+                "type": "string"
+              }
+            ],
+            "returns": "void"
+          },
+          "enable": {
+            "params": [
+              {
+                "name": "flag",
+                "type": "string"
+              }
+            ],
+            "returns": "void"
+          },
+          "isEnabled": {
+            "params": [
+              {
+                "name": "flag",
+                "type": "string"
+              }
+            ],
+            "returns": "boolean"
+          },
+          "isShadow": {
+            "params": [
+              {
+                "name": "flag",
+                "type": "string"
+              }
+            ],
+            "returns": "boolean"
+          },
+          "list": {
+            "params": [],
+            "returns": "SeamEntry[]"
+          },
+          "register": {
+            "params": [
+              {
+                "name": "flag",
+                "type": "string"
+              },
+              {
+                "name": "config",
+                "type": "SeamConfig"
+              }
+            ],
+            "returns": "void"
+          },
+          "remove": {
+            "params": [
+              {
+                "name": "flag",
+                "type": "string"
+              }
+            ],
+            "returns": "void"
+          }
+        }
+      }
+    },
+    "typedefs": {
+      "SeamConfig": {
+        "fields": {
+          "cleanupBy": {
+            "optional": true,
+            "type": "string"
+          },
+          "created": {
+            "optional": true,
+            "type": "string"
+          },
+          "description": {
+            "optional": true,
+            "type": "string"
+          },
+          "owner": {
+            "type": "string"
+          },
+          "state": {
+            "type": "'active' | 'shadow' | 'disabled'"
+          }
+        }
+      },
+      "SeamEntry": {
+        "fields": {
+          "cleanupBy": {
+            "optional": true,
+            "type": "string"
+          },
+          "created": {
+            "optional": true,
+            "type": "string"
+          },
+          "description": {
+            "optional": true,
+            "type": "string"
+          },
+          "disabledAt": {
+            "optional": true,
+            "type": "string"
+          },
+          "enabledAt": {
+            "optional": true,
+            "type": "string"
+          },
+          "flag": {
+            "type": "string"
+          },
+          "owner": {
+            "type": "string"
+          },
+          "state": {
+            "type": "'active' | 'shadow' | 'disabled'"
+          }
+        }
+      }
+    }
+  }
+}

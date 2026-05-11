@@ -1,0 +1,10 @@
+{
+  "timestamp": "REPLACE_WITH_ISO_8601_NOW",
+  "slice_id": "TPL-NNN",
+  "reason": "Describe why ceremony is unavailable (>= 20 chars required). Example: transport ceremony broken — coa-worktree fails due to corrupted worktree state.",
+  "expected_files": [
+    "path/to/staged/file1.mjs",
+    "path/to/staged/file2.md"
+  ],
+  "category": "hotfix-trunk-blocked"
+}

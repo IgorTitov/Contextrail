@@ -1,0 +1,47 @@
+{
+  "_comment": "Contextrail × Continue — copy to .continue/config.json and adjust apiBase / model. The un-suffixed file is gitignored. See docs/guides/local-frameworks.md.",
+  "models": [
+    {
+      "title": "Qwen 2.5 Coder 7B (LM Studio)",
+      "provider": "openai",
+      "model": "qwen2.5-coder-7b-instruct",
+      "apiBase": "http://localhost:1234/v1",
+      "apiKey": "lm-studio"
+    }
+  ],
+  "systemMessage": "Read LOCAL.md at the repo root before any edits. It is the slim Contextrail contract for local-tier agents — coordination, commit ceremony, header discipline, module-fit constraints. Do not invent process from training; the contract is the source of authority for this repo.",
+  "rules": [
+    {
+      "name": "claim-before-cross-module",
+      "rule": "Before editing files outside your single target module, file a claim via `node scripts/checks/claim-check.mjs --acquire --agent=<name> --slice=<id> --action=modify --targets=<paths>`. The pre-commit hook blocks commits that touch claimed files without your own claim. See LOCAL.md."
+    },
+    {
+      "name": "commit-via-coa-merge",
+      "rule": "Use `node scripts/coa-merge.mjs --message=\"feat(module): description (TPL-XXX)\"` for the commit ceremony. Do not bump VERSION, edit package.json's version field, or release CHANGELOG sections by hand. coa-merge handles pull, version bump, changelog release, claim auto-complete, and snapshot atomically."
+    },
+    {
+      "name": "header-version-untouched",
+      "rule": "Never write `@version <number>` in file headers. Leave whatever value is there; the pre-commit hook stamps the right number from the VERSION file. Manually written versions collide with parallel sessions."
+    },
+    {
+      "name": "small-slices-only",
+      "rule": "Owned scope is bounded slices inside one module at a time. If you find yourself wandering across more than two modules, stop and surface that to the operator — local-tier agents are scoped to bounded slices."
+    }
+  ],
+  "contextProviders": [
+    { "name": "file" },
+    { "name": "code" },
+    { "name": "diff" },
+    { "name": "tree" }
+  ],
+  "slashCommands": [
+    {
+      "name": "edit",
+      "description": "Edit selected code"
+    },
+    {
+      "name": "comment",
+      "description": "Add comments to selected code"
+    }
+  ]
+}

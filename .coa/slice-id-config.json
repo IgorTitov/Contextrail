@@ -1,0 +1,8 @@
+{
+  "$schema": "https://contextrail.dev/schemas/slice-id-config.v1.json",
+  "prefix": "TPL",
+  "format": "TPL-{NNN}",
+  "numbering_start": 1,
+  "padding": 3,
+  "description": "Slice ID convention for this repository. Used by coa-worktree --create auto-pick mode and claim-check uniqueness checks. Customize per-repository: prefix can be any string (e.g., MYPROJ, FEAT, AIC-DEV). See docs/guides/slice-id-config.md for full schema."
+}

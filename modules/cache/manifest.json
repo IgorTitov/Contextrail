@@ -1,0 +1,160 @@
+{
+  "name": "cache",
+  "description": "Hexagonal cache module with memory-LRU, localStorage, and IndexedDB adapters",
+  "maturity": "stable",
+  "exports": [
+    "public-api.mjs"
+  ],
+  "dependencies": {
+    "modules": [],
+    "external": [],
+    "builtins": []
+  },
+  "dependents": [],
+  "structure": {
+    "domain": [
+      "cache-utils.mjs"
+    ],
+    "ports": [
+      "cache-port.mjs"
+    ],
+    "adapters": [
+      "memory-lru-adapter.mjs",
+      "local-storage-adapter.mjs",
+      "indexeddb-adapter.mjs",
+      "redis-adapter.mjs"
+    ],
+    "root": [
+      "public-api.mjs",
+      "messages.mjs"
+    ]
+  },
+  "testFiles": [
+    "tests/unit/cache.test.mjs",
+    "tests/contract/cache-hex-contract.test.mjs",
+    "tests/bdd/cache.test.mjs"
+  ],
+  "capabilities": {
+    "adapters": [
+      "indexeddb-adapter.mjs",
+      "local-storage-adapter.mjs",
+      "memory-lru-adapter.mjs",
+      "redis-adapter.mjs"
+    ],
+    "ports": {
+      "CachePort": {
+        "kind": "interface",
+        "methods": {
+          "clear": {
+            "params": [],
+            "returns": "void"
+          },
+          "delete": {
+            "params": [
+              {
+                "name": "key",
+                "type": "string"
+              }
+            ],
+            "returns": "boolean"
+          },
+          "get": {
+            "params": [
+              {
+                "name": "key",
+                "type": "string"
+              }
+            ],
+            "returns": "*|undefined"
+          },
+          "has": {
+            "params": [
+              {
+                "name": "key",
+                "type": "string"
+              }
+            ],
+            "returns": "boolean"
+          },
+          "keys": {
+            "params": [],
+            "returns": "string[]"
+          },
+          "set": {
+            "params": [
+              {
+                "name": "key",
+                "type": "string"
+              },
+              {
+                "name": "value",
+                "type": "*"
+              },
+              {
+                "name": "options",
+                "optional": true,
+                "type": "CacheSetOptions"
+              }
+            ],
+            "returns": "void"
+          },
+          "size": {
+            "params": [],
+            "returns": "number"
+          }
+        }
+      }
+    },
+    "typedefs": {
+      "CacheEntry": {
+        "fields": {
+          "accessedAt": {
+            "type": "number"
+          },
+          "createdAt": {
+            "type": "number"
+          },
+          "size": {
+            "optional": true,
+            "type": "number"
+          },
+          "ttl": {
+            "optional": true,
+            "type": "number"
+          },
+          "value": {
+            "type": "*"
+          }
+        }
+      },
+      "CachePortOptions": {
+        "fields": {
+          "defaultTtl": {
+            "optional": true,
+            "type": "number"
+          },
+          "maxEntries": {
+            "optional": true,
+            "type": "number"
+          },
+          "maxSize": {
+            "optional": true,
+            "type": "number"
+          }
+        }
+      },
+      "CacheSetOptions": {
+        "fields": {
+          "size": {
+            "optional": true,
+            "type": "number"
+          },
+          "ttl": {
+            "optional": true,
+            "type": "number"
+          }
+        }
+      }
+    }
+  }
+}

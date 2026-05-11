@@ -1,0 +1,165 @@
+{
+  "name": "scheduler",
+  "description": "Hexagonal scheduler with interval, idle-callback, and visibility-aware adapters",
+  "maturity": "stable",
+  "exports": [
+    "public-api.mjs"
+  ],
+  "dependencies": {
+    "modules": [],
+    "external": [],
+    "builtins": []
+  },
+  "dependents": [],
+  "structure": {
+    "domain": [
+      "cron-parser.mjs",
+      "jitter.mjs"
+    ],
+    "ports": [
+      "scheduler-port.mjs"
+    ],
+    "adapters": [
+      "interval-adapter.mjs",
+      "idle-adapter.mjs",
+      "visibility-aware-adapter.mjs"
+    ],
+    "root": [
+      "public-api.mjs",
+      "messages.mjs"
+    ]
+  },
+  "testFiles": [
+    "tests/unit/scheduler.test.mjs",
+    "tests/contract/scheduler-hex-contract.test.mjs",
+    "tests/bdd/scheduler.test.mjs"
+  ],
+  "capabilities": {
+    "adapters": [
+      "idle-adapter.mjs",
+      "interval-adapter.mjs",
+      "visibility-aware-adapter.mjs"
+    ],
+    "ports": {
+      "SchedulerPort": {
+        "kind": "interface",
+        "methods": {
+          "cancel": {
+            "params": [
+              {
+                "name": "scheduleId",
+                "type": "string"
+              }
+            ],
+            "returns": "void"
+          },
+          "destroy": {
+            "params": [],
+            "returns": "void"
+          },
+          "getSchedule": {
+            "params": [
+              {
+                "name": "scheduleId",
+                "type": "string"
+              }
+            ],
+            "returns": "ScheduleInfo | undefined"
+          },
+          "listSchedules": {
+            "params": [],
+            "returns": "ScheduleInfo[]"
+          },
+          "pause": {
+            "params": [
+              {
+                "name": "scheduleId",
+                "type": "string"
+              }
+            ],
+            "returns": "void"
+          },
+          "resume": {
+            "params": [
+              {
+                "name": "scheduleId",
+                "type": "string"
+              }
+            ],
+            "returns": "void"
+          },
+          "schedule": {
+            "params": [
+              {
+                "name": "taskFn",
+                "type": "() => void | Promise<void>, config: ScheduleConfig, options?: ScheduleOptions"
+              }
+            ],
+            "returns": "ScheduleHandle"
+          }
+        }
+      }
+    },
+    "typedefs": {
+      "ScheduleConfig": {
+        "fields": {
+          "immediate": {
+            "optional": true,
+            "type": "boolean"
+          },
+          "interval": {
+            "type": "number | string"
+          },
+          "jitter": {
+            "optional": true,
+            "type": "number"
+          },
+          "maxRuns": {
+            "optional": true,
+            "type": "number"
+          }
+        }
+      },
+      "ScheduleHandle": {
+        "fields": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "ScheduleInfo": {
+        "fields": {
+          "id": {
+            "type": "string"
+          },
+          "lastRun": {
+            "optional": true,
+            "type": "number"
+          },
+          "nextRun": {
+            "optional": true,
+            "type": "number"
+          },
+          "runCount": {
+            "type": "number"
+          },
+          "status": {
+            "type": "ScheduleStatus"
+          }
+        }
+      },
+      "ScheduleOptions": {
+        "fields": {
+          "name": {
+            "optional": true,
+            "type": "string"
+          }
+        }
+      },
+      "ScheduleStatus": {
+        "alias": "'active' | 'paused' | 'completed' | 'cancelled'",
+        "kind": "alias"
+      }
+    }
+  }
+}

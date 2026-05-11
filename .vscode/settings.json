@@ -1,0 +1,58 @@
+{
+  "files.encoding": "utf8",
+  "files.autoGuessEncoding": false,
+
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+
+  "editor.formatOnSave": true,
+  "editor.rulers": [100],
+
+  "files.associations": {
+    "*.feature": "gherkin",
+    "*.header.md": "markdown"
+  },
+
+  "actionButtons": {
+    "defaultColor": "#ffffff",
+    "loadNpmCommands": false,
+    "commands": [
+      {
+        "name": "$(debug-start) Test",
+        "tooltip": "Run VS Code task: Test",
+        "useVsCodeApi": true,
+        "command": "workbench.action.tasks.runTask",
+        "args": ["Test"],
+        "color": "#118AB2",
+        "alignment": "left"
+      },
+      {
+        "name": "$(debug-start) Merge & Zip",
+        "tooltip": "Run VS Code task: Merge and Zip",
+        "useVsCodeApi": true,
+        "command": "workbench.action.tasks.runTask",
+        "args": ["Merge and Zip"],
+        "color": "#FFD166",
+        "alignment": "left"
+      },
+      {
+        "name": "$(debug-start) Test & Merge & Zip",
+        "tooltip": "Run VS Code task: Test and Merge and Zip",
+        "useVsCodeApi": true,
+        "command": "workbench.action.tasks.runTask",
+        "args": ["Test and Merge and Zip"],
+        "color": "#FF0000",
+        "alignment": "left"
+      },
+      {
+        "name": "$(debug-start) Visible E2E",
+        "tooltip": "Run VS Code task: E2E (visible)",
+        "useVsCodeApi": true,
+        "command": "workbench.action.tasks.runTask",
+        "args": ["E2E (visible)"],
+        "color": "#06D6A0",
+        "alignment": "left"
+      }
+    ]
+  }
+}

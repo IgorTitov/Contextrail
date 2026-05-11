@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Shared dangerous-command and sensitive-path blocklist. Consumed by the Claude PreToolUse hook and referenced by all agent adapters.",
+  "version": "0.6.3",
+  "dangerousCommands": [
+    { "label": "rm recursive force", "pattern": "\\brm\\s+(-[a-zA-Z]*r[a-zA-Z]*f|--recursive)\\b", "reason": "Recursive force-delete can destroy the working tree" },
+    { "label": "mkfs", "pattern": "\\bmkfs\\b", "reason": "Filesystem format — catastrophic data loss" },
+    { "label": "dd if=", "pattern": "\\bdd\\s+if=", "reason": "Raw disk write — catastrophic data loss" },
+    { "label": "fork bomb", "pattern": ":\\(\\)\\s*\\{\\s*:\\|:&\\s*\\};:", "reason": "Process exhaustion DoS" },
+    { "label": "git reset --hard", "pattern": "\\bgit\\s+reset\\s+--hard\\b", "reason": "Discards uncommitted work irreversibly" },
+    { "label": "git clean -f", "pattern": "\\bgit\\s+clean\\s+(-[a-zA-Z]*f|--force)\\b", "reason": "Removes untracked files, potentially including ignored ones" },
+    { "label": "git push --force", "pattern": "\\bgit\\s+push\\s+(-[a-zA-Z]*f|--force)\\b", "reason": "Force push can overwrite remote history" },
+    { "label": "git checkout -- .", "pattern": "\\bgit\\s+(checkout|restore)\\s+(--)?(\\s+\\.\\s*$|\\s+\\*)", "reason": "Discards all uncommitted changes" },
+    { "label": "git branch -D", "pattern": "\\bgit\\s+branch\\s+-D\\b", "reason": "Force-deletes branch without merge check" },
+    { "label": "curl pipe sh", "pattern": "\\bcurl\\b.*\\|.*\\b(sh|bash|zsh)\\b", "reason": "Executes arbitrary remote code" },
+    { "label": "wget pipe sh", "pattern": "\\bwget\\b.*\\|.*\\b(sh|bash|zsh)\\b", "reason": "Executes arbitrary remote code" },
+    { "label": "chmod 777", "pattern": "\\bchmod\\s+(-[a-zA-Z]*R)?\\s*777\\b", "reason": "World-writable permissions — security risk" }
+  ],
+  "sensitivePathFragments": [
+    ".git/",
+    ".claude/settings.json",
+    ".claude/hooks/",
+    ".env",
+    "secrets",
+    "id_rsa"
+  ],
+  "sensitivePathExceptions": [
+    ".env.example"
+  ]
+}

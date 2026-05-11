@@ -1,0 +1,90 @@
+{
+  "name": "rate-limit",
+  "description": "Hexagonal rate-limiting module with token-bucket domain + in-memory adapter",
+  "maturity": "beta",
+  "exports": [
+    "public-api.mjs"
+  ],
+  "dependencies": {
+    "modules": [],
+    "external": [],
+    "builtins": []
+  },
+  "dependents": [],
+  "structure": {
+    "domain": [
+      "rate-limit.mjs"
+    ],
+    "ports": [
+      "rate-limit-port.mjs"
+    ],
+    "adapters": [
+      "default-adapter.mjs"
+    ],
+    "root": [
+      "public-api.mjs",
+      "messages.mjs"
+    ]
+  },
+  "testFiles": [
+    "tests/unit/rate-limit.test.mjs",
+    "tests/contract/rate-limit-hex-contract.test.mjs"
+  ],
+  "capabilities": {
+    "adapters": [
+      "default-adapter.mjs"
+    ],
+    "ports": {
+      "RateLimiterPort": {
+        "kind": "interface",
+        "methods": {
+          "check": {
+            "params": [
+              {
+                "name": "key",
+                "type": "string"
+              },
+              {
+                "name": "cost",
+                "optional": true,
+                "type": "number"
+              }
+            ],
+            "returns": "RateLimitDecision"
+          },
+          "reset": {
+            "params": [
+              {
+                "name": "key",
+                "type": "string"
+              }
+            ],
+            "returns": "void"
+          },
+          "size": {
+            "params": [],
+            "returns": "number"
+          }
+        }
+      }
+    },
+    "typedefs": {
+      "RateLimitDecision": {
+        "fields": {
+          "allowed": {
+            "type": "boolean"
+          },
+          "remaining": {
+            "type": "number"
+          },
+          "resetAt": {
+            "type": "number"
+          },
+          "retryAfterMs": {
+            "type": "number"
+          }
+        }
+      }
+    }
+  }
+}

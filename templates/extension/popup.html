@@ -1,0 +1,52 @@
+<!-- @HEADER
+@version 0.6.5 | 2026-04-28
+@purpose Extension popup HTML entry point that loads and initializes the starter app inside the popup container.
+@sidecar popup.html.header.md
+@layer templates | @hex _none_ | @ctx _none_
+@public false
+@edit careful -->
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Extension Popup</title>
+    <style>
+      body {
+        width: 360px;
+        min-height: 480px;
+        margin: 0;
+        font-family: system-ui, -apple-system, sans-serif;
+      }
+    </style>
+    <!--
+      Link the same CSS files from the built starter app.
+      Adjust paths if your build output structure differs.
+    -->
+  </head>
+  <body>
+    <div id="app">
+      <p>Loading&hellip;</p>
+    </div>
+
+    <script type="module">
+      /**
+       * Extension popup entry point.
+       *
+       * Imports initApp from the built starter app and initializes
+       * it inside the popup's #app container.
+       *
+       * The app detects chrome.runtime.id and selects the extension
+       * storage strategy automatically.
+       */
+      import { initApp } from './app.mjs';
+
+      initApp(document.getElementById('app')).then((app) => {
+        console.log('[extension] Popup initialized in mode:', app.ctx.mode);
+      }).catch((err) => {
+        console.error('[extension] Popup init failed:', err);
+      });
+    </script>
+  </body>
+</html>

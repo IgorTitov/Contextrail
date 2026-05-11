@@ -1,0 +1,50 @@
+{
+  "name": "example-greeter",
+  "description": "Minimal example hex module demonstrating port/adapter pattern",
+  "maturity": "example",
+  "exports": [
+    "public-api.mjs"
+  ],
+  "dependencies": {
+    "modules": [],
+    "external": [],
+    "builtins": []
+  },
+  "dependents": [],
+  "structure": {
+    "domain": [
+      "greeter.mjs"
+    ],
+    "ports": [
+      "greeting-port.mjs"
+    ],
+    "adapters": [
+      "default-adapter.mjs"
+    ],
+    "root": [
+      "public-api.mjs"
+    ]
+  },
+  "testFiles": [
+    "tests/unit/example-greeter.test.mjs",
+    "tests/bdd/example-greeter.test.mjs",
+    "tests/contract/example-greeter-hex-contract.test.mjs"
+  ],
+  "capabilities": {
+    "adapters": [
+      "default-adapter.mjs"
+    ],
+    "ports": {
+      "GreetingPort": {
+        "kind": "interface",
+        "methods": {
+          "getTemplate": {
+            "params": [],
+            "returns": "string"
+          }
+        }
+      }
+    },
+    "typedefs": {}
+  }
+}
