@@ -880,6 +880,9 @@ export function runCreate(repoRoot, opts = {}) {
     // suspiciously larger than git-log-derived max (TPL-335 / ADR-0051).
     // Operator-gated; also reads COA_ALLOW_CLAIM_BUMP=1 env.
     allowClaimBump = false,
+    // historyRoot: override COA_HISTORY_ROOT for the claim-check subprocess.
+    // ONLY for tests that need a controlled git history. Production callers must never set this.
+    historyRoot = null,
   } = opts;
   const trunkBranch = detectTrunkBranch(repoRoot, trunk);
 
@@ -992,7 +995,7 @@ export function runCreate(repoRoot, opts = {}) {
           cwd: repoRoot,
           encoding: 'utf8',
           stdio: 'pipe',
-          env: { ...process.env, COA_HISTORY_ROOT: ROOT },
+          env: { ...process.env, COA_HISTORY_ROOT: historyRoot || ROOT },
         },
       );
 
@@ -1090,7 +1093,7 @@ export function runCreate(repoRoot, opts = {}) {
         cwd: repoRoot,
         encoding: 'utf8',
         stdio: 'pipe',
-        env: { ...process.env, COA_HISTORY_ROOT: ROOT },
+        env: { ...process.env, COA_HISTORY_ROOT: historyRoot || ROOT },
       });
       if (claimResult.status !== 0) {
         const errMsg = (claimResult.stderr || claimResult.stdout || '').trim();

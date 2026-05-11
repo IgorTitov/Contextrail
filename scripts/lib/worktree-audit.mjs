@@ -177,7 +177,13 @@ export function isPathNestedInsideRepo(wtPath, repoRoot) {
  */
 export function isKnownInfraWorktree(wtPath) {
   if (!wtPath) return false;
-  return KNOWN_INFRA_BASENAMES.has(basename(wtPath));
+  // Split on both separators so Windows-style paths work correctly on Linux.
+  const name =
+    wtPath
+      .replace(/[/\\]+$/, '')
+      .split(/[/\\]/)
+      .pop() ?? '';
+  return KNOWN_INFRA_BASENAMES.has(name);
 }
 
 /**

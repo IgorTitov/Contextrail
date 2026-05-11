@@ -190,13 +190,21 @@ test('C4/T2: second runCreate passes collision check after active claim expires'
 // ---------------------------------------------------------------------------
 
 test('C4/T3: runCreate refuses when slice ID is in live repo git history', () => {
-  // TPL-279 is a known committed slice ID in this repository.
-  // Its commit subject contains '(TPL-279)'.
-  const sliceId = 'TPL-279';
+  // Use a self-contained history repo instead of the live git history so the
+  // test does not depend on specific commits being present (shallow CI clone).
+  const historyRepo = makeIsolatedRepo('t3-history');
   const repo = makeIsolatedRepo('t3');
 
   try {
-    const result = runCreate(repo, { sliceId, silent: true });
+    writeFileSync(join(historyRepo, 'a.txt'), 'a\n');
+    safeGitSpawn(historyRepo, ['add', 'a.txt']);
+    safeGitSpawn(historyRepo, ['commit', '-q', '-m', 'feat: past slice (PAST-T3-001)']);
+
+    const result = runCreate(repo, {
+      sliceId: 'PAST-T3-001',
+      silent: true,
+      historyRoot: historyRepo,
+    });
     assert.equal(result.exitCode, 1, 'should be blocked');
     assert.ok(
       (result.result.error || '').includes('slice-id-collision'),
@@ -204,5 +212,6 @@ test('C4/T3: runCreate refuses when slice ID is in live repo git history', () =>
     );
   } finally {
     rmSync(repo, { recursive: true, force: true });
+    rmSync(historyRepo, { recursive: true, force: true });
   }
 });
