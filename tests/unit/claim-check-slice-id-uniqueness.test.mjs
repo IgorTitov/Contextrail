@@ -292,13 +292,17 @@ describe('CLI --acquire slice-id-collision blocking', () => {
       safeGitSpawn(tmpRepo, ['add', 'a.txt']);
       safeGitSpawn(tmpRepo, ['commit', '-q', '-m', 'feat: past work (PAST-001)']);
 
-      const result = runClaimCheckCLI(tmpRepo, [
-        '--acquire',
-        '--agent=test-history-check',
-        '--slice=PAST-001',
-        '--targets=README.md',
-        '--action=extend',
-      ], { COA_HISTORY_ROOT: tmpRepo });
+      const result = runClaimCheckCLI(
+        tmpRepo,
+        [
+          '--acquire',
+          '--agent=test-history-check',
+          '--slice=PAST-001',
+          '--targets=README.md',
+          '--action=extend',
+        ],
+        { COA_HISTORY_ROOT: tmpRepo },
+      );
       assert.equal(result.status, 1, 'should be blocked');
       assert.ok(
         (result.stderr || '').includes('slice-id-collision'),
