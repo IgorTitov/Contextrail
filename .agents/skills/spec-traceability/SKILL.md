@@ -1,5 +1,5 @@
 <!-- @HEADER
- * @version 0.8.15 | 2026-05-11
+ * @version 0.8.6 | 2026-05-11
  * @purpose Keep backlog, PRD, USM, design, and proof references aligned around the changed slice.
  * @sidecar SKILL.md.header.md
  * @layer control-plane

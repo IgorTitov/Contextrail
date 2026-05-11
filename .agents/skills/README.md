@@ -1,5 +1,5 @@
 <!-- @HEADER
- * @version 0.8.15 | 2026-05-11
+ * @version 0.8.6 | 2026-05-11
  * @purpose Index of generated Codex-compatible skills that mirror the shared repo workflow contract.
  * @sidecar README.md.header.md
  * @layer control-plane

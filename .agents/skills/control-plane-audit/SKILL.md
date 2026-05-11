@@ -1,5 +1,5 @@
 <!-- @HEADER
- * @version 0.8.15 | 2026-05-11
+ * @version 0.8.6 | 2026-05-11
  * @purpose Audit drift across instructions, hooks, scripts, docs, and tests, then repair the real source.
  * @sidecar SKILL.md.header.md
  * @layer control-plane

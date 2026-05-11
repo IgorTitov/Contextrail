@@ -1,5 +1,5 @@
 <!-- @HEADER
- * @version 0.8.15 | 2026-05-11
+ * @version 0.8.6 | 2026-05-11
  * @purpose Keep folder-level READMEs aligned with real ownership and entrypoints.
  * @sidecar SKILL.md.header.md
  * @layer control-plane

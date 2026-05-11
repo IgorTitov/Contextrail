@@ -1,5 +1,5 @@
 <!-- @HEADER
- * @version 0.8.15 | 2026-05-11
+ * @version 0.8.6 | 2026-05-11
  * @purpose Folder guide for the Codex-facing agent adapter layer.
  * @sidecar README.md.header.md
  * @layer control-plane

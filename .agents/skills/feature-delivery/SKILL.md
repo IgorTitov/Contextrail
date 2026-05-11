@@ -1,5 +1,5 @@
 <!-- @HEADER
- * @version 0.8.15 | 2026-05-11
+ * @version 0.8.6 | 2026-05-11
  * @purpose Implement one bounded backlog slice by deep-reading only touched files and direct collaborators.
  * @sidecar SKILL.md.header.md
  * @layer control-plane

@@ -1,5 +1,5 @@
 <!-- @HEADER
- * @version 0.8.15 | 2026-05-11
+ * @version 0.8.6 | 2026-05-11
  * @purpose Codex adapter for the shared repo-level delivery contract and skill map.
  * @sidecar AGENTS.md.header.md
  * @layer root

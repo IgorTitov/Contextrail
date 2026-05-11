@@ -1,5 +1,5 @@
 <!-- @HEADER
- * @version 0.8.15 | 2026-05-11
+ * @version 0.8.6 | 2026-05-11
  * @purpose Keep structured headers and sidecars aligned with the real file role.
  * @sidecar SKILL.md.header.md
  * @layer control-plane
