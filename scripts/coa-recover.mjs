@@ -66,8 +66,9 @@ export function readHeadVersion(rootDir) {
  */
 export function detectVersionDrift(workingVersion, headVersion) {
   if (!workingVersion || !headVersion) return { drifted: false, reason: 'missing version' };
-  if (workingVersion === headVersion)
+  if (workingVersion === headVersion) {
     return { drifted: false, reason: 'not bumped (ok if pre-commit)' };
+  }
 
   const parts = headVersion.split('.').map(Number);
   const expectedPatch = `${parts[0]}.${parts[1]}.${parts[2] + 1}`;
@@ -167,20 +168,22 @@ export function diagnose(rootDir) {
 
   const issues = [];
   if (versionDrift.drifted) issues.push({ type: 'version-drift', detail: versionDrift.reason });
-  if (staleClaims.length > 0)
+  if (staleClaims.length > 0) {
     issues.push({
       type: 'stale-claims',
       detail: `${staleClaims.length} stale claim(s)`,
       claims: staleClaims,
     });
+  }
   if (mergeConflict) issues.push({ type: 'merge-conflict', detail: 'Merge conflict in progress' });
   if (rebaseInProgress) issues.push({ type: 'rebase-in-progress', detail: 'Rebase in progress' });
-  if (orphanedWorktrees.length > 0)
+  if (orphanedWorktrees.length > 0) {
     issues.push({
       type: 'orphaned-worktrees',
       detail: `${orphanedWorktrees.length} orphaned worktree(s)`,
       worktrees: orphanedWorktrees,
     });
+  }
 
   return {
     ok: issues.length === 0,

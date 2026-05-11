@@ -274,8 +274,9 @@ function explainRefusal(result) {
   );
   lines.push('');
   if (!result.operatorEnv) lines.push('  Currently: COA_OPERATOR is NOT set.');
-  if (!result.hasReason)
+  if (!result.hasReason) {
     lines.push('  Currently: Allow-test-deletion line is missing or reason is too short.');
+  }
   lines.push('');
   lines.push('See docs/adr/0041-test-deletion-guard.md.');
   return lines.join('\n');

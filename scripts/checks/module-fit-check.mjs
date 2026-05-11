@@ -151,10 +151,11 @@ async function main(argv = process.argv.slice(2)) {
     ensureDir(reportDir);
     const reportPath = join(reportDir, 'module-fit-report.json');
     writeFileSync(reportPath, JSON.stringify(output, null, 2) + '\n', 'utf8');
-    if (!wantJson)
+    if (!wantJson) {
       console.log(
         `module-fit-check: report written to ${reportPath.slice(ROOT.length + 1).replaceAll('\\', '/')}`,
       );
+    }
   }
 
   if (wantJson) {

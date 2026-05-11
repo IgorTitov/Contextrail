@@ -2493,7 +2493,7 @@ async function main() {
     }
     if (claim.status === 'completed' || claim.status === 'abandoned') {
       const msg = `claim ${targetId} is already ${claim.status} — no action needed`;
-      if (wantJson)
+      if (wantJson) {
         console.log(
           JSON.stringify(
             result('claim-check:force-expire', true, [], [msg], {
@@ -2502,7 +2502,7 @@ async function main() {
             }),
           ),
         );
-      else console.log(`claim-check --force-expire: ${msg}`);
+      } else console.log(`claim-check --force-expire: ${msg}`);
       return;
     }
 

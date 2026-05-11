@@ -1094,8 +1094,9 @@ export function runCreate(repoRoot, opts = {}) {
       });
       if (claimResult.status !== 0) {
         const errMsg = (claimResult.stderr || claimResult.stdout || '').trim();
-        if (!silent && !wantJson)
+        if (!silent && !wantJson) {
           console.error(`coa-worktree --create: claim-check failed:\n${errMsg}`);
+        }
         return { exitCode: 1, result: { ok: false, error: errMsg } };
       }
     }
@@ -1483,8 +1484,9 @@ export function runRefresh(repoRoot, opts = {}) {
   if (record.isPrimary) return fail('refusing to refresh the primary worktree');
   if (record.status.mergeInProgress) return fail('merge in progress — complete or abort first');
   if (record.status.rebaseInProgress) return fail('rebase in progress — complete or abort first');
-  if (record.status.stagedCount > 0)
+  if (record.status.stagedCount > 0) {
     return fail('staged changes present — operator must commit or unstage first');
+  }
   if (isCwdInside(process.cwd(), record.path)) {
     return fail('refusing to refresh the worktree your shell is currently inside');
   }
@@ -1701,8 +1703,9 @@ export function runTeardownStale(repoRoot, opts = {}) {
         if (ineligible.length > 0) {
           console.log('');
           console.log(`  skipped (${ineligible.length}):`);
-          for (const i of ineligible)
+          for (const i of ineligible) {
             console.log(`    ${i.path}  [${i.branch}]  reason: ${i.reason}`);
+          }
         }
         if (candidates.length > 0) {
           console.log('');
@@ -1817,8 +1820,9 @@ export function runTeardownStale(repoRoot, opts = {}) {
       console.log(
         `coa-worktree --teardown-stale (execute): ${torn.length} torn down, ${failures.length} failed`,
       );
-      for (const t of torn)
+      for (const t of torn) {
         console.log(`  removed ${t.path}  [${t.branch}]  branch-deleted=${t.branchDeleted}`);
+      }
       for (const f of failures) console.log(`  FAILED ${f.path}  reason: ${f.reason}`);
     }
   }

@@ -718,8 +718,9 @@ function analyzeFirstArg(expr, looksLikeExec) {
     // Strip the surrounding quote, look at content.
     const inner = trimmed.slice(1, -1);
     if (looksLikeExec) {
-      if (/^\s*git(\s|$)/i.test(inner))
+      if (/^\s*git(\s|$)/i.test(inner)) {
         return { isGit: true, dynamic: false, reason: 'literal-exec' };
+      }
       return { isGit: false, dynamic: false, reason: 'non-git-exec' };
     }
     // spawn-family — first arg is executable name.

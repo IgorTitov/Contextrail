@@ -203,8 +203,9 @@ export function measureWorkSurface(moduleName, opts = {}) {
   // Sidecars for the two public surface files.
   const sidecarPaths = [];
   if (existsSync(manifestAbs + '.header.md')) sidecarPaths.push(manifestAbs + '.header.md');
-  if (publicApiAbs && existsSync(publicApiAbs + '.header.md'))
+  if (publicApiAbs && existsSync(publicApiAbs + '.header.md')) {
     sidecarPaths.push(publicApiAbs + '.header.md');
+  }
   let sidecarTokens = 0;
   for (const sc of sidecarPaths) sidecarTokens += approximateTokenCount(safeReadText(sc));
   if (sidecarPaths.length === 0) missing.push('sidecars');

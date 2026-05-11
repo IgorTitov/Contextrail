@@ -390,8 +390,9 @@ function check5() {
 
   const issues = [];
   if (missingScripts.length > 0) issues.push(`Missing scripts: ${missingScripts.join(', ')}`);
-  if (missingPhases.length > 0)
+  if (missingPhases.length > 0) {
     issues.push(`Phases in doc but not in pre-commit: ${missingPhases.join(', ')}`);
+  }
 
   if (issues.length > 0) {
     warn(5, issues.join('; '));
