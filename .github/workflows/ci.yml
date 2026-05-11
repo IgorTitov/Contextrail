@@ -124,7 +124,7 @@ jobs:
       - run: node scripts/checks/instruction-integrity-check.mjs
       - run: node scripts/checks/seam-audit.mjs
       - run: node scripts/checks/manifest-staleness-check.mjs
-      - run: node scripts/checks/header-exports-fill.mjs --check
+      - run: node scripts/checks/header-exports-fill.mjs --dry-run
       - run: node scripts/checks/system-map-check.mjs
       - run: node scripts/checks/sidecar-content-check.mjs
       - run: node scripts/checks/numbers-sync.mjs --check
