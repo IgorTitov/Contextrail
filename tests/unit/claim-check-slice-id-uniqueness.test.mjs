@@ -283,20 +283,30 @@ describe('CLI --acquire slice-id-collision blocking', () => {
   });
 
   test('7. --acquire --slice=PAST-CLI-001 when commit exists → exit 1 + slice-id-collision', () => {
-    const repo = fileURLToPath(new URL('../../', import.meta.url));
-    // TPL-279 is already committed in the live repo; use it as a known committed slice ID
-    const result = runClaimCheckCLI(repo, [
-      '--acquire',
-      '--agent=test-history-check',
-      '--slice=TPL-279',
-      '--targets=tests/unit/claim-check-slice-id-uniqueness.test.mjs',
-      '--action=extend',
-    ]);
-    assert.equal(result.status, 1, 'should be blocked');
-    assert.ok(
-      (result.stderr || '').includes('slice-id-collision'),
-      `stderr should contain 'slice-id-collision', got: ${result.stderr}`,
-    );
+    // Use a temp git repo with a known commit so this test does not depend on
+    // the live repo's git history (which may be shallow in CI).
+    const tmpRepo = makeGitRepo();
+    try {
+      mkdirSync(join(tmpRepo, '.claims'), { recursive: true });
+      writeFileSync(join(tmpRepo, 'a.txt'), 'a\n');
+      safeGitSpawn(tmpRepo, ['add', 'a.txt']);
+      safeGitSpawn(tmpRepo, ['commit', '-q', '-m', 'feat: past work (PAST-001)']);
+
+      const result = runClaimCheckCLI(tmpRepo, [
+        '--acquire',
+        '--agent=test-history-check',
+        '--slice=PAST-001',
+        '--targets=README.md',
+        '--action=extend',
+      ], { COA_HISTORY_ROOT: tmpRepo });
+      assert.equal(result.status, 1, 'should be blocked');
+      assert.ok(
+        (result.stderr || '').includes('slice-id-collision'),
+        `stderr should contain 'slice-id-collision', got: ${result.stderr}`,
+      );
+    } finally {
+      rmSync(tmpRepo, { recursive: true, force: true });
+    }
   });
 
   test('8. --acquire --allow-id-collision without COA_OPERATOR=1 → exit 1', () => {
