@@ -89,8 +89,8 @@ export function buildDependentMap(manifests) {
  * @param {string} moduleName
  * @returns {string[]}
  */
-export function findBacklogReferences(moduleName) {
-  const backlogDir = join(ROOT, 'docs', 'backlog');
+export function findBacklogReferences(moduleName, rootDir = ROOT) {
+  const backlogDir = join(rootDir, 'docs', 'backlog');
   if (!existsSync(backlogDir)) return [];
   /** @type {string[]} */
   const refs = [];

@@ -16,7 +16,7 @@
 import { describe, it, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { execSync } from 'node:child_process';
-import { mkdirSync, writeFileSync, rmSync, existsSync, readFileSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync, existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
@@ -169,8 +169,15 @@ describe('buildDependentMap()', () => {
 
 describe('findBacklogReferences()', () => {
   it('finds references in backlog files', () => {
-    const refs = findBacklogReferences('retrieval');
-    assert.ok(refs.length >= 1, 'expected at least one backlog reference for retrieval');
+    const tmpRoot = mkdtempSync(join(tmpdir(), 'backlog-test-'));
+    try {
+      mkdirSync(join(tmpRoot, 'docs', 'backlog'), { recursive: true });
+      writeFileSync(join(tmpRoot, 'docs', 'backlog', 'slice-001.md'), 'module_ref: retrieval\n');
+      const refs = findBacklogReferences('retrieval', tmpRoot);
+      assert.ok(refs.length >= 1, 'expected at least one backlog reference for retrieval');
+    } finally {
+      rmSync(tmpRoot, { recursive: true, force: true });
+    }
   });
 
   it('returns empty for non-existent module', () => {
