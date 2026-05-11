@@ -25,10 +25,12 @@ try {
   if (!hook.includes('ORIG_STAGED')) {
     console.error(
       '\n⚠️  WARNING: .githooks/pre-commit is missing ORIG_STAGED snapshot.\n' +
-      '   This means parallel Claude sessions will overwrite each other\'s work.\n' +
-      '   Update pre-commit from the Contextrail template (v0.6.7+).\n',
+        "   This means parallel Claude sessions will overwrite each other's work.\n" +
+        '   Update pre-commit from the Contextrail template (v0.6.7+).\n',
     );
   }
-} catch { /* pre-commit doesn't exist yet — OK for fresh repos */ }
+} catch {
+  /* pre-commit doesn't exist yet — OK for fresh repos */
+}
 
 console.log('Git hooks installed: .githooks/');

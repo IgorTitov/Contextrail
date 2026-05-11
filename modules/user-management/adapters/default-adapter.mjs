@@ -100,7 +100,10 @@ export function createMemoryUserManagementAdapter() {
     async requestPasswordReset(email) {
       let userId = null;
       for (const user of users.values()) {
-        if (user.email === email) { userId = user.id; break; }
+        if (user.email === email) {
+          userId = user.id;
+          break;
+        }
       }
       if (!userId) throw new Error('user-not-found');
       const request = createPasswordReset(userId);

@@ -60,7 +60,14 @@ const childProcess = cjsRequire('node:child_process');
 // GIT_COMMON_DIR added in TPL-274: set by git for hooks in linked worktrees;
 // points at the common .git dir and causes git to write objects/refs there
 // even when cwd is in tmpdir. Must be scrubbed alongside GIT_DIR.
-const SAFE_KEYS = ['GIT_DIR', 'GIT_WORK_TREE', 'GIT_INDEX_FILE', 'GIT_OBJECT_DIRECTORY', 'GIT_ALTERNATE_OBJECT_DIRECTORIES', 'GIT_COMMON_DIR'];
+const SAFE_KEYS = [
+  'GIT_DIR',
+  'GIT_WORK_TREE',
+  'GIT_INDEX_FILE',
+  'GIT_OBJECT_DIRECTORY',
+  'GIT_ALTERNATE_OBJECT_DIRECTORIES',
+  'GIT_COMMON_DIR',
+];
 
 // ---------------------------------------------------------------------------
 // 1. Tmpdir root resolution
@@ -160,9 +167,7 @@ function assertNoInheritedGitEnv() {
       '',
       'Scrub your shell before running tests:',
       ...offenders.map((o) =>
-        process.platform === 'win32'
-          ? `  Remove-Item Env:${o.key}`
-          : `  unset ${o.key}`,
+        process.platform === 'win32' ? `  Remove-Item Env:${o.key}` : `  unset ${o.key}`,
       ),
       '',
       'See docs/adr/0015-test-isolation-enforcement.md',
@@ -233,8 +238,10 @@ function isGitCommand(firstArg, argvOrUndefined) {
     const tokenMatch = trimmed.match(/^("[^"]+"|'[^']+'|\S+)/);
     if (!tokenMatch) return false;
     let token = tokenMatch[1];
-    if ((token.startsWith('"') && token.endsWith('"')) ||
-        (token.startsWith("'") && token.endsWith("'"))) {
+    if (
+      (token.startsWith('"') && token.endsWith('"')) ||
+      (token.startsWith("'") && token.endsWith("'"))
+    ) {
       token = token.slice(1, -1);
     }
     const base = token.split(/[\\/]/).pop().toLowerCase();

@@ -62,12 +62,16 @@ function readAppVersion(root) {
   try {
     const v = readFileSync(versionPath, 'utf-8').trim();
     if (v) return v;
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 
   try {
     const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
     if (typeof pkg.version === 'string') return pkg.version;
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 
   return 'dev';
 }

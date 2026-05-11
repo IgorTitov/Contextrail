@@ -99,7 +99,10 @@ describe('loadFingerprints', () => {
   it('throws ENOENT for a missing file', () => {
     const dir = mkdtempSync(join(tmpdir(), 'hi-unit-'));
     const missing = join(dir, 'does-not-exist.json');
-    assert.throws(() => loadFingerprints(missing), (err) => err.code === 'ENOENT');
+    assert.throws(
+      () => loadFingerprints(missing),
+      (err) => err.code === 'ENOENT',
+    );
   });
 
   it('strips an inline header prefix before parsing (TPL-277 resilience)', () => {
@@ -144,9 +147,7 @@ describe('compareFingerprints', () => {
   });
 
   it('reports mismatch when sha256 differs', () => {
-    const hookFiles = [
-      { path: '.githooks/pre-commit', sha256: 'aaa'.padEnd(64, '0'), size: 100 },
-    ];
+    const hookFiles = [{ path: '.githooks/pre-commit', sha256: 'aaa'.padEnd(64, '0'), size: 100 }];
     const registry = {
       '.githooks/pre-commit': { sha256: 'bbb'.padEnd(64, '0'), size: 100 },
     };
@@ -158,9 +159,7 @@ describe('compareFingerprints', () => {
   });
 
   it('reports mismatch when size differs (sha256 same)', () => {
-    const hookFiles = [
-      { path: '.githooks/pre-commit', sha256: 'abc'.padEnd(64, '0'), size: 999 },
-    ];
+    const hookFiles = [{ path: '.githooks/pre-commit', sha256: 'abc'.padEnd(64, '0'), size: 999 }];
     const registry = {
       '.githooks/pre-commit': { sha256: 'abc'.padEnd(64, '0'), size: 100 },
     };
@@ -183,9 +182,7 @@ describe('compareFingerprints', () => {
   });
 
   it('reports extra when file is on disk but not in registry', () => {
-    const hookFiles = [
-      { path: '.githooks/post-merge', sha256: 'xyz'.padEnd(64, '0'), size: 50 },
-    ];
+    const hookFiles = [{ path: '.githooks/post-merge', sha256: 'xyz'.padEnd(64, '0'), size: 50 }];
     const registry = {}; // empty — no known hooks
 
     const result = compareFingerprints(hookFiles, registry);
@@ -197,7 +194,7 @@ describe('compareFingerprints', () => {
   it('handles all three cases simultaneously', () => {
     const hookFiles = [
       { path: '.githooks/pre-commit', sha256: 'aaa'.padEnd(64, '0'), size: 100 }, // mismatch
-      { path: '.githooks/post-merge', sha256: 'ccc'.padEnd(64, '0'), size: 50 },  // extra
+      { path: '.githooks/post-merge', sha256: 'ccc'.padEnd(64, '0'), size: 50 }, // extra
       // .githooks/pre-push is in registry but absent → missing
     ];
     const registry = {
@@ -217,13 +214,13 @@ describe('compareFingerprints', () => {
 // ---------------------------------------------------------------------------
 describe('formatRegistry', () => {
   it('produces valid JSON with version field', () => {
-    const entries = [
-      { path: '.githooks/pre-commit', sha256: 'abc'.padEnd(64, '0'), size: 100 },
-    ];
+    const entries = [{ path: '.githooks/pre-commit', sha256: 'abc'.padEnd(64, '0'), size: 100 }];
     const json = formatRegistry(entries, 'TPL-256');
 
     let parsed;
-    assert.doesNotThrow(() => { parsed = JSON.parse(json); }, 'must produce parseable JSON');
+    assert.doesNotThrow(() => {
+      parsed = JSON.parse(json);
+    }, 'must produce parseable JSON');
     assert.equal(parsed.version, '1.0', 'must have version field "1.0"');
     assert.equal(typeof parsed.hooks, 'object');
     assert.equal(parsed.hooks['.githooks/pre-commit'].sha256, 'abc'.padEnd(64, '0'));

@@ -30,9 +30,7 @@
 
 import { describe, test, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
-import {
-  mkdtempSync, mkdirSync, writeFileSync, rmSync, existsSync,
-} from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -59,10 +57,7 @@ function createTransportFixture(label) {
   // Minimal repo structure required by coa-merge ceremony.
   mkdirSync(join(root, '.claims'), { recursive: true });
   writeFileSync(join(root, 'VERSION'), '0.0.1\n');
-  writeFileSync(
-    join(root, 'CHANGELOG.md'),
-    '# Changelog\n\n## [Unreleased]\n\n- initial\n',
-  );
+  writeFileSync(join(root, 'CHANGELOG.md'), '# Changelog\n\n## [Unreleased]\n\n- initial\n');
   writeFileSync(
     join(root, 'package.json'),
     JSON.stringify({ name: 'autostash-fixture', version: '0.0.1' }, null, 2) + '\n',
@@ -70,7 +65,11 @@ function createTransportFixture(label) {
   // TPL-304: step 0.5 requires a .coa-session identifying the session owner.
   writeFileSync(
     join(root, '.coa-session'),
-    JSON.stringify({ sessionName: 'tx-TPL-250-autostash', agent: 'test-autostash-agent', created: new Date().toISOString() }) + '\n',
+    JSON.stringify({
+      sessionName: 'tx-TPL-250-autostash',
+      agent: 'test-autostash-agent',
+      created: new Date().toISOString(),
+    }) + '\n',
   );
   safeGitSpawn(root, ['add', 'VERSION', 'CHANGELOG.md', 'package.json']);
   safeGitSpawn(root, ['commit', '-m', 'init']);
@@ -133,8 +132,11 @@ function createClaim(root, claimId, targets) {
 function subprocessEnv(fixtureRoot) {
   const env = { ...process.env };
   for (const key of [
-    'GIT_DIR', 'GIT_WORK_TREE', 'GIT_INDEX_FILE',
-    'GIT_OBJECT_DIRECTORY', 'GIT_ALTERNATE_OBJECT_DIRECTORIES',
+    'GIT_DIR',
+    'GIT_WORK_TREE',
+    'GIT_INDEX_FILE',
+    'GIT_OBJECT_DIRECTORY',
+    'GIT_ALTERNATE_OBJECT_DIRECTORIES',
   ]) {
     delete env[key];
   }
@@ -188,16 +190,13 @@ describe('coa-merge: autostash preservation (TPL-250)', () => {
     );
 
     // feature.js must appear in the HEAD commit's file list.
-    const showResult = safeGitSpawn(
-      fixtureRoot,
-      ['show', '--name-only', '--format=', 'HEAD'],
-    );
+    const showResult = safeGitSpawn(fixtureRoot, ['show', '--name-only', '--format=', 'HEAD']);
     const committedFiles = showResult.stdout.trim().split('\n').filter(Boolean);
     assert.ok(
       committedFiles.includes('feature.js'),
       `feature.js missing from HEAD commit (autostash dropped it from index).\n` +
-      `Committed files: ${committedFiles.join(', ')}\n` +
-      `coa-merge stdout:\n${result.stdout}`,
+        `Committed files: ${committedFiles.join(', ')}\n` +
+        `coa-merge stdout:\n${result.stdout}`,
     );
 
     // No staged residue.
@@ -241,7 +240,10 @@ describe('coa-merge: autostash preservation (TPL-250)', () => {
 
       // Verify a.txt is now unstaged.
       const beforeRestage = safeGitSpawn(root, ['diff', '--cached', '--name-only']);
-      assert.ok(!beforeRestage.stdout.includes('a.txt'), 'a.txt should not be staged before restage');
+      assert.ok(
+        !beforeRestage.stdout.includes('a.txt'),
+        'a.txt should not be staged before restage',
+      );
 
       // Apply the fix helper.
       const r = restageAfterAutostash(['a.txt', 'nonexistent.txt'], root);

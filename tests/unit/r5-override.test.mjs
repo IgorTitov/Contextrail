@@ -12,13 +12,24 @@
 import { describe, test, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  mkdtempSync, mkdirSync, writeFileSync, readFileSync,
-  existsSync, rmSync, readdirSync, unlinkSync,
+  mkdtempSync,
+  mkdirSync,
+  writeFileSync,
+  readFileSync,
+  existsSync,
+  rmSync,
+  readdirSync,
+  unlinkSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { consumeOverride, VALID_CATEGORIES, TTL_MS, CLOCK_SKEW_TOLERANCE_MS } from '../../scripts/lib/r5-override.mjs';
+import {
+  consumeOverride,
+  VALID_CATEGORIES,
+  TTL_MS,
+  CLOCK_SKEW_TOLERANCE_MS,
+} from '../../scripts/lib/r5-override.mjs';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -57,7 +68,7 @@ function validOverride(overrides = {}) {
 function logFiles() {
   const logDir = join(tmpRoot, '.coa', 'r5-override-log');
   if (!existsSync(logDir)) return [];
-  return readdirSync(logDir).filter(f => f !== '.gitkeep');
+  return readdirSync(logDir).filter((f) => f !== '.gitkeep');
 }
 
 // ---------------------------------------------------------------------------
@@ -81,8 +92,9 @@ describe('consumeOverride', () => {
 
     // Override file should still exist — caller deletes it.
     assert.equal(
-      existsSync(join(tmpRoot, '.coa', 'r5-override.json')), true,
-      'consumeOverride must NOT delete the override file (caller responsibility)'
+      existsSync(join(tmpRoot, '.coa', 'r5-override.json')),
+      true,
+      'consumeOverride must NOT delete the override file (caller responsibility)',
     );
 
     // Simulate caller side effects: write log + delete override.
@@ -92,14 +104,19 @@ describe('consumeOverride', () => {
 
     const files = logFiles();
     assert.equal(files.length, 1, 'Exactly one log entry should be created by caller');
-    const archived = JSON.parse(readFileSync(join(tmpRoot, '.coa', 'r5-override-log', files[0]), 'utf8'));
+    const archived = JSON.parse(
+      readFileSync(join(tmpRoot, '.coa', 'r5-override-log', files[0]), 'utf8'),
+    );
     assert.ok(archived.consumed_at, 'archived entry should have consumed_at field');
   });
 
   test('missing file → refuse with clear message', () => {
     const result = consumeOverride(['foo.mjs'], tmpRoot);
     assert.equal(result.ok, false);
-    assert.ok(result.reason.includes('No .coa/r5-override.json'), `Unexpected reason: ${result.reason}`);
+    assert.ok(
+      result.reason.includes('No .coa/r5-override.json'),
+      `Unexpected reason: ${result.reason}`,
+    );
   });
 
   test('TTL-expired timestamp → refuse', () => {
@@ -130,22 +147,26 @@ describe('consumeOverride', () => {
   });
 
   test('staged file not in expected_files → refuse and name the uncovered file', () => {
-    writeOverride(validOverride({
-      expected_files: ['scripts/checks/main-worktree-guard.mjs'],
-    }));
+    writeOverride(
+      validOverride({
+        expected_files: ['scripts/checks/main-worktree-guard.mjs'],
+      }),
+    );
     const staged = ['scripts/checks/main-worktree-guard.mjs', 'scripts/lib/r5-override.mjs'];
     const result = consumeOverride(staged, tmpRoot);
     assert.equal(result.ok, false);
     assert.ok(
       result.reason.includes('scripts/lib/r5-override.mjs'),
-      `Refusal should name the uncovered file. Got: ${result.reason}`
+      `Refusal should name the uncovered file. Got: ${result.reason}`,
     );
   });
 
   test('expected_files may contain extras not staged — still accepted', () => {
-    writeOverride(validOverride({
-      expected_files: ['scripts/checks/main-worktree-guard.mjs', 'CHANGELOG.md'],
-    }));
+    writeOverride(
+      validOverride({
+        expected_files: ['scripts/checks/main-worktree-guard.mjs', 'CHANGELOG.md'],
+      }),
+    );
     const staged = ['scripts/checks/main-worktree-guard.mjs'];
     const result = consumeOverride(staged, tmpRoot);
     assert.equal(result.ok, true, `Expected ok but got: ${result.reason}`);
@@ -161,7 +182,7 @@ describe('consumeOverride', () => {
       assert.equal(result.ok, false, 'consumeOverride must refuse even with COA_OPERATOR=1');
       assert.ok(
         result.reason.includes('No .coa/r5-override.json'),
-        `Expected file-not-found message but got: ${result.reason}`
+        `Expected file-not-found message but got: ${result.reason}`,
       );
     } finally {
       if (origOperator === undefined) {
@@ -199,28 +220,32 @@ describe('consumeOverride', () => {
 
   test('self-modifying-ceremony + non-ceremony file → refuse with category-files-mismatch', () => {
     // expected_files contains a path that does not match CEREMONY_PATH_PATTERNS.
-    writeOverride(validOverride({
-      category: 'self-modifying-ceremony',
-      expected_files: ['foo/bar.js'],
-    }));
+    writeOverride(
+      validOverride({
+        category: 'self-modifying-ceremony',
+        expected_files: ['foo/bar.js'],
+      }),
+    );
     const result = consumeOverride(['foo/bar.js'], tmpRoot);
     assert.equal(result.ok, false);
     assert.ok(
       result.reason.includes('category-files-mismatch'),
-      `Reason should include 'category-files-mismatch'. Got: ${result.reason}`
+      `Reason should include 'category-files-mismatch'. Got: ${result.reason}`,
     );
     assert.ok(
       result.reason.includes('foo/bar.js'),
-      `Reason should name the offending path. Got: ${result.reason}`
+      `Reason should name the offending path. Got: ${result.reason}`,
     );
   });
 
   test('self-modifying-ceremony + only ceremony-pattern files → accepts', () => {
     // All expected_files match CEREMONY_PATH_PATTERNS — should be accepted.
-    writeOverride(validOverride({
-      category: 'self-modifying-ceremony',
-      expected_files: ['scripts/coa-merge.mjs'],
-    }));
+    writeOverride(
+      validOverride({
+        category: 'self-modifying-ceremony',
+        expected_files: ['scripts/coa-merge.mjs'],
+      }),
+    );
     const result = consumeOverride(['scripts/coa-merge.mjs'], tmpRoot);
     assert.equal(result.ok, true, `Expected ok but got: ${result.reason}`);
     assert.ok(result.logEntry, 'logEntry should be present on success');

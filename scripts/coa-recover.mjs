@@ -51,7 +51,9 @@ export function readVersion(rootDir) {
 export function readHeadVersion(rootDir) {
   try {
     const result = spawnSync('git', ['show', 'HEAD:VERSION'], {
-      cwd: rootDir, encoding: 'utf8', stdio: 'pipe',
+      cwd: rootDir,
+      encoding: 'utf8',
+      stdio: 'pipe',
     });
     return result.status === 0 ? result.stdout.trim() : null;
   } catch {
@@ -64,14 +66,19 @@ export function readHeadVersion(rootDir) {
  */
 export function detectVersionDrift(workingVersion, headVersion) {
   if (!workingVersion || !headVersion) return { drifted: false, reason: 'missing version' };
-  if (workingVersion === headVersion) return { drifted: false, reason: 'not bumped (ok if pre-commit)' };
+  if (workingVersion === headVersion)
+    return { drifted: false, reason: 'not bumped (ok if pre-commit)' };
 
   const parts = headVersion.split('.').map(Number);
   const expectedPatch = `${parts[0]}.${parts[1]}.${parts[2] + 1}`;
   const expectedMinor = `${parts[0]}.${parts[1] + 1}.0`;
   const expectedMajor = `${parts[0] + 1}.0.0`;
 
-  if (workingVersion === expectedPatch || workingVersion === expectedMinor || workingVersion === expectedMajor) {
+  if (
+    workingVersion === expectedPatch ||
+    workingVersion === expectedMinor ||
+    workingVersion === expectedMajor
+  ) {
     return { drifted: false, reason: 'valid bump' };
   }
   return {
@@ -95,7 +102,9 @@ export function findStaleClaims(rootDir, now = new Date()) {
       if (claim.status === 'active' && new Date(claim.expires) < now) {
         stale.push({ ...claim, _file: file });
       }
-    } catch { /* skip malformed */ }
+    } catch {
+      /* skip malformed */
+    }
   }
   return stale;
 }
@@ -122,7 +131,9 @@ export function isRebaseInProgress(rootDir) {
  */
 export function findOrphanedWorktrees(rootDir) {
   const result = spawnSync('git', ['worktree', 'list', '--porcelain'], {
-    cwd: rootDir, encoding: 'utf8', stdio: 'pipe',
+    cwd: rootDir,
+    encoding: 'utf8',
+    stdio: 'pipe',
   });
   if (result.status !== 0) return [];
 
@@ -156,10 +167,20 @@ export function diagnose(rootDir) {
 
   const issues = [];
   if (versionDrift.drifted) issues.push({ type: 'version-drift', detail: versionDrift.reason });
-  if (staleClaims.length > 0) issues.push({ type: 'stale-claims', detail: `${staleClaims.length} stale claim(s)`, claims: staleClaims });
+  if (staleClaims.length > 0)
+    issues.push({
+      type: 'stale-claims',
+      detail: `${staleClaims.length} stale claim(s)`,
+      claims: staleClaims,
+    });
   if (mergeConflict) issues.push({ type: 'merge-conflict', detail: 'Merge conflict in progress' });
   if (rebaseInProgress) issues.push({ type: 'rebase-in-progress', detail: 'Rebase in progress' });
-  if (orphanedWorktrees.length > 0) issues.push({ type: 'orphaned-worktrees', detail: `${orphanedWorktrees.length} orphaned worktree(s)`, worktrees: orphanedWorktrees });
+  if (orphanedWorktrees.length > 0)
+    issues.push({
+      type: 'orphaned-worktrees',
+      detail: `${orphanedWorktrees.length} orphaned worktree(s)`,
+      worktrees: orphanedWorktrees,
+    });
 
   return {
     ok: issues.length === 0,
@@ -183,7 +204,13 @@ function parseArgs() {
       else map.set(arg, true);
     }
   }
-  return { has: (k) => map.has(k), get: (k) => { const v = map.get(k); return v === true ? undefined : v; } };
+  return {
+    has: (k) => map.has(k),
+    get: (k) => {
+      const v = map.get(k);
+      return v === true ? undefined : v;
+    },
+  };
 }
 
 function main() {
@@ -245,13 +272,21 @@ function main() {
 
     for (const issue of report.issues) {
       if (issue.type === 'stale-claims') {
-        const r = spawnSync(process.execPath, [join(ROOT, 'scripts/checks/claim-check.mjs'), '--auto-expire'], {
-          cwd: ROOT, encoding: 'utf8', stdio: 'pipe',
-        });
+        const r = spawnSync(
+          process.execPath,
+          [join(ROOT, 'scripts/checks/claim-check.mjs'), '--auto-expire'],
+          {
+            cwd: ROOT,
+            encoding: 'utf8',
+            stdio: 'pipe',
+          },
+        );
         console.log(`  ${r.stdout.trim()}`);
       } else if (issue.type === 'orphaned-worktrees') {
         const r = spawnSync('git', ['worktree', 'prune'], {
-          cwd: ROOT, encoding: 'utf8', stdio: 'pipe',
+          cwd: ROOT,
+          encoding: 'utf8',
+          stdio: 'pipe',
         });
         console.log('  Pruned orphaned worktrees');
       } else if (issue.type === 'version-drift') {
@@ -263,7 +298,8 @@ function main() {
   }
 }
 
-const isDirectRun = process.argv[1] &&
+const isDirectRun =
+  process.argv[1] &&
   (process.argv[1].endsWith('coa-recover.mjs') || process.argv[1].endsWith('coa-recover'));
 
 if (isDirectRun) {

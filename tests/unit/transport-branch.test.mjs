@@ -257,22 +257,13 @@ describe('parseMergingMarker — invalid inputs return null', () => {
     assert.equal(parseMergingMarker(JSON.stringify({ pid: 1, ts: 1 })), null);
   });
   test('50. branch not transport-shaped → null', () => {
-    assert.equal(
-      parseMergingMarker(JSON.stringify({ pid: 1, branch: 'main', ts: 1 })),
-      null,
-    );
+    assert.equal(parseMergingMarker(JSON.stringify({ pid: 1, branch: 'main', ts: 1 })), null);
   });
   test('51. negative pid → null', () => {
-    assert.equal(
-      parseMergingMarker(JSON.stringify({ pid: -1, branch: 'tx-TPL-1', ts: 1 })),
-      null,
-    );
+    assert.equal(parseMergingMarker(JSON.stringify({ pid: -1, branch: 'tx-TPL-1', ts: 1 })), null);
   });
   test('52. negative ts → null', () => {
-    assert.equal(
-      parseMergingMarker(JSON.stringify({ pid: 1, branch: 'tx-TPL-1', ts: -1 })),
-      null,
-    );
+    assert.equal(parseMergingMarker(JSON.stringify({ pid: 1, branch: 'tx-TPL-1', ts: -1 })), null);
   });
   test('53. non-string input → null', () => {
     assert.equal(parseMergingMarker(null), null);
@@ -352,28 +343,20 @@ describe('ceremonyFilesIn', () => {
     assert.throws(() => CEREMONY_FILES.push('extra'));
   });
   test('71. plain code commit (no ceremony files) → empty array', () => {
-    assert.deepEqual(
-      ceremonyFilesIn(['scripts/foo.mjs', 'tests/unit/foo.test.mjs']),
-      [],
-    );
+    assert.deepEqual(ceremonyFilesIn(['scripts/foo.mjs', 'tests/unit/foo.test.mjs']), []);
   });
   test('72. mixes detected (VERSION + code) → just VERSION', () => {
-    assert.deepEqual(
-      ceremonyFilesIn(['VERSION', 'scripts/foo.mjs']),
-      ['VERSION'],
-    );
+    assert.deepEqual(ceremonyFilesIn(['VERSION', 'scripts/foo.mjs']), ['VERSION']);
   });
   test('73. all three ceremony files staged → all three returned', () => {
-    assert.deepEqual(
-      ceremonyFilesIn(['VERSION', 'package.json', 'CHANGELOG.md']),
-      ['VERSION', 'package.json', 'CHANGELOG.md'],
-    );
+    assert.deepEqual(ceremonyFilesIn(['VERSION', 'package.json', 'CHANGELOG.md']), [
+      'VERSION',
+      'package.json',
+      'CHANGELOG.md',
+    ]);
   });
   test('74. backslash paths normalized to forward slash', () => {
-    assert.deepEqual(
-      ceremonyFilesIn(['VERSION', 'CHANGELOG.md']),
-      ['VERSION', 'CHANGELOG.md'],
-    );
+    assert.deepEqual(ceremonyFilesIn(['VERSION', 'CHANGELOG.md']), ['VERSION', 'CHANGELOG.md']);
   });
   test('75. non-array input → empty', () => {
     assert.deepEqual(ceremonyFilesIn(null), []);
@@ -381,10 +364,10 @@ describe('ceremonyFilesIn', () => {
     assert.deepEqual(ceremonyFilesIn('VERSION'), []);
   });
   test('76. non-string entries skipped', () => {
-    assert.deepEqual(
-      ceremonyFilesIn(['VERSION', null, 42, 'package.json']),
-      ['VERSION', 'package.json'],
-    );
+    assert.deepEqual(ceremonyFilesIn(['VERSION', null, 42, 'package.json']), [
+      'VERSION',
+      'package.json',
+    ]);
   });
   test('77. partial match (e.g. "version" lowercase) does NOT match', () => {
     assert.deepEqual(ceremonyFilesIn(['version']), []);
@@ -486,16 +469,10 @@ describe('transportBranchNameForSlice — multi-segment (TPL-303)', () => {
 
 describe('parseWorktreeListPorcelain', () => {
   test('87. single worktree on main', () => {
-    const out = [
-      'worktree /home/u/repo',
-      'HEAD abc123',
-      'branch refs/heads/main',
-      '',
-    ].join('\n');
-    assert.deepEqual(
-      parseWorktreeListPorcelain(out),
-      [{ path: '/home/u/repo', head: 'abc123', branch: 'main' }],
-    );
+    const out = ['worktree /home/u/repo', 'HEAD abc123', 'branch refs/heads/main', ''].join('\n');
+    assert.deepEqual(parseWorktreeListPorcelain(out), [
+      { path: '/home/u/repo', head: 'abc123', branch: 'main' },
+    ]);
   });
 
   test('88. main + transport worktree', () => {
@@ -516,11 +493,7 @@ describe('parseWorktreeListPorcelain', () => {
   });
 
   test('89. bare repo metadata entry preserved with bare flag', () => {
-    const out = [
-      'worktree /srv/repo.git',
-      'bare',
-      '',
-    ].join('\n');
+    const out = ['worktree /srv/repo.git', 'bare', ''].join('\n');
     const got = parseWorktreeListPorcelain(out);
     assert.equal(got.length, 1);
     assert.equal(got[0].path, '/srv/repo.git');
@@ -529,12 +502,7 @@ describe('parseWorktreeListPorcelain', () => {
   });
 
   test('90. CRLF line endings tolerated', () => {
-    const out = [
-      'worktree /home/u/repo',
-      'HEAD abc123',
-      'branch refs/heads/main',
-      '',
-    ].join('\r\n');
+    const out = ['worktree /home/u/repo', 'HEAD abc123', 'branch refs/heads/main', ''].join('\r\n');
     assert.equal(parseWorktreeListPorcelain(out).length, 1);
   });
 
@@ -560,24 +528,14 @@ describe('parseWorktreeListPorcelain', () => {
   });
 
   test('93. branch line without refs/heads/ prefix preserved verbatim', () => {
-    const out = [
-      'worktree /home/u/repo',
-      'HEAD abc',
-      'branch main',
-      '',
-    ].join('\n');
+    const out = ['worktree /home/u/repo', 'HEAD abc', 'branch main', ''].join('\n');
     assert.equal(parseWorktreeListPorcelain(out)[0].branch, 'main');
   });
 });
 
 describe('findMainWorktree', () => {
   test('94. single main worktree returned', () => {
-    const out = [
-      'worktree /home/u/repo',
-      'HEAD abc',
-      'branch refs/heads/main',
-      '',
-    ].join('\n');
+    const out = ['worktree /home/u/repo', 'HEAD abc', 'branch refs/heads/main', ''].join('\n');
     const got = findMainWorktree(out);
     assert.equal(got.path, '/home/u/repo');
   });
@@ -597,31 +555,19 @@ describe('findMainWorktree', () => {
   });
 
   test('96. only non-main worktrees → null', () => {
-    const out = [
-      'worktree /home/u/repo-tx',
-      'HEAD def',
-      'branch refs/heads/tx-TPL-237',
-      '',
-    ].join('\n');
+    const out = ['worktree /home/u/repo-tx', 'HEAD def', 'branch refs/heads/tx-TPL-237', ''].join(
+      '\n',
+    );
     assert.equal(findMainWorktree(out), null);
   });
 
   test('97. only bare metadata → null (bare entries skipped)', () => {
-    const out = [
-      'worktree /srv/repo.git',
-      'bare',
-      '',
-    ].join('\n');
+    const out = ['worktree /srv/repo.git', 'bare', ''].join('\n');
     assert.equal(findMainWorktree(out), null);
   });
 
   test('98. trunkName="master" honoured', () => {
-    const out = [
-      'worktree /home/u/repo',
-      'HEAD abc',
-      'branch refs/heads/master',
-      '',
-    ].join('\n');
+    const out = ['worktree /home/u/repo', 'HEAD abc', 'branch refs/heads/master', ''].join('\n');
     assert.equal(findMainWorktree(out, 'master').path, '/home/u/repo');
     // And looking for "main" finds nothing.
     assert.equal(findMainWorktree(out, 'main'), null);
@@ -676,10 +622,7 @@ describe('classifyFfUpdateMethod', () => {
   const mainWt = { path: '/home/u/repo', branch: 'main', head: 'abc' };
 
   test('107. bare repo → update-ref-bare', () => {
-    assert.equal(
-      classifyFfUpdateMethod({ isBare: true }),
-      FF_UPDATE_METHODS.UPDATE_REF_BARE,
-    );
+    assert.equal(classifyFfUpdateMethod({ isBare: true }), FF_UPDATE_METHODS.UPDATE_REF_BARE);
     // Bare wins even when other fields would say otherwise:
     assert.equal(
       classifyFfUpdateMethod({
@@ -748,14 +691,8 @@ describe('classifyFfUpdateMethod', () => {
 
   test('113. defaults — all-false / null inputs → update-ref-no-main', () => {
     // No args → safe non-bare default.
-    assert.equal(
-      classifyFfUpdateMethod(),
-      FF_UPDATE_METHODS.UPDATE_REF_NO_MAIN,
-    );
-    assert.equal(
-      classifyFfUpdateMethod({}),
-      FF_UPDATE_METHODS.UPDATE_REF_NO_MAIN,
-    );
+    assert.equal(classifyFfUpdateMethod(), FF_UPDATE_METHODS.UPDATE_REF_NO_MAIN);
+    assert.equal(classifyFfUpdateMethod({}), FF_UPDATE_METHODS.UPDATE_REF_NO_MAIN);
   });
 
   test('114. FF_UPDATE_METHODS table is frozen', () => {

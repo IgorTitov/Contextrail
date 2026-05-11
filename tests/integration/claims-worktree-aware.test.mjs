@@ -118,10 +118,14 @@ test('TPL-288 unit: linked worktree — resolveMainRepoRoot returns main repo ro
   } finally {
     try {
       safeGitSpawn(mainDir, ['worktree', 'remove', '--force', txPath]);
-    } catch { /* best-effort */ }
+    } catch {
+      /* best-effort */
+    }
     try {
       rmSync(txPath, { recursive: true, force: true });
-    } catch { /* best-effort */ }
+    } catch {
+      /* best-effort */
+    }
     rmSync(mainDir, { recursive: true, force: true });
   }
 });
@@ -177,10 +181,14 @@ test('TPL-288 int: linked worktree — claim-check --enforce finds claim in main
   } finally {
     try {
       safeGitSpawn(mainDir, ['worktree', 'remove', '--force', txPath]);
-    } catch { /* best-effort */ }
+    } catch {
+      /* best-effort */
+    }
     try {
       rmSync(txPath, { recursive: true, force: true });
-    } catch { /* best-effort */ }
+    } catch {
+      /* best-effort */
+    }
     rmSync(mainDir, { recursive: true, force: true });
   }
 });
@@ -211,9 +219,13 @@ test('TPL-288 int: CLAIMS_DIR env override — explicit path is honoured', () =>
     // Claim only in overrideDir — nothing in mainDir/.claims/
     writeActiveClaim(overrideDir, 'clm-cwa-override-001', 'src/override.mjs');
 
-    const result = runClaimCheck(mainDir, ['--targets=src/override.mjs', '--action=modify', '--enforce'], {
-      CLAIMS_DIR: overrideDir,
-    });
+    const result = runClaimCheck(
+      mainDir,
+      ['--targets=src/override.mjs', '--action=modify', '--enforce'],
+      {
+        CLAIMS_DIR: overrideDir,
+      },
+    );
 
     assert.equal(result.status, 1, 'CLAIMS_DIR override: claim in override dir must be found');
     const combined = result.stdout + result.stderr;

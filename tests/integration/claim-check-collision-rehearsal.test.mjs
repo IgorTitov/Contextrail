@@ -152,9 +152,7 @@ test('TPL-221: naive cross-agent --force-expire is rejected (no --agent, no --re
       created: new Date().toISOString(),
       expires: farFutureExpiry(),
       status: 'active',
-      targets: [
-        { path: 'docs/backlog/index.md', action: 'modify', description: 'shared infra' },
-      ],
+      targets: [{ path: 'docs/backlog/index.md', action: 'modify', description: 'shared infra' }],
       strategy: 'modify-in-place',
       dependsOn: [],
       notes: 'Live work — must not be wipeable by a sibling tab.',
@@ -303,11 +301,7 @@ test('TPL-221: same-agent --force-expire on a young claim without --really is re
       dependsOn: [],
     });
 
-    const result = runClaimCheck(repo, [
-      '--force-expire',
-      '--id=clm-young',
-      '--agent=session-A',
-    ]);
+    const result = runClaimCheck(repo, ['--force-expire', '--id=clm-young', '--agent=session-A']);
 
     assert.notEqual(result.status, 0, 'young same-agent override must require --really');
     const combined = `${result.stdout}\n${result.stderr}`;
@@ -371,11 +365,7 @@ test('TPL-221: same-agent --force-expire on an old claim succeeds without --real
       dependsOn: [],
     });
 
-    const result = runClaimCheck(repo, [
-      '--force-expire',
-      '--id=clm-old',
-      '--agent=session-A',
-    ]);
+    const result = runClaimCheck(repo, ['--force-expire', '--id=clm-old', '--agent=session-A']);
 
     assert.equal(result.status, 0);
     const claim = readClaim(repo, 'clm-old');
@@ -721,9 +711,7 @@ test('TPL-225: MEDIUM confidence (non-git working dir) requires --operator-confi
     assert.equal(claim.status, 'expired');
 
     const events = readAuditEvents(dir);
-    const successEv = events.find(
-      (e) => e.event === 'force-expire' && e.claimId === 'clm-medium',
-    );
+    const successEv = events.find((e) => e.event === 'force-expire' && e.claimId === 'clm-medium');
     assert.ok(successEv);
     assert.equal(successEv.abandonedCheck.confidence, 'medium');
     assert.equal(successEv.abandonedCheck.operatorConfirmed, true);
@@ -767,11 +755,7 @@ test('TPL-225: same-agent overrides do NOT run the abandoned-check (preserves TP
     const events = readAuditEvents(repo);
     const ev = events.find((e) => e.event === 'force-expire' && e.claimId === 'clm-self');
     assert.ok(ev);
-    assert.equal(
-      'abandonedCheck' in ev,
-      false,
-      'same-agent events must NOT carry abandonedCheck',
-    );
+    assert.equal('abandonedCheck' in ev, false, 'same-agent events must NOT carry abandonedCheck');
   } finally {
     rmSync(repo, { recursive: true, force: true });
   }
@@ -857,7 +841,7 @@ function createGitRepo() {
 }
 
 function gitHead(repo) {
-  const r = safeGitSpawn(repo, ['rev-parse', 'HEAD'], { encoding: 'utf8'});
+  const r = safeGitSpawn(repo, ['rev-parse', 'HEAD'], { encoding: 'utf8' });
   return r.stdout.trim();
 }
 
@@ -882,11 +866,7 @@ test('TPL-223 J3: --auto-complete --staged WITHOUT a real commit is rejected, cl
     writeFileSync(join(repo, 'VERSION'), '0.1.0\n', 'utf8');
     safeGitSpawn(repo, ['add', 'VERSION']);
 
-    const result = runClaimCheck(repo, [
-      '--auto-complete',
-      '--staged',
-      '--agent=session-A',
-    ]);
+    const result = runClaimCheck(repo, ['--auto-complete', '--staged', '--agent=session-A']);
 
     assert.notEqual(result.status, 0, 'unverified auto-complete must exit non-zero');
     const combined = `${result.stdout}\n${result.stderr}`;
@@ -938,7 +918,11 @@ test('TPL-223 J3: after a real commit, --auto-complete --commit-hash=<HEAD> succ
       `--commit-hash=${head}`,
     ]);
 
-    assert.equal(result.status, 0, `verified auto-complete must exit zero (stderr=${result.stderr})`);
+    assert.equal(
+      result.status,
+      0,
+      `verified auto-complete must exit zero (stderr=${result.stderr})`,
+    );
     const claim = readClaim(repo, 'clm-j3-good');
     assert.equal(claim.status, 'completed');
 
@@ -1098,9 +1082,7 @@ test('TPL-223 J3.5: with --agent=X --really --reason, Y-owned claim IS completed
     assert.equal(claim.status, 'completed');
 
     const events = readAuditEvents(repo);
-    const ev = events.find(
-      (e) => e.event === 'auto-complete' && e.claimId === 'clm-j35-takeover',
-    );
+    const ev = events.find((e) => e.event === 'auto-complete' && e.claimId === 'clm-j35-takeover');
     assert.ok(ev);
     assert.equal(ev.crossAgent, true);
     assert.equal(ev.agentMatch, false);
@@ -1229,9 +1211,17 @@ test('TPL-223 J3.6: claim with auto-extended ceremony targets completes when onl
       `--commit-hash=${head}`,
     ]);
 
-    assert.equal(result.status, 0, `J3.6 ceremony completion must succeed (stderr=${result.stderr})`);
+    assert.equal(
+      result.status,
+      0,
+      `J3.6 ceremony completion must succeed (stderr=${result.stderr})`,
+    );
     const claim = readClaim(repo, 'clm-j36');
-    assert.equal(claim.status, 'completed', 'claim should complete despite extended targets being absent from commit');
+    assert.equal(
+      claim.status,
+      'completed',
+      'claim should complete despite extended targets being absent from commit',
+    );
   } finally {
     rmSync(repo, { recursive: true, force: true });
   }
@@ -1306,7 +1296,11 @@ test('TPL-223: --from-pre-commit-hook short-circuits HEAD verification (preserve
       '--from-pre-commit-hook',
     ]);
 
-    assert.equal(result.status, 0, `pre-commit-hook short-circuit should succeed (stderr=${result.stderr})`);
+    assert.equal(
+      result.status,
+      0,
+      `pre-commit-hook short-circuit should succeed (stderr=${result.stderr})`,
+    );
     const claim = readClaim(repo, 'clm-hook');
     assert.equal(claim.status, 'completed');
 
@@ -1342,7 +1336,11 @@ test('TPL-223: --from-pre-commit-hook auto-derives --agent from COA_AGENT env va
       { cwd: repo, encoding: 'utf8', env: { ...process.env, COA_AGENT: 'env-driven-agent' } },
     );
 
-    assert.equal(result.status, 0, `COA_AGENT-driven auto-complete should succeed (stderr=${result.stderr})`);
+    assert.equal(
+      result.status,
+      0,
+      `COA_AGENT-driven auto-complete should succeed (stderr=${result.stderr})`,
+    );
     const claim = readClaim(repo, 'clm-env');
     assert.equal(claim.status, 'completed');
   } finally {

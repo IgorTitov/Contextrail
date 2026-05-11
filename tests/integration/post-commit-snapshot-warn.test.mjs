@@ -24,9 +24,7 @@
 
 import { describe, test, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
-import {
-  mkdtempSync, mkdirSync, writeFileSync, rmSync, existsSync,
-} from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -54,15 +52,19 @@ function createFixture(label) {
 
   // First commit at v0.0.1
   writeFileSync(join(root, 'VERSION'), '0.0.1\n');
-  writeFileSync(join(root, 'package.json'),
-    JSON.stringify({ name: 'snap-fixture', version: '0.0.1' }, null, 2) + '\n');
+  writeFileSync(
+    join(root, 'package.json'),
+    JSON.stringify({ name: 'snap-fixture', version: '0.0.1' }, null, 2) + '\n',
+  );
   safeGitSpawn(root, ['add', 'VERSION', 'package.json']);
   safeGitSpawn(root, ['commit', '-m', 'init: v0.0.1']);
 
   // Second commit at v0.0.2 (the "bumped" commit)
   writeFileSync(join(root, 'VERSION'), '0.0.2\n');
-  writeFileSync(join(root, 'package.json'),
-    JSON.stringify({ name: 'snap-fixture', version: '0.0.2' }, null, 2) + '\n');
+  writeFileSync(
+    join(root, 'package.json'),
+    JSON.stringify({ name: 'snap-fixture', version: '0.0.2' }, null, 2) + '\n',
+  );
   safeGitSpawn(root, ['add', 'VERSION', 'package.json']);
   safeGitSpawn(root, ['commit', '-m', 'bump: v0.0.2']);
 
@@ -73,7 +75,11 @@ const fixtures = [];
 afterEach(() => {
   while (fixtures.length) {
     const d = fixtures.pop();
-    try { rmSync(d, { recursive: true, force: true }); } catch { /* best effort */ }
+    try {
+      rmSync(d, { recursive: true, force: true });
+    } catch {
+      /* best effort */
+    }
   }
 });
 
@@ -134,7 +140,10 @@ describe('runPostCommitWarn', () => {
     assert.equal(warned, true);
     const output = lines.join('\n');
     assert.ok(output.includes('0.0.2'), `expected version in warning, got: ${output}`);
-    assert.ok(output.includes('mergezip:no-bump'), `expected remedy hint in warning, got: ${output}`);
+    assert.ok(
+      output.includes('mergezip:no-bump'),
+      `expected remedy hint in warning, got: ${output}`,
+    );
   });
 
   test('returns false and prints nothing when both snapshots are present', () => {

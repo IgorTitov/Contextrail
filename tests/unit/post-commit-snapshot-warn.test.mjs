@@ -50,10 +50,7 @@ describe('snapshotWarnCheck — no-warn cases', () => {
   });
 
   test('returns no-warn when both .txt and .zip are present', () => {
-    const files = [
-      'merge-my-repo(0.7.62).txt',
-      'merge-my-repo(0.7.62).zip',
-    ];
+    const files = ['merge-my-repo(0.7.62).txt', 'merge-my-repo(0.7.62).zip'];
     const r = snapshotWarnCheck({
       newVersion: '0.7.62',
       prevVersion: '0.7.61',
@@ -139,10 +136,7 @@ describe('snapshotWarnCheck — warn cases', () => {
     const r = snapshotWarnCheck({
       newVersion: '0.7.62',
       prevVersion: '0.7.61',
-      backupFiles: [
-        'merge-my-repo(0.7.61).txt',
-        'merge-my-repo(0.7.61).zip',
-      ],
+      backupFiles: ['merge-my-repo(0.7.61).txt', 'merge-my-repo(0.7.61).zip'],
       pkgName: 'my-repo',
     });
     assert.equal(r.shouldWarn, true);

@@ -116,10 +116,7 @@ describe('notification history', () => {
   });
 
   test('filterByStatus', () => {
-    const items = [
-      createHistoryItem('a', 'msg1'),
-      markRead(createHistoryItem('b', 'msg2')),
-    ];
+    const items = [createHistoryItem('a', 'msg1'), markRead(createHistoryItem('b', 'msg2'))];
     assert.equal(filterByStatus(items, 'unread').length, 1);
     assert.equal(filterByStatus(items, 'read').length, 1);
   });

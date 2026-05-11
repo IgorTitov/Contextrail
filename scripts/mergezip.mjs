@@ -140,10 +140,17 @@ async function main() {
       const after = start + '## [Unreleased]'.length;
       const next = cl.indexOf('\n## ', after);
       const block = (next >= 0 ? cl.slice(after, next) : cl.slice(after)).trim();
-      const lines = block.split('\n').map((l) => l.trim())
+      const lines = block
+        .split('\n')
+        .map((l) => l.trim())
         .filter((l) => l && !l.startsWith('##') && !l.startsWith('###'));
-      return lines.some((l) => l !== '_Nothing yet._' && l !== '_none_' && l !== '- _none_' && l !== '- _Nothing yet._');
-    } catch { return false; }
+      return lines.some(
+        (l) =>
+          l !== '_Nothing yet._' && l !== '_none_' && l !== '- _none_' && l !== '- _Nothing yet._',
+      );
+    } catch {
+      return false;
+    }
   })();
 
   if (!skipVersionBump && hasRealUnreleased) {

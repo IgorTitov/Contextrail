@@ -369,7 +369,11 @@ if (CHECK) {
 }
 
 const existingParsed = parseJsonOrNull(await readText(OUT).catch(() => null));
-if (existingParsed && stableSerialize(existingParsed) === stableSerialize(payload) && existingParsed._generated) {
+if (
+  existingParsed &&
+  stableSerialize(existingParsed) === stableSerialize(payload) &&
+  existingParsed._generated
+) {
   payload._generated = existingParsed._generated;
 }
 

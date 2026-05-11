@@ -182,7 +182,8 @@ describe('coa-merge: shouldWriteSnapshot', () => {
 
 describe('coa-merge: hasVersionedSection', () => {
   test('detects standard "## [X.Y.Z] — date" heading', () => {
-    const text = '## [Unreleased]\n\n_Nothing yet._\n\n## [0.7.28] — 2026-04-27 12:34:56 UTC+3\n\n- foo\n';
+    const text =
+      '## [Unreleased]\n\n_Nothing yet._\n\n## [0.7.28] — 2026-04-27 12:34:56 UTC+3\n\n- foo\n';
     assert.equal(hasVersionedSection(text, '0.7.28'), true);
   });
 
@@ -384,7 +385,12 @@ describe('coa-merge: propagateBackupsToMainRepo (TPL-270)', () => {
       localRoot: '/some/transport',
       mainWorktreePath: '/some/main',
       version: '1.2.3',
-      _fs: { existsSync: () => false, readdirSync: () => [], mkdirSync: () => {}, copyFileSync: () => {} },
+      _fs: {
+        existsSync: () => false,
+        readdirSync: () => [],
+        mkdirSync: () => {},
+        copyFileSync: () => {},
+      },
     });
     assert.equal(result.ok, false);
     assert.ok(/not found/.test(result.message));
@@ -436,7 +442,10 @@ describe('coa-merge: propagateBackupsToMainRepo (TPL-270)', () => {
       _fs: {
         existsSync: (p) => existingPaths.has(p),
         readdirSync: () => ['merge-repo(0.7.79).txt'],
-        mkdirSync: (p) => { dirCreated = true; existingPaths.add(p); },
+        mkdirSync: (p) => {
+          dirCreated = true;
+          existingPaths.add(p);
+        },
         copyFileSync: () => {},
       },
     });
@@ -453,7 +462,9 @@ describe('coa-merge: propagateBackupsToMainRepo (TPL-270)', () => {
         existsSync: () => true,
         readdirSync: () => ['merge-repo(1.2.3).txt'],
         mkdirSync: () => {},
-        copyFileSync: () => { copyCount++; },
+        copyFileSync: () => {
+          copyCount++;
+        },
       },
     });
     assert.equal(result.ok, true);
@@ -465,10 +476,7 @@ describe('coa-merge: propagateBackupsToMainRepo (TPL-270)', () => {
     const copied = [];
     // Use a Set of existing paths to avoid Windows backslash comparison issues.
     // Both local and target .backups/ dirs exist; no individual files exist (so copy proceeds).
-    const existingDirs = new Set([
-      join('/transport', '.backups'),
-      join('/main', '.backups'),
-    ]);
+    const existingDirs = new Set([join('/transport', '.backups'), join('/main', '.backups')]);
     propagateBackupsToMainRepo({
       localRoot: '/transport',
       mainWorktreePath: '/main',
@@ -558,7 +566,9 @@ describe('coa-merge: propagateSummariesToMainRepo (TPL-271)', () => {
       _fs: {
         existsSync: (p) => p === localDir,
         readdirSync: () => ['2026-05-04_TPL-271_Summary.md'],
-        mkdirSync: () => { dirCreated = true; },
+        mkdirSync: () => {
+          dirCreated = true;
+        },
         copyFileSync: () => {},
         readFileSync: () => '',
       },
@@ -579,7 +589,9 @@ describe('coa-merge: propagateSummariesToMainRepo (TPL-271)', () => {
         existsSync: (p) => existingPaths.has(p),
         readdirSync: () => ['2026-05-04_TPL-271_Summary.md'],
         mkdirSync: () => {},
-        copyFileSync: () => { copyCount++; },
+        copyFileSync: () => {
+          copyCount++;
+        },
         readFileSync: () => 'identical content',
       },
     });
@@ -601,8 +613,10 @@ describe('coa-merge: propagateSummariesToMainRepo (TPL-271)', () => {
         existsSync: (p) => existingPaths.has(p),
         readdirSync: () => ['2026-05-04_TPL-271_Summary.md'],
         mkdirSync: () => {},
-        copyFileSync: () => { copyCount++; },
-        readFileSync: (p) => p.includes('transport') ? 'new content' : 'old content',
+        copyFileSync: () => {
+          copyCount++;
+        },
+        readFileSync: (p) => (p.includes('transport') ? 'new content' : 'old content'),
       },
     });
     assert.equal(result.ok, true);

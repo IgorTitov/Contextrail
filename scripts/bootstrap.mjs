@@ -55,7 +55,9 @@ if (values['init-slice-config']) {
     console.log(`Created ${result.path}`);
     console.log(`  prefix: "${result.prefix}"`);
     console.log('');
-    console.log('Edit .coa/slice-id-config.json to customize prefix, padding, and numbering_start.');
+    console.log(
+      'Edit .coa/slice-id-config.json to customize prefix, padding, and numbering_start.',
+    );
     console.log('See docs/guides/slice-id-config.md for the full schema.');
   } else {
     console.log(`Slice ID config already exists: ${result.path}`);

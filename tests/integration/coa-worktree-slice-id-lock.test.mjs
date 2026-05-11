@@ -31,14 +31,7 @@
 
 import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
-import {
-  mkdtempSync,
-  writeFileSync,
-  readFileSync,
-  existsSync,
-  rmSync,
-  readdirSync,
-} from 'node:fs';
+import { mkdtempSync, writeFileSync, readFileSync, existsSync, rmSync, readdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -56,7 +49,9 @@ after(() => {
     try {
       const filePath = join(LIVE_CLAIMS_DIR, `${id}.json`);
       if (existsSync(filePath)) rmSync(filePath);
-    } catch { /* non-fatal */ }
+    } catch {
+      /* non-fatal */
+    }
   }
 });
 
@@ -92,7 +87,9 @@ function findLiveClaimForSlice(sliceId) {
       const text = readFileSync(join(LIVE_CLAIMS_DIR, f), 'utf8');
       const c = JSON.parse(text);
       if (c.slice === sliceId && c.status === 'active') return c;
-    } catch { /* skip unparseable files */ }
+    } catch {
+      /* skip unparseable files */
+    }
   }
   return null;
 }

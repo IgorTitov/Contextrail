@@ -121,11 +121,14 @@ function resolveVersionAtHash(hash) {
  *   - 'no-history'      — git log returned no hash (uncommitted)
  *   - 'no-version-file' — git log resolved a hash, but git show <hash>:VERSION failed
  */
-export function resolveBackfillVersion(file, {
-  currentVersion,
-  runResolveHash = resolveLastChangeHash,
-  runResolveVersionAtHash = resolveVersionAtHash,
-} = {}) {
+export function resolveBackfillVersion(
+  file,
+  {
+    currentVersion,
+    runResolveHash = resolveLastChangeHash,
+    runResolveVersionAtHash = resolveVersionAtHash,
+  } = {},
+) {
   const hash = runResolveHash(file);
   if (!hash) {
     return { resolved: currentVersion, hash: null, fallback: 'no-history' };
@@ -146,9 +149,7 @@ async function backfillSlimHeader(file, resolved) {
   // parseSlimHeader returns "<version> | <date>" as one string in parsed.version.
   // Split on `|` so the renderer (which appends its own date tail) does not
   // produce a double-dated `@version A.B.C | YYYY-MM-DD | YYYY-MM-DD` line.
-  const parsedVersionOnly = parsed.version
-    ? String(parsed.version).split('|')[0].trim()
-    : null;
+  const parsedVersionOnly = parsed.version ? String(parsed.version).split('|')[0].trim() : null;
 
   const slimData = {
     version: resolved,
@@ -229,7 +230,11 @@ async function main() {
         resolvedVersion: resolved,
         fallback,
         slim: { before: slimResult.before, after: slimResult.after, wrote: slimResult.wrote },
-        sidecar: { before: sidecarResult.before, after: sidecarResult.after, wrote: sidecarResult.wrote },
+        sidecar: {
+          before: sidecarResult.before,
+          after: sidecarResult.after,
+          wrote: sidecarResult.wrote,
+        },
       };
 
       if (slimResult.wrote || sidecarResult.wrote) report.counts.drifted += 1;
@@ -263,8 +268,8 @@ async function main() {
     const c = report.counts;
     console.log(
       `header-backfill: walked=${c.walked} drifted=${c.drifted} alreadyCorrect=${c.alreadyCorrect} ` +
-      `fallback=${c.fallback} errors=${c.errors}` +
-      (dryRun ? ' (dry-run)' : ` → ${REPORT_PATH}`),
+        `fallback=${c.fallback} errors=${c.errors}` +
+        (dryRun ? ' (dry-run)' : ` → ${REPORT_PATH}`),
     );
   }
 }

@@ -130,7 +130,6 @@ function makeEmptyGitRepo() {
 // ---------------------------------------------------------------------------
 
 describe('recently-completed coverage — Layer 1.5 (TPL-293 / ADR-0030)', () => {
-
   test('1. active claim → ok=true reason=active-claim (regression)', async () => {
     const sliceId = 'RCMC-ACTIVE-001';
     const claimsDir = makeClaimsDir(sliceId, 'active');

@@ -91,8 +91,9 @@ function extractSpecRefsFromHeaders(text) {
   const source = String(text);
   // Legacy form: `SpecRefs: TPL-001` (capital S, optional comment marker prefix).
   for (const match of source.matchAll(/^\s*(?:#|\/\/|\*|<!--)?\s*SpecRefs:\s*(.+)$/gm)) {
-    const raw = match[1].trim()
-      .replace(/\s*-->$/g, '')   // strip HTML comment closer
+    const raw = match[1]
+      .trim()
+      .replace(/\s*-->$/g, '') // strip HTML comment closer
       .replace(/\s*\*\/$/g, ''); // strip block comment closer
     if (!raw || raw === '_none_') continue;
     refs.push(
@@ -171,7 +172,9 @@ async function main() {
     readText('package.json'),
     Promise.resolve(
       gitWorkTree && baselineCommit
-        ? (fromPreCommit ? stagedFilesFromGit() : changedFilesFromGit())
+        ? fromPreCommit
+          ? stagedFilesFromGit()
+          : changedFilesFromGit()
         : [],
     ),
     collectWorkItems(),

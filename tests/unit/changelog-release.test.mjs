@@ -142,10 +142,7 @@ describe('composeReleasedChangelog()', () => {
       timestamp: '2026-04-27 14:00:00 UTC+3',
     });
     // Inject fresh content into [Unreleased] so a second release is meaningful.
-    const seeded = first.replace(
-      '_Nothing yet._',
-      '### Fixed\n\n- second-pass fix.',
-    );
+    const seeded = first.replace('_Nothing yet._', '### Fixed\n\n- second-pass fix.');
     const second = composeReleasedChangelog({
       ...extractUnreleased(seeded),
       version: '0.7.18',
@@ -175,8 +172,11 @@ describe('composeReleasedChangelog()', () => {
       version: '0.1.1',
       timestamp: '2026-01-02 00:00:00 UTC+3',
     });
-    assert.match(result, /## \[0\.1\.1\][\s\S]*### (Fixed|Added|Changed)/,
-      'released section must contain a ### subheading');
+    assert.match(
+      result,
+      /## \[0\.1\.1\][\s\S]*### (Fixed|Added|Changed)/,
+      'released section must contain a ### subheading',
+    );
   });
 });
 
@@ -245,7 +245,11 @@ describe('scaffoldSubheadings()', () => {
   it('adds categorize comment to ### Changed section when bullets defaulted', () => {
     const input = '- some unlabeled change.';
     const result = scaffoldSubheadings(input);
-    assert.match(result, /categorize/i, '### Changed section should include a categorize reminder comment');
+    assert.match(
+      result,
+      /categorize/i,
+      '### Changed section should include a categorize reminder comment',
+    );
   });
 
   it('does not add categorize comment when no Changed bullets', () => {
@@ -255,10 +259,7 @@ describe('scaffoldSubheadings()', () => {
   });
 
   it('preserves multi-line bullet continuation under the correct subheading', () => {
-    const input = [
-      '- fix: long description',
-      '  that continues on the next line.',
-    ].join('\n');
+    const input = ['- fix: long description', '  that continues on the next line.'].join('\n');
     const result = scaffoldSubheadings(input);
     assert.match(result, /### Fixed/);
     assert.match(result, /continues on the next line/);
@@ -317,13 +318,23 @@ describe('composeReleasedChangelog() — version-uniqueness idempotency (TPL-286
     // so the composed text would only add an empty section — confirm the guard fires.
     const { unreleased: unreleased2 } = extractUnreleased(firstResult);
     // After the first release, [Unreleased] is just "_Nothing yet._" — no real content.
-    const hasContent = unreleased2.split('\n')
-      .map((l) => l.trim())
-      .filter((l) => l && !l.startsWith('##') && !l.startsWith('###'))
-      .filter((l) => l !== '_Nothing yet._' && l !== '_none_' && l !== '- _none_' && l !== '- _Nothing yet._')
-      .length > 0;
-    assert.equal(hasContent, false,
-      'after first release, [Unreleased] has no real content — second call must skip');
+    const hasContent =
+      unreleased2
+        .split('\n')
+        .map((l) => l.trim())
+        .filter((l) => l && !l.startsWith('##') && !l.startsWith('###'))
+        .filter(
+          (l) =>
+            l !== '_Nothing yet._' &&
+            l !== '_none_' &&
+            l !== '- _none_' &&
+            l !== '- _Nothing yet._',
+        ).length > 0;
+    assert.equal(
+      hasContent,
+      false,
+      'after first release, [Unreleased] has no real content — second call must skip',
+    );
   });
 
   it('composed output contains exactly one versioned section for the released version', () => {
@@ -332,7 +343,7 @@ describe('composeReleasedChangelog() — version-uniqueness idempotency (TPL-286
       version: '0.1.1',
       timestamp: '2026-05-05 10:00:00 UTC+3',
     });
-    const sections = (result.match(/^## \[0\.1\.1\]/gm) || []);
+    const sections = result.match(/^## \[0\.1\.1\]/gm) || [];
     assert.equal(sections.length, 1, 'must contain exactly one [0.1.1] section');
   });
 });

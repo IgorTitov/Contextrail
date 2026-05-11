@@ -28,9 +28,7 @@
 
 import { describe, test, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
-import {
-  mkdtempSync, mkdirSync, writeFileSync, rmSync, existsSync,
-} from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -50,8 +48,11 @@ const COA_MERGE = resolve(__dirname, '../../scripts/coa-merge.mjs');
 function subprocessEnv(fixtureRoot) {
   const env = { ...process.env };
   for (const key of [
-    'GIT_DIR', 'GIT_WORK_TREE', 'GIT_INDEX_FILE',
-    'GIT_OBJECT_DIRECTORY', 'GIT_ALTERNATE_OBJECT_DIRECTORIES',
+    'GIT_DIR',
+    'GIT_WORK_TREE',
+    'GIT_INDEX_FILE',
+    'GIT_OBJECT_DIRECTORY',
+    'GIT_ALTERNATE_OBJECT_DIRECTORIES',
   ]) {
     delete env[key];
   }
@@ -81,17 +82,18 @@ function createBaseFixture(label) {
   mkdirSync(join(root, '.claims'), { recursive: true });
   writeFileSync(
     join(root, '.claims', 'config.json'),
-    JSON.stringify({
-      protectedPathMode: 'block',
-      protectedPaths: ['CHANGELOG.md', 'VERSION', 'package.json'],
-    }, null, 2) + '\n',
+    JSON.stringify(
+      {
+        protectedPathMode: 'block',
+        protectedPaths: ['CHANGELOG.md', 'VERSION', 'package.json'],
+      },
+      null,
+      2,
+    ) + '\n',
   );
 
   writeFileSync(join(root, 'VERSION'), '0.0.1\n');
-  writeFileSync(
-    join(root, 'CHANGELOG.md'),
-    '# Changelog\n\n## [Unreleased]\n\n- initial\n',
-  );
+  writeFileSync(join(root, 'CHANGELOG.md'), '# Changelog\n\n## [Unreleased]\n\n- initial\n');
   writeFileSync(
     join(root, 'package.json'),
     JSON.stringify({ name: 'j5-extend-fixture', version: '0.0.1' }, null, 2) + '\n',
@@ -109,26 +111,31 @@ function writeClaim(root, claimId, agent, slice, targetPaths) {
   const expires = new Date(now.getTime() + 6 * 24 * 60 * 60 * 1000);
   writeFileSync(
     join(root, '.claims', `${claimId}.json`),
-    JSON.stringify({
-      id: claimId,
-      agent,
-      slice,
-      targets: targetPaths.map((path) => ({ path, action: 'modify' })),
-      status: 'active',
-      strategy: 'modify-in-place',
-      created: now.toISOString(),
-      expires: expires.toISOString(),
-    }, null, 2) + '\n',
+    JSON.stringify(
+      {
+        id: claimId,
+        agent,
+        slice,
+        targets: targetPaths.map((path) => ({ path, action: 'modify' })),
+        status: 'active',
+        strategy: 'modify-in-place',
+        created: now.toISOString(),
+        expires: expires.toISOString(),
+      },
+      null,
+      2,
+    ) + '\n',
   );
 }
 
 /** Run coa-merge in the fixture root and return the spawnSync result. */
 function runCoaMerge(root, message, env) {
-  return spawnSync(
-    process.execPath,
-    [COA_MERGE, `--message=${message}`, '--no-snapshot'],
-    { cwd: root, encoding: 'utf8', stdio: 'pipe', env },
-  );
+  return spawnSync(process.execPath, [COA_MERGE, `--message=${message}`, '--no-snapshot'], {
+    cwd: root,
+    encoding: 'utf8',
+    stdio: 'pipe',
+    env,
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -181,7 +188,7 @@ describe('coa-merge J5 auto-extend: integration (TPL-252)', () => {
       result.status,
       0,
       `coa-merge should succeed when J5 auto-extends CHANGELOG.md.\n` +
-      `STDOUT:\n${result.stdout}\nSTDERR:\n${result.stderr}`,
+        `STDOUT:\n${result.stdout}\nSTDERR:\n${result.stderr}`,
     );
 
     // Both files in HEAD commit.
@@ -225,17 +232,13 @@ describe('coa-merge J5 auto-extend: integration (TPL-252)', () => {
     env.COA_AGENT = 'test-agent';
     env.COA_GATE = 'minimal';
 
-    const result = runCoaMerge(
-      fixtureRoot,
-      'test(j5): sidecar pair auto-extend (TPL-252)',
-      env,
-    );
+    const result = runCoaMerge(fixtureRoot, 'test(j5): sidecar pair auto-extend (TPL-252)', env);
 
     assert.strictEqual(
       result.status,
       0,
       `coa-merge should succeed when J5 auto-extends sidecar.\n` +
-      `STDOUT:\n${result.stdout}\nSTDERR:\n${result.stderr}`,
+        `STDOUT:\n${result.stdout}\nSTDERR:\n${result.stderr}`,
     );
 
     const show = safeGitSpawn(fixtureRoot, ['show', '--name-only', '--format=', 'HEAD']);

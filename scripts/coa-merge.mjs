@@ -57,13 +57,19 @@
  */
 
 import { execSync, spawnSync } from 'node:child_process';
-import { readFileSync, writeFileSync, appendFileSync, existsSync, mkdirSync, readdirSync, rmSync, copyFileSync } from 'node:fs';
+import {
+  readFileSync,
+  writeFileSync,
+  appendFileSync,
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  rmSync,
+  copyFileSync,
+} from 'node:fs';
 import { join, dirname, resolve, isAbsolute } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import {
-  composeReleasedChangelog,
-  extractUnreleased,
-} from './checks/changelog-release.mjs';
+import { composeReleasedChangelog, extractUnreleased } from './checks/changelog-release.mjs';
 import {
   isTransportBranchName,
   isTrunkBranchName,
@@ -142,7 +148,9 @@ export function isValidBump(headVersion, newVersion) {
   const expectedPatch = `${head.major}.${head.minor}.${head.patch + 1}`;
   const expectedMinor = `${head.major}.${head.minor + 1}.0`;
   const expectedMajor = `${head.major + 1}.0.0`;
-  return newVersion === expectedPatch || newVersion === expectedMinor || newVersion === expectedMajor;
+  return (
+    newVersion === expectedPatch || newVersion === expectedMinor || newVersion === expectedMajor
+  );
 }
 
 /**
@@ -153,15 +161,17 @@ export function changelogHasContent(changelogText) {
   if (start === -1) return false;
   const afterHeading = start + '## [Unreleased]'.length;
   const nextSection = changelogText.indexOf('\n## ', afterHeading);
-  const block = nextSection >= 0
-    ? changelogText.slice(afterHeading, nextSection)
-    : changelogText.slice(afterHeading);
+  const block =
+    nextSection >= 0
+      ? changelogText.slice(afterHeading, nextSection)
+      : changelogText.slice(afterHeading);
   const content = block.trim();
   if (content === '' || content === '_Nothing yet._' || content === '_none_') return false;
   // Filter out lines that are only section headers (### Added, etc.)
-  const realLines = content.split('\n').map((l) => l.trim()).filter(
-    (l) => l && !l.startsWith('###'),
-  );
+  const realLines = content
+    .split('\n')
+    .map((l) => l.trim())
+    .filter((l) => l && !l.startsWith('###'));
   return realLines.length > 0;
 }
 
@@ -284,14 +294,24 @@ export function propagateSummariesToMainRepo({
   const localSummariesDir = join(localRoot, SUMMARIES_REL);
 
   if (!_fs.existsSync(localSummariesDir)) {
-    return { ok: true, copied: [], skipped: [], message: 'no local session-summaries dir; nothing to propagate' };
+    return {
+      ok: true,
+      copied: [],
+      skipped: [],
+      message: 'no local session-summaries dir; nothing to propagate',
+    };
   }
 
   const allFiles = _fs.readdirSync(localSummariesDir);
   const mdFiles = allFiles.filter((f) => f.endsWith('.md'));
 
   if (mdFiles.length === 0) {
-    return { ok: true, copied: [], skipped: [], message: 'no .md files in session-summaries; nothing to propagate' };
+    return {
+      ok: true,
+      copied: [],
+      skipped: [],
+      message: 'no .md files in session-summaries; nothing to propagate',
+    };
   }
 
   const targetSummariesDir = join(mainWorktreePath, SUMMARIES_REL);
@@ -359,7 +379,11 @@ export function findWorktreeForBranch(porcelainOutput, branchName) {
  * @param {(b:string)=>boolean} opts.isAncestorOfMain
  * @returns {{ merged: string[], unmerged: string[] }}
  */
-export function classifyTxBranchesForTeardown({ allTxBranches = [], currentBranch, isAncestorOfMain }) {
+export function classifyTxBranchesForTeardown({
+  allTxBranches = [],
+  currentBranch,
+  isAncestorOfMain,
+}) {
   const merged = [];
   const unmerged = [];
   for (const branch of allTxBranches) {
@@ -382,7 +406,7 @@ export function validatePushUpdateInsteadWorktree(branchName) {
   if (!isTransportBranchName(branchName)) {
     throw new Error(
       `Step 9c PUSH_UPDATE_INSTEAD must run from a tx-* transport worktree, ` +
-      `got branch '${branchName}'. Refusing to mutate target repo config.`,
+        `got branch '${branchName}'. Refusing to mutate target repo config.`,
     );
   }
 }
@@ -479,15 +503,13 @@ export function resolveAutoExtendPaths({
   sidecarExists = null,
 } = {}) {
   const checkSidecar = sidecarExists ?? ((p) => existsSync(join(ROOT, p)));
-  const stagedSet = new Set(
-    (filesUserStaged || []).map((f) => String(f).replaceAll('\\', '/')),
-  );
+  const stagedSet = new Set((filesUserStaged || []).map((f) => String(f).replaceAll('\\', '/')));
   const out = [];
   const seen = new Set();
 
   // Ceremony files: always extend, never filter — they are protected paths that
   // coa-merge owns; the claim must cover them even when pre-staged (TPL-252).
-  for (const p of (ceremonyFiles || [])) {
+  for (const p of ceremonyFiles || []) {
     if (typeof p !== 'string' || p.length === 0) continue;
     const norm = p.replaceAll('\\', '/');
     if (seen.has(norm)) continue;
@@ -496,7 +518,7 @@ export function resolveAutoExtendPaths({
   }
 
   // Regen paths: skip if already staged (original claim coverage, no noise).
-  for (const p of (regenPaths || [])) {
+  for (const p of regenPaths || []) {
     if (typeof p !== 'string' || p.length === 0) continue;
     const norm = p.replaceAll('\\', '/');
     if (stagedSet.has(norm)) continue;
@@ -512,10 +534,8 @@ export function resolveAutoExtendPaths({
   const ceremonyNormSet = new Set(
     (ceremonyFiles || []).map((p) => String(p).replaceAll('\\', '/')),
   );
-  const regenNormSet = new Set(
-    (regenPaths || []).map((p) => String(p).replaceAll('\\', '/')),
-  );
-  for (const f of (filesUserStaged || [])) {
+  const regenNormSet = new Set((regenPaths || []).map((p) => String(p).replaceAll('\\', '/')));
+  for (const f of filesUserStaged || []) {
     const norm = String(f).replaceAll('\\', '/');
     if (!norm) continue;
     if (!/\.(mjs|js|mts|ts|tsx|md|sh|bash)$/.test(norm)) continue;
@@ -543,8 +563,10 @@ export function hasVersionedSection(changelogText, version) {
   if (typeof changelogText !== 'string' || typeof version !== 'string') return false;
   const escaped = version.replace(/\./g, '\\.');
   // Match "## [X.Y.Z]" at line start, optionally followed by a separator + date.
-  return new RegExp(`(^|\\n)##\\s+\\[${escaped}\\][\\s—\\-]`, 'm').test(changelogText)
-    || new RegExp(`(^|\\n)##\\s+\\[${escaped}\\]\\s*$`, 'm').test(changelogText);
+  return (
+    new RegExp(`(^|\\n)##\\s+\\[${escaped}\\][\\s—\\-]`, 'm').test(changelogText) ||
+    new RegExp(`(^|\\n)##\\s+\\[${escaped}\\]\\s*$`, 'm').test(changelogText)
+  );
 }
 
 /**
@@ -565,7 +587,12 @@ export function hasVersionedSection(changelogText, version) {
  */
 export function detectPartialState({ headVersion, wtVersion, changelogText } = {}) {
   if (!headVersion || !wtVersion) {
-    return { partial: false, kind: 'normal', headVersion: headVersion || null, wtVersion: wtVersion || null };
+    return {
+      partial: false,
+      kind: 'normal',
+      headVersion: headVersion || null,
+      wtVersion: wtVersion || null,
+    };
   }
   if (wtVersion === headVersion) {
     return { partial: false, kind: 'normal', headVersion, wtVersion };
@@ -649,7 +676,12 @@ export function resolveCallerAgent(parsedArgs, env = process.env) {
  * @param {object|null} opts.session       - parsed .coa-session (null = file absent)
  * @param {boolean}     opts.allowForeign  - true when COA_OPERATOR=1 + COA_ALLOW_FOREIGN_WORKTREE=1
  */
-export function verifyWorktreeOwnership({ branch, callerAgent, session, allowForeign = false } = {}) {
+export function verifyWorktreeOwnership({
+  branch,
+  callerAgent,
+  session,
+  allowForeign = false,
+} = {}) {
   if (!branch || branch === 'HEAD') {
     return { ok: true, reason: 'no-branch' };
   }
@@ -747,7 +779,10 @@ export function parseMergeArgs(argv = process.argv.slice(2)) {
   }
   return {
     has: (k) => map.has(k),
-    get: (k) => { const v = map.get(k); return v === true ? undefined : v; },
+    get: (k) => {
+      const v = map.get(k);
+      return v === true ? undefined : v;
+    },
   };
 }
 
@@ -787,7 +822,9 @@ function writeOwnershipOverrideAuditEntry({ branch, sliceId, callerAgent, sessio
       timestamp: new Date().toISOString(),
     });
     appendFileSync(auditPath, entry + '\n', 'utf8');
-  } catch { /* telemetry is best-effort, never blocks the workflow */ }
+  } catch {
+    /* telemetry is best-effort, never blocks the workflow */
+  }
 }
 
 /**
@@ -806,7 +843,9 @@ function emitCollisionMarker(step, message) {
     };
     const filename = `collision-${Date.now()}.json`;
     writeFileSync(join(markersDir, filename), JSON.stringify(marker, null, 2) + '\n');
-  } catch { /* telemetry is best-effort, never blocks the workflow */ }
+  } catch {
+    /* telemetry is best-effort, never blocks the workflow */
+  }
 }
 
 function fail(step, message, wantJson) {
@@ -938,9 +977,7 @@ export function pickCallerClaim({
   claimIdOverride = null,
   now = new Date(),
 } = {}) {
-  const stagedSet = new Set(
-    (stagedFiles || []).map((f) => String(f).replaceAll('\\', '/')),
-  );
+  const stagedSet = new Set((stagedFiles || []).map((f) => String(f).replaceAll('\\', '/')));
   const isLive = (c) => {
     if (!c || c.status !== 'active') return false;
     if (c.expires) {
@@ -1142,7 +1179,11 @@ function writeMergingMarker(repoRoot, branch) {
 
 function removeMergingMarker(repoRoot) {
   const path = mergingMarkerPath(repoRoot);
-  try { rmSync(path); } catch { /* best effort */ }
+  try {
+    rmSync(path);
+  } catch {
+    /* best effort */
+  }
 }
 
 /**
@@ -1153,7 +1194,8 @@ function removeMergingMarker(repoRoot) {
 function detectCurrentBranch() {
   try {
     const out = execSync('git rev-parse --abbrev-ref HEAD', {
-      cwd: ROOT, encoding: 'utf8',
+      cwd: ROOT,
+      encoding: 'utf8',
     }).trim();
     if (!out || out === 'HEAD') return null;
     return out;
@@ -1320,8 +1362,7 @@ function main() {
   if (coaMergeMode === 'transport') {
     const callerAgent = resolveCallerAgent(args);
     const allowForeign =
-      process.env.COA_OPERATOR === '1' &&
-      process.env.COA_ALLOW_FOREIGN_WORKTREE === '1';
+      process.env.COA_OPERATOR === '1' && process.env.COA_ALLOW_FOREIGN_WORKTREE === '1';
     const session = readCoaSession(ROOT);
     const sliceId = branchAtEntry.replace(/^tx-/, '');
 
@@ -1341,7 +1382,7 @@ function main() {
       if (!wantJson) {
         console.warn(
           `coa-merge: WARN ownership override accepted (COA_OPERATOR+COA_ALLOW_FOREIGN_WORKTREE);` +
-          ` session.agent='${session ? session.agent : 'unknown'}', caller='${callerAgent || 'unknown'}'`,
+            ` session.agent='${session ? session.agent : 'unknown'}', caller='${callerAgent || 'unknown'}'`,
         );
       }
     } else if (!wantJson) {
@@ -1434,8 +1475,7 @@ function main() {
   // ---------------------------------------------------------------------
   log('[2.5/10] Auto-extending caller claim with ceremony + regen paths...', wantJson);
   const callerAgentForPick = resolveCallerAgent(args);
-  const sliceForPick =
-    coaMergeMode === 'transport' ? branchAtEntry.replace(/^tx-/, '') : null;
+  const sliceForPick = coaMergeMode === 'transport' ? branchAtEntry.replace(/^tx-/, '') : null;
   const claimIdOverride = args.get('--claim-id') || null;
   const pickResult = findCallerActiveClaim(stagedFiles, {
     callerAgent: callerAgentForPick,
@@ -1503,13 +1543,12 @@ function main() {
     ];
     const extend = run('node', extendCmd);
     if (!extend.ok) {
-      fail(
-        2.5,
-        `claim --extend failed: ${extend.stdout}\n${extend.stderr}`,
-        wantJson,
-      );
+      fail(2.5, `claim --extend failed: ${extend.stdout}\n${extend.stderr}`, wantJson);
     }
-    log(`  extended claim ${callerClaim.id} (+${addPaths.length} ceremony/regen path(s))`, wantJson);
+    log(
+      `  extended claim ${callerClaim.id} (+${addPaths.length} ceremony/regen path(s))`,
+      wantJson,
+    );
   } else {
     log(`  (dry-run) would extend claim ${callerClaim.id}`, wantJson);
   }
@@ -1545,13 +1584,17 @@ function main() {
   const changelogPath = join(ROOT, 'CHANGELOG.md');
   const changelog = changelogAtEntry || readFileSync(changelogPath, 'utf8');
   if (!changelogHasContent(changelog)) {
-    fail(5, 'CHANGELOG [Unreleased] has no content. Add changelog entries before merging.', wantJson);
+    fail(
+      5,
+      'CHANGELOG [Unreleased] has no content. Add changelog entries before merging.',
+      wantJson,
+    );
   }
   if (changelog.includes(`## [${nextVersion}]`)) {
     fail(
       5,
       `CHANGELOG.md already contains [${nextVersion}] section. ` +
-      'A previous run may have partially completed — investigate before re-running.',
+        'A previous run may have partially completed — investigate before re-running.',
       wantJson,
     );
   }
@@ -1602,7 +1645,10 @@ function main() {
     try {
       writeMergingMarker(ROOT, branchAtEntry);
       markerWritten = true;
-      log(`  marker written for ${branchAtEntry} (mainSha=${mainShaAtEntry.slice(0, 8)})`, wantJson);
+      log(
+        `  marker written for ${branchAtEntry} (mainSha=${mainShaAtEntry.slice(0, 8)})`,
+        wantJson,
+      );
     } catch (err) {
       fail(6.5, `failed to write merge marker: ${err.message}`, wantJson);
     }
@@ -1619,7 +1665,10 @@ function main() {
     writeFileSync(pkgPath, nextPackageText, 'utf8');
     writeFileSync(changelogPath, nextChangelogText, 'utf8');
     run('git', ['add', 'VERSION', 'package.json', 'CHANGELOG.md']);
-    log(`  VERSION + package.json bumped to ${nextVersion}; CHANGELOG [${nextVersion}] composed`, wantJson);
+    log(
+      `  VERSION + package.json bumped to ${nextVersion}; CHANGELOG [${nextVersion}] composed`,
+      wantJson,
+    );
   }
 
   // Step 8: Commit (pre-commit hook runs all phases). On failure, roll
@@ -1646,11 +1695,7 @@ function main() {
       const rollbackNote = rollback.ok
         ? 'Rolled back VERSION/package.json/CHANGELOG.md to pre-mutation state; re-run coa-merge once the issue is fixed.'
         : `Rollback PARTIALLY FAILED — ${rollback.failures.length} file(s) may be stuck mid-mutation. Manual recovery: git restore VERSION CHANGELOG.md package.json`;
-      fail(
-        8,
-        `git commit failed (pre-commit hook may have blocked). ${rollbackNote}`,
-        wantJson,
-      );
+      fail(8, `git commit failed (pre-commit hook may have blocked). ${rollbackNote}`, wantJson);
     }
   }
 
@@ -1772,15 +1817,16 @@ function main() {
     const isBare = coreBare && isBareRepo;
 
     const wtListProbe = run('git', ['worktree', 'list', '--porcelain']);
-    const mainWt = wtListProbe.ok
-      ? findMainWorktree(wtListProbe.stdout)
-      : null;
+    const mainWt = wtListProbe.ok ? findMainWorktree(wtListProbe.stdout) : null;
 
     let denyValue = null;
     if (mainWt) {
       const denyProbe = run('git', [
-        '-C', mainWt.path,
-        'config', '--get', 'receive.denyCurrentBranch',
+        '-C',
+        mainWt.path,
+        'config',
+        '--get',
+        'receive.denyCurrentBranch',
       ]);
       // git config exits 1 when key unset; treat empty/missing as null.
       denyValue = denyProbe.ok ? (denyProbe.stdout || '').trim() : null;
@@ -1794,11 +1840,7 @@ function main() {
 
     if (method === FF_UPDATE_METHODS.REFUSE_NEEDS_CONFIG) {
       cleanupMarker();
-      fail(
-        9.3,
-        composeUpdateInsteadSetupHint(mainWt?.path),
-        wantJson,
-      );
+      fail(9.3, composeUpdateInsteadSetupHint(mainWt?.path), wantJson);
     }
 
     if (method === FF_UPDATE_METHODS.PUSH_UPDATE_INSTEAD) {
@@ -1820,7 +1862,9 @@ function main() {
       try {
         capturedGitConfig = captureGitConfig(mainWt.path);
       } catch (captureErr) {
-        console.error(`coa-merge: WARN could not capture ${mainWt.path}/.git/config for rollback: ${captureErr.message}`);
+        console.error(
+          `coa-merge: WARN could not capture ${mainWt.path}/.git/config for rollback: ${captureErr.message}`,
+        );
       }
 
       // git push --force-with-lease=main:<oldSha> <main-worktree-path>
@@ -1842,9 +1886,13 @@ function main() {
         if (capturedGitConfig !== null) {
           try {
             restoreGitConfig(mainWt.path, capturedGitConfig);
-            console.error(`coa-merge: Step 9c failed; restored ${mainWt.path}/.git/config to pre-push state`);
+            console.error(
+              `coa-merge: Step 9c failed; restored ${mainWt.path}/.git/config to pre-push state`,
+            );
           } catch (restoreErr) {
-            console.error(`coa-merge: WARN could not restore ${mainWt.path}/.git/config: ${restoreErr.message}`);
+            console.error(
+              `coa-merge: WARN could not restore ${mainWt.path}/.git/config: ${restoreErr.message}`,
+            );
           }
         }
         // updateInstead refusal text mentions "dirty working directory"
@@ -1868,7 +1916,11 @@ function main() {
           const checkout = run('git', ['checkout', 'HEAD', '--', '.'], { cwd: mainWt.path });
           if (!checkout.ok) {
             cleanupMarker();
-            fail(9.3, `checkout HEAD -- after dirty-wt update-ref failed: ${checkout.stderr}`, wantJson);
+            fail(
+              9.3,
+              `checkout HEAD -- after dirty-wt update-ref failed: ${checkout.stderr}`,
+              wantJson,
+            );
           }
           step9cSyncMethod = 'update-ref+checkout';
         } else {
@@ -1897,12 +1949,7 @@ function main() {
     } else {
       // UPDATE_REF_BARE or UPDATE_REF_NO_MAIN → fall back to update-ref.
       // Preserves R2 baseline behaviour for bare repos (Zvenix shape).
-      const update = run('git', [
-        'update-ref',
-        'refs/heads/main',
-        headSha,
-        mainShaAtEntry,
-      ]);
+      const update = run('git', ['update-ref', 'refs/heads/main', headSha, mainShaAtEntry]);
       if (!update.ok) {
         cleanupMarker();
         fail(
@@ -1949,14 +1996,12 @@ function main() {
   // net, not a gate. (TPL-217)
   if (shouldWriteSnapshot({ noSnapshot: wantNoSnapshot, dryRun })) {
     log('[9b/10] Writing snapshot + zip to .backups/...', wantJson);
-    const snapshot = run('node', [
-      MERGEZIP_SCRIPT,
-      '--no-bump',
-      '--skip-tests',
-      '--quiet',
-    ]);
+    const snapshot = run('node', [MERGEZIP_SCRIPT, '--no-bump', '--skip-tests', '--quiet']);
     if (!snapshot.ok) {
-      log(`  WARN: snapshot failed (commit succeeded; safety net not written): ${snapshot.stderr}`, wantJson);
+      log(
+        `  WARN: snapshot failed (commit succeeded; safety net not written): ${snapshot.stderr}`,
+        wantJson,
+      );
     }
   } else if (wantNoSnapshot) {
     log('[9b/10] Snapshot skipped (--no-snapshot)', wantJson);
@@ -1969,17 +2014,29 @@ function main() {
   // snapshot on the next push. Non-fatal — same policy as step 9b.
   // Note: step 9c runs BEFORE step 9b, so PUSH_UPDATE_INSTEAD failure exits
   // before this step — no orphan cleanup needed on push failure.
-  if (coaMergeMode === 'transport' && !dryRun && shouldWriteSnapshot({ noSnapshot: wantNoSnapshot, dryRun })) {
+  if (
+    coaMergeMode === 'transport' &&
+    !dryRun &&
+    shouldWriteSnapshot({ noSnapshot: wantNoSnapshot, dryRun })
+  ) {
     log('[9b.5/10] Propagating .backups/ artifacts to main repo...', wantJson);
     const wtListResult = run('git', ['worktree', 'list', '--porcelain']);
     const propagateMainWt = wtListResult.ok ? findMainWorktree(wtListResult.stdout) : null;
     if (!propagateMainWt) {
       log('  WARN: no main worktree found; .backups/ propagation skipped', wantJson);
     } else {
-      const bareCheck = run('git', ['-C', propagateMainWt.path, 'rev-parse', '--is-bare-repository']);
+      const bareCheck = run('git', [
+        '-C',
+        propagateMainWt.path,
+        'rev-parse',
+        '--is-bare-repository',
+      ]);
       const isBareMain = (bareCheck.stdout || '').trim() === 'true';
       if (isBareMain) {
-        log(`  WARN: main repo at ${propagateMainWt.path} is bare; .backups/ propagation skipped (run pnpm mergezip:no-bump from main manually)`, wantJson);
+        log(
+          `  WARN: main repo at ${propagateMainWt.path} is bare; .backups/ propagation skipped (run pnpm mergezip:no-bump from main manually)`,
+          wantJson,
+        );
       } else {
         const result = propagateBackupsToMainRepo({
           localRoot: ROOT,
@@ -1987,7 +2044,10 @@ function main() {
           version: nextVersion,
         });
         if (result.ok) {
-          log(`  propagated ${result.copied.length} artifact(s) to ${propagateMainWt.path}/.backups/: ${result.copied.join(', ')}`, wantJson);
+          log(
+            `  propagated ${result.copied.length} artifact(s) to ${propagateMainWt.path}/.backups/: ${result.copied.join(', ')}`,
+            wantJson,
+          );
         } else {
           log(`  WARN: .backups/ propagation incomplete: ${result.message}`, wantJson);
         }
@@ -2007,21 +2067,35 @@ function main() {
     if (!propagateMainWt96) {
       log('  WARN: no main worktree found; session-summaries propagation skipped', wantJson);
     } else {
-      const bareCheck96 = run('git', ['-C', propagateMainWt96.path, 'rev-parse', '--is-bare-repository']);
+      const bareCheck96 = run('git', [
+        '-C',
+        propagateMainWt96.path,
+        'rev-parse',
+        '--is-bare-repository',
+      ]);
       const isBareMain96 = (bareCheck96.stdout || '').trim() === 'true';
       if (isBareMain96) {
-        log(`  WARN: main repo at ${propagateMainWt96.path} is bare; session-summaries propagation skipped`, wantJson);
+        log(
+          `  WARN: main repo at ${propagateMainWt96.path} is bare; session-summaries propagation skipped`,
+          wantJson,
+        );
       } else {
         const result96 = propagateSummariesToMainRepo({
           localRoot: ROOT,
           mainWorktreePath: propagateMainWt96.path,
         });
         if (result96.copied.length > 0) {
-          log(`  propagated ${result96.copied.length} summary file(s) to ${propagateMainWt96.path}/docs/analysis/session-summaries/: ${result96.copied.join(', ')}`, wantJson);
+          log(
+            `  propagated ${result96.copied.length} summary file(s) to ${propagateMainWt96.path}/docs/analysis/session-summaries/: ${result96.copied.join(', ')}`,
+            wantJson,
+          );
         }
         const differs = result96.skipped.filter((s) => s.reason === 'differs');
         for (const { file } of differs) {
-          log(`  WARN: session-summary ${file} already exists in main with different content; skipped (resolve manually)`, wantJson);
+          log(
+            `  WARN: session-summary ${file} already exists in main with different content; skipped (resolve manually)`,
+            wantJson,
+          );
         }
         if (result96.message) {
           log(`  ${result96.message}`, wantJson);
@@ -2044,7 +2118,9 @@ function main() {
   if (coaMergeMode === 'transport' && !dryRun) {
     log('[9e/10] Auto-teardown provably-merged tx-* branches...', wantJson);
     const allBranchResult = run('git', [
-      'for-each-ref', '--format=%(refname:short)', 'refs/heads/tx-*',
+      'for-each-ref',
+      '--format=%(refname:short)',
+      'refs/heads/tx-*',
     ]);
     const allTxBranches = allBranchResult.ok
       ? allBranchResult.stdout.split('\n').filter(Boolean)
@@ -2053,8 +2129,7 @@ function main() {
     const { merged, unmerged } = classifyTxBranchesForTeardown({
       allTxBranches,
       currentBranch: branchAtEntry,
-      isAncestorOfMain: (b) =>
-        run('git', ['merge-base', '--is-ancestor', b, 'main']).status === 0,
+      isAncestorOfMain: (b) => run('git', ['merge-base', '--is-ancestor', b, 'main']).status === 0,
     });
 
     if (unmerged.length > 0) {
@@ -2067,9 +2142,7 @@ function main() {
     for (const txBranch of merged) {
       // Find associated worktree (if any) before attempting branch deletion.
       const wtListResult = run('git', ['worktree', 'list', '--porcelain']);
-      const wtPath = wtListResult.ok
-        ? findWorktreeForBranch(wtListResult.stdout, txBranch)
-        : null;
+      const wtPath = wtListResult.ok ? findWorktreeForBranch(wtListResult.stdout, txBranch) : null;
 
       if (wtPath) {
         const removeResult = run('git', ['worktree', 'remove', wtPath]);
@@ -2129,7 +2202,11 @@ function main() {
     if (!dryRun) {
       const push = run('git', ['push', 'origin', 'main']);
       if (!push.ok) {
-        fail(10, `git push failed: ${push.stderr}. Try git pull --rebase and run coa-merge again.`, wantJson);
+        fail(
+          10,
+          `git push failed: ${push.stderr}. Try git pull --rebase and run coa-merge again.`,
+          wantJson,
+        );
       }
     }
   } else {
@@ -2138,13 +2215,15 @@ function main() {
 
   // Success
   if (wantJson) {
-    console.log(JSON.stringify({
-      ok: true,
-      version: nextVersion,
-      stagedFiles: stagedFiles.length,
-      pushed: wantPush && !dryRun,
-      dryRun,
-    }));
+    console.log(
+      JSON.stringify({
+        ok: true,
+        version: nextVersion,
+        stagedFiles: stagedFiles.length,
+        pushed: wantPush && !dryRun,
+        dryRun,
+      }),
+    );
   } else {
     console.log(`\ncoa-merge: SUCCESS — committed as v${nextVersion}`);
     if (dryRun) console.log('  (dry-run mode — no changes were made)');
@@ -2155,7 +2234,8 @@ function main() {
 // Entry
 // ---------------------------------------------------------------------------
 
-const isDirectRun = process.argv[1] &&
+const isDirectRun =
+  process.argv[1] &&
   (process.argv[1].endsWith('coa-merge.mjs') || process.argv[1].endsWith('coa-merge'));
 
 if (isDirectRun) {

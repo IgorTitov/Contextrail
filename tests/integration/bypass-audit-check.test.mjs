@@ -21,9 +21,7 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import {
-  mkdtempSync, mkdirSync, writeFileSync, rmSync, cpSync,
-} from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync, cpSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { safeGitSpawn } from '../_setup/safe-git.mjs';
@@ -76,7 +74,7 @@ function getParentSHA(dir, n = 1) {
 /** Write a complete audit log from an array of record objects. */
 function writeAuditLog(dir, records) {
   const logPath = join(dir, '.claims', 'commit-audit.log');
-  const content = records.map(r => JSON.stringify(r)).join('\n') + '\n';
+  const content = records.map((r) => JSON.stringify(r)).join('\n') + '\n';
   writeFileSync(logPath, content);
 }
 
@@ -88,7 +86,11 @@ function runCheck(cwd, extraArgs = []) {
     encoding: 'utf8',
   });
   let payload = null;
-  try { payload = JSON.parse(r.stdout || '{}'); } catch { /* leave null */ }
+  try {
+    payload = JSON.parse(r.stdout || '{}');
+  } catch {
+    /* leave null */
+  }
   return { code: r.status, payload };
 }
 
@@ -122,13 +124,15 @@ describe('bypass-audit-check integration', () => {
     const dir = makeTempWorkspace('happy');
     try {
       const sha = initGitRepo(dir);
-      writeAuditLog(dir, [{
-        ts: '2026-05-04T10:00:00Z',
-        phases: ['1.0', '2.5', '7', '1', '2', '3', '4', '5', '6', '8'],
-        skipped: [],
-        skipReason: '',
-        commitSha: sha,
-      }]);
+      writeAuditLog(dir, [
+        {
+          ts: '2026-05-04T10:00:00Z',
+          phases: ['1.0', '2.5', '7', '1', '2', '3', '4', '5', '6', '8'],
+          skipped: [],
+          skipReason: '',
+          commitSha: sha,
+        },
+      ]);
 
       const { code, payload } = runCheck(dir, ['--recent=5']);
       assert.equal(code, 0, 'should exit 0 when all commits have records');
@@ -146,19 +150,21 @@ describe('bypass-audit-check integration', () => {
       const sha2 = makeCommit(dir, 'extra.txt');
 
       // Only write audit record for sha1, not sha2
-      writeAuditLog(dir, [{
-        ts: '2026-05-04T10:00:00Z',
-        phases: ['1.0', '2.5', '7'],
-        skipped: [],
-        skipReason: '',
-        commitSha: sha1,
-      }]);
+      writeAuditLog(dir, [
+        {
+          ts: '2026-05-04T10:00:00Z',
+          phases: ['1.0', '2.5', '7'],
+          skipped: [],
+          skipReason: '',
+          commitSha: sha1,
+        },
+      ]);
 
       const { code, payload } = runCheck(dir, ['--recent=5']);
       assert.equal(code, 1, 'should exit 1 when a commit has no audit record');
       assert.equal(payload?.ok, false);
       assert.ok(payload?.gaps?.length > 0, 'gaps array should be non-empty');
-      const gapShas = payload.gaps.map(g => g.sha);
+      const gapShas = payload.gaps.map((g) => g.sha);
       assert.ok(gapShas.includes(sha2), `sha2 (${sha2.slice(0, 8)}) should be in gaps`);
     } finally {
       rmSync(dir, { recursive: true, force: true });
@@ -170,13 +176,15 @@ describe('bypass-audit-check integration', () => {
     try {
       initGitRepo(dir);
       // Audit log has a record for a different SHA, not HEAD
-      writeAuditLog(dir, [{
-        ts: '2026-05-04T10:00:00Z',
-        phases: ['1.0', '2.5', '7'],
-        skipped: [],
-        skipReason: '',
-        commitSha: 'deadbeefdeadbeefdeadbeefdeadbeefdeadbeef',
-      }]);
+      writeAuditLog(dir, [
+        {
+          ts: '2026-05-04T10:00:00Z',
+          phases: ['1.0', '2.5', '7'],
+          skipped: [],
+          skipReason: '',
+          commitSha: 'deadbeefdeadbeefdeadbeefdeadbeefdeadbeef',
+        },
+      ]);
 
       const { code, payload } = runCheck(dir, ['--recent=5', '--warn-only']);
       assert.equal(code, 0, '--warn-only must exit 0 even with gaps');
@@ -191,13 +199,15 @@ describe('bypass-audit-check integration', () => {
     try {
       const sha = initGitRepo(dir);
       // NON_SKIPPABLE phases (1.0, 2.5, 7) ran; skippable phases (1,2,3...) were skipped
-      writeAuditLog(dir, [{
-        ts: '2026-05-04T10:00:00Z',
-        phases: ['1.0', '2.5', '7'],
-        skipped: ['1', '2', '3', '4', '5', '6', '8'],
-        skipReason: '1,2,3,4,5,6,8',
-        commitSha: sha,
-      }]);
+      writeAuditLog(dir, [
+        {
+          ts: '2026-05-04T10:00:00Z',
+          phases: ['1.0', '2.5', '7'],
+          skipped: ['1', '2', '3', '4', '5', '6', '8'],
+          skipReason: '1,2,3,4,5,6,8',
+          commitSha: sha,
+        },
+      ]);
 
       const { code, payload } = runCheck(dir, ['--recent=5']);
       assert.equal(code, 0, 'COA_SKIP_GATES of non-critical phases should not trigger a failure');
@@ -212,13 +222,15 @@ describe('bypass-audit-check integration', () => {
     try {
       const sha = initGitRepo(dir);
       // Record that has phases 1.0 and 2.5 but is missing phase 7
-      writeAuditLog(dir, [{
-        ts: '2026-05-04T10:00:00Z',
-        phases: ['1.0', '2.5'],
-        skipped: ['7'],
-        skipReason: '7',
-        commitSha: sha,
-      }]);
+      writeAuditLog(dir, [
+        {
+          ts: '2026-05-04T10:00:00Z',
+          phases: ['1.0', '2.5'],
+          skipped: ['7'],
+          skipReason: '7',
+          commitSha: sha,
+        },
+      ]);
 
       const { code, payload } = runCheck(dir, ['--recent=5']);
       assert.equal(code, 1, 'should fail when NON_SKIPPABLE phase is missing from record');
@@ -240,13 +252,15 @@ describe('bypass-audit-check integration', () => {
       const sha2 = makeCommit(dir, 'second.txt');
 
       // Write audit record only for sha2 (the most recent)
-      writeAuditLog(dir, [{
-        ts: '2026-05-04T10:00:00Z',
-        phases: ['1.0', '2.5', '7'],
-        skipped: [],
-        skipReason: '',
-        commitSha: sha2,
-      }]);
+      writeAuditLog(dir, [
+        {
+          ts: '2026-05-04T10:00:00Z',
+          phases: ['1.0', '2.5', '7'],
+          skipped: [],
+          skipReason: '',
+          commitSha: sha2,
+        },
+      ]);
 
       // --recent=1 checks only sha2 → has record → pass
       const r1 = runCheck(dir, ['--recent=1']);
@@ -255,7 +269,7 @@ describe('bypass-audit-check integration', () => {
       // --recent=2 checks sha1 and sha2; sha1 has no record → fail
       const r2 = runCheck(dir, ['--recent=2']);
       assert.equal(r2.code, 1, '--recent=2 should fail because sha1 has no record');
-      const gapShas = r2.payload?.gaps?.map(g => g.sha) ?? [];
+      const gapShas = r2.payload?.gaps?.map((g) => g.sha) ?? [];
       assert.ok(gapShas.includes(sha1), `sha1 (${sha1.slice(0, 8)}) should be in gaps`);
     } finally {
       rmSync(dir, { recursive: true, force: true });

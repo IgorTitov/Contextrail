@@ -104,7 +104,8 @@ describe('test-gate exit-code semantics (TPL-324 regression)', () => {
     // Exercises the "stderr non-empty but process exits 0" class — test-gate
     // must not treat stderr content as a failure signal.
     const dir = makeTempPkg({
-      'test:integration': 'node -e "process.stderr.write(\'deprecation warning\\n\'); process.exit(0)"',
+      'test:integration':
+        'node -e "process.stderr.write(\'deprecation warning\\n\'); process.exit(0)"',
     });
     const { status, output, stderr } = runTestGate(dir);
     assert.equal(status, 0, `Expected exit 0 despite non-empty stderr.\nstderr: ${stderr}`);

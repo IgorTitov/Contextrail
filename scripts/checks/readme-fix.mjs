@@ -18,8 +18,8 @@ const { isScoped } = resolveScope(args.get('--scope'));
 if (!fromPreCommit && !isScoped) {
   console.error(
     'readme-fix: repo-wide run requires --scope=<dir>.\n' +
-    'Running without scope in a parallel session can create READMEs in other sessions\' areas.\n' +
-    'Use: node scripts/checks/readme-fix.mjs --scope=modules/my-module',
+      "Running without scope in a parallel session can create READMEs in other sessions' areas.\n" +
+      'Use: node scripts/checks/readme-fix.mjs --scope=modules/my-module',
   );
   process.exit(1);
 }

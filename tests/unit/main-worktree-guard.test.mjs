@@ -29,15 +29,15 @@ const GUARD = resolve(ROOT, 'scripts', 'checks', 'main-worktree-guard.mjs');
 describe('isTransportWorktree', () => {
   const cases = [
     // non-transport paths
-    { path: '/repos/contextrail-template',                   expected: false },
-    { path: 'C:\\Projects\\contextrail-template',            expected: false },
-    { path: '/repos/my-project',                             expected: false },
-    { path: '/repos/my-tx-project',                          expected: false },
+    { path: '/repos/contextrail-template', expected: false },
+    { path: 'C:\\Projects\\contextrail-template', expected: false },
+    { path: '/repos/my-project', expected: false },
+    { path: '/repos/my-tx-project', expected: false },
     // transport paths
-    { path: '/repos/contextrail-template-tx-TPL-276',        expected: true  },
-    { path: 'C:\\Projects\\contextrail-template-tx-TPL-276', expected: true  },
-    { path: '/repos/ai-cockpit-tx-AIC-DEV-132',              expected: true  },
-    { path: '/repos/zvenix-tx-ZVX-DEV-068',                  expected: true  },
+    { path: '/repos/contextrail-template-tx-TPL-276', expected: true },
+    { path: 'C:\\Projects\\contextrail-template-tx-TPL-276', expected: true },
+    { path: '/repos/ai-cockpit-tx-AIC-DEV-132', expected: true },
+    { path: '/repos/zvenix-tx-ZVX-DEV-068', expected: true },
   ];
 
   for (const { path, expected } of cases) {
@@ -56,9 +56,11 @@ describe('--self-test mode', () => {
     const result = spawnSync(process.execPath, [GUARD, '--self-test'], {
       encoding: 'utf8',
     });
-    assert.equal(result.status, 0,
-      `Expected exit 0 but got ${result.status}.\nstderr: ${result.stderr}`);
-    assert.match(result.stderr, /All \d+ cases passed/,
-      'Expected "All N cases passed" in stderr');
+    assert.equal(
+      result.status,
+      0,
+      `Expected exit 0 but got ${result.status}.\nstderr: ${result.stderr}`,
+    );
+    assert.match(result.stderr, /All \d+ cases passed/, 'Expected "All N cases passed" in stderr');
   });
 });

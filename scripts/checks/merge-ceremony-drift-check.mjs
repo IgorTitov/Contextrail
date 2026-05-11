@@ -225,7 +225,10 @@ function check3() {
   }
 
   if (adjacentHeadingDuplicates.length > 0) {
-    warn(3, `Same slice IDs as section headings in adjacent versions (possible split ceremony): ${adjacentHeadingDuplicates.join('; ')}`);
+    warn(
+      3,
+      `Same slice IDs as section headings in adjacent versions (possible split ceremony): ${adjacentHeadingDuplicates.join('; ')}`,
+    );
   } else {
     pass(3, 'No duplicate version headings; no adjacent-section heading-level ID duplicates');
   }
@@ -308,7 +311,9 @@ function check4() {
 
     const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
     if (ageMs > TWENTY_FOUR_HOURS) {
-      diverged.push(`${wt.path} (HEAD ${wt.head?.slice(0, 8)}, ~${Math.round(ageMs / 3600000)}h old)`);
+      diverged.push(
+        `${wt.path} (HEAD ${wt.head?.slice(0, 8)}, ~${Math.round(ageMs / 3600000)}h old)`,
+      );
     }
   }
 
@@ -373,7 +378,10 @@ function check5() {
   if (preCommit) {
     for (const phase of referencedPhases) {
       // Check if phase appears in pre-commit (as "Phase N" or "should_run N" or "should_run $phase" check)
-      const phasePattern = new RegExp(`Phase\\s+${phase.replace('.', '\\.')}|should_run\\s+${phase.replace('.', '\\.')}`, 'i');
+      const phasePattern = new RegExp(
+        `Phase\\s+${phase.replace('.', '\\.')}|should_run\\s+${phase.replace('.', '\\.')}`,
+        'i',
+      );
       if (!phasePattern.test(preCommit)) {
         missingPhases.push(phase);
       }
@@ -382,12 +390,16 @@ function check5() {
 
   const issues = [];
   if (missingScripts.length > 0) issues.push(`Missing scripts: ${missingScripts.join(', ')}`);
-  if (missingPhases.length > 0) issues.push(`Phases in doc but not in pre-commit: ${missingPhases.join(', ')}`);
+  if (missingPhases.length > 0)
+    issues.push(`Phases in doc but not in pre-commit: ${missingPhases.join(', ')}`);
 
   if (issues.length > 0) {
     warn(5, issues.join('; '));
   } else {
-    pass(5, `Ceremony doc references verified (${referencedScripts.length} scripts, ${referencedPhases.size} phases)`);
+    pass(
+      5,
+      `Ceremony doc references verified (${referencedScripts.length} scripts, ${referencedPhases.size} phases)`,
+    );
   }
 }
 
@@ -498,10 +510,10 @@ function check6() {
     // Get files changed by this commit
     let changedFiles;
     try {
-      const diffOutput = execSync(
-        `git diff-tree --no-commit-id -r --name-only ${commit.hash}`,
-        { cwd: repoRoot, encoding: 'utf8' },
-      ).trim();
+      const diffOutput = execSync(`git diff-tree --no-commit-id -r --name-only ${commit.hash}`, {
+        cwd: repoRoot,
+        encoding: 'utf8',
+      }).trim();
       changedFiles = diffOutput ? diffOutput.split('\n') : [];
     } catch {
       continue;
@@ -547,14 +559,19 @@ function check6() {
     }
 
     if (!covered) {
-      warnings.push(`${commit.hash.slice(0, 8)} touches [${touchedProtected.join(', ')}] but no audit entry within ±120s`);
+      warnings.push(
+        `${commit.hash.slice(0, 8)} touches [${touchedProtected.join(', ')}] but no audit entry within ±120s`,
+      );
     }
   }
 
   if (warnings.length > 0) {
     warn(6, `Commits touching protected paths without audit coverage:\n  ${warnings.join('\n  ')}`);
   } else {
-    pass(6, `Claim audit-log correlation OK for last ${Math.min(commits.length, recentCount)} commits`);
+    pass(
+      6,
+      `Claim audit-log correlation OK for last ${Math.min(commits.length, recentCount)} commits`,
+    );
   }
 }
 

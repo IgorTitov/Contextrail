@@ -28,12 +28,7 @@
 import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import {
-  existsSync,
-  readdirSync,
-  readFileSync,
-  rmSync,
-} from 'node:fs';
+import { existsSync, readdirSync, readFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { SAFE_GIT_ENV_KEYS } from '../_setup/safe-git.mjs';
@@ -51,7 +46,9 @@ after(() => {
     try {
       const f = join(LIVE_CLAIMS_DIR, `${id}.json`);
       if (existsSync(f)) rmSync(f);
-    } catch { /* non-fatal */ }
+    } catch {
+      /* non-fatal */
+    }
   }
 });
 
@@ -73,7 +70,9 @@ function findLiveClaimsForSlice(sliceId) {
     try {
       const c = JSON.parse(readFileSync(join(LIVE_CLAIMS_DIR, f), 'utf8'));
       if (c.slice === sliceId) found.push(c);
-    } catch { /* skip */ }
+    } catch {
+      /* skip */
+    }
   }
   return found;
 }
@@ -135,7 +134,11 @@ test('C4/race: exactly one of two concurrent --acquire calls succeeds for same s
   // second always fails (active claim from first exists).
   // In concurrent execution (if called from parallel processes):
   // exactly one of the two should succeed.
-  assert.equal(successCount, 1, `Expected exactly 1 success, got ${successCount}. Results: ${results}`);
+  assert.equal(
+    successCount,
+    1,
+    `Expected exactly 1 success, got ${successCount}. Results: ${results}`,
+  );
   assert.equal(failCount, 1, `Expected exactly 1 failure, got ${failCount}. Results: ${results}`);
 
   // The failure must be due to slice-id-collision

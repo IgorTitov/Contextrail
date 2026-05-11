@@ -29,13 +29,15 @@ const DRY_RUN = process.argv.includes('--dry-run');
 if (!DRY_RUN && !process.argv.includes('--scope') && process.env.COA_PRE_COMMIT !== '1') {
   const name = import.meta.url.split('/').pop();
   console.error(
-    name + ': repo-wide run requires --scope=<dir> or --dry-run.\n' +
-    "Running without scope in a parallel session can overwrite other sessions' files.\n" +
-    'Use: node scripts/checks/' + name + ' --scope=modules/my-module',
+    name +
+      ': repo-wide run requires --scope=<dir> or --dry-run.\n' +
+      "Running without scope in a parallel session can overwrite other sessions' files.\n" +
+      'Use: node scripts/checks/' +
+      name +
+      ' --scope=modules/my-module',
   );
   process.exit(1);
 }
-
 
 // ---------------------------------------------------------------------------
 // Layer detection (mirrors architecture-check.mjs)

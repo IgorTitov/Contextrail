@@ -131,7 +131,11 @@ test('TPL-317 #2: --enforce --staged passes when staged files do not intersect a
     });
     stageFiles(repo, ['src/foo.mjs']);
     const result = runClaimCheck(repo, ['--enforce', '--staged']);
-    assert.equal(result.status, 0, `expected exit 0, got ${result.status}; stderr=${result.stderr}`);
+    assert.equal(
+      result.status,
+      0,
+      `expected exit 0, got ${result.status}; stderr=${result.stderr}`,
+    );
   } finally {
     rmSync(repo, { recursive: true, force: true });
   }
@@ -271,7 +275,11 @@ test('TPL-317 #7: --acquire without --frozen flag still succeeds; no enforcement
       '--targets=src/x.mjs',
       '--action=modify',
     ]);
-    assert.equal(acq.status, 0, `--acquire without --frozen must still succeed; stderr=${acq.stderr}`);
+    assert.equal(
+      acq.status,
+      0,
+      `--acquire without --frozen must still succeed; stderr=${acq.stderr}`,
+    );
     stageFiles(repo, ['src/x.mjs', 'src/elsewhere.mjs']);
     const enforce = runClaimCheck(repo, ['--enforce', '--staged']);
     assert.equal(enforce.status, 0, 'no frozen list means no blocks');
@@ -399,10 +407,7 @@ test('TPL-317 #11: Allow-frozen-write line alone is NOT enough — COA_OPERATOR=
       strategy: 'modify-in-place',
     });
     stageFiles(repo, ['src/locked.mjs']);
-    writeCommitEditMsg(
-      repo,
-      'fix(scope): something\n\nAllow-frozen-write: not enough by itself\n',
-    );
+    writeCommitEditMsg(repo, 'fix(scope): something\n\nAllow-frozen-write: not enough by itself\n');
     const result = runClaimCheck(repo, ['--enforce', '--staged']);
     assert.notEqual(result.status, 0, 'commit-msg alone must not bypass the frozen block');
   } finally {
@@ -430,11 +435,7 @@ test('TPL-317 #12: Allow-frozen-write with empty / <3-char reason fails the over
     stageFiles(repo, ['src/locked.mjs']);
     writeCommitEditMsg(repo, 'fix: x\n\nAllow-frozen-write: ab\n');
     const result = runClaimCheck(repo, ['--enforce', '--staged'], { COA_OPERATOR: '1' });
-    assert.notEqual(
-      result.status,
-      0,
-      'reason shorter than 3 chars must not satisfy the override',
-    );
+    assert.notEqual(result.status, 0, 'reason shorter than 3 chars must not satisfy the override');
   } finally {
     rmSync(repo, { recursive: true, force: true });
   }
@@ -459,11 +460,7 @@ test('TPL-317 #13: --query=<path> reports a frozen flag when the path is in any 
     });
     const hit = runClaimCheck(repo, ['--query=src/locked.mjs']);
     assert.equal(hit.status, 0);
-    assert.match(
-      hit.stdout,
-      /FROZEN/i,
-      '--query of a frozen path must surface a FROZEN indicator',
-    );
+    assert.match(hit.stdout, /FROZEN/i, '--query of a frozen path must surface a FROZEN indicator');
     const miss = runClaimCheck(repo, ['--query=src/elsewhere.mjs']);
     assert.equal(miss.status, 0);
     assert.doesNotMatch(
@@ -508,8 +505,16 @@ test('TPL-317 #14: --audit surfaces frozen-count per claim (and 0 for legacy cla
     assert.equal(result.status, 0, `--audit must succeed; stderr=${result.stderr}`);
     // The audit JSON output should expose frozen-count info on each active claim.
     // We assert by grepping the JSON text for both claim IDs and a frozen count.
-    assert.match(result.stdout, /"frozenCount"\s*:\s*3/, 'claim with 3 frozen paths must report frozenCount=3');
-    assert.match(result.stdout, /"frozenCount"\s*:\s*0/, 'legacy claim without frozen must report frozenCount=0');
+    assert.match(
+      result.stdout,
+      /"frozenCount"\s*:\s*3/,
+      'claim with 3 frozen paths must report frozenCount=3',
+    );
+    assert.match(
+      result.stdout,
+      /"frozenCount"\s*:\s*0/,
+      'legacy claim without frozen must report frozenCount=0',
+    );
   } finally {
     rmSync(repo, { recursive: true, force: true });
   }

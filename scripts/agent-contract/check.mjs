@@ -101,9 +101,7 @@ export function validateLocalAdapter(text, hardCap = LOCAL_TOKEN_HARD_CAP, failF
   }
   const tokens = approximateTokenCount(text);
   if (tokens > hardCap) {
-    failFn(
-      `LOCAL.md adapter: ${tokens} tokens exceeds hard cap ${hardCap} — trim, do not grow`,
-    );
+    failFn(`LOCAL.md adapter: ${tokens} tokens exceeds hard cap ${hardCap} — trim, do not grow`);
   }
 }
 
@@ -117,9 +115,7 @@ export function validateMicroAdapter(text, hardCap = MICRO_TOKEN_HARD_CAP, failF
   }
   const tokens = approximateTokenCount(text);
   if (tokens > hardCap) {
-    failFn(
-      `MICRO.md adapter: ${tokens} tokens exceeds hard cap ${hardCap} — trim, do not grow`,
-    );
+    failFn(`MICRO.md adapter: ${tokens} tokens exceeds hard cap ${hardCap} — trim, do not grow`);
   }
 }
 
@@ -178,7 +174,16 @@ function validateCapabilityTiers(contract, failFn = fail) {
   }
 }
 
-const SHELL_PIPELINE_PATTERNS = [/&&/, /\|\|/, /(?<![|>])\|(?!\|)/, /;/, />/, /<(?!=)/, /\$\(/, /`/];
+const SHELL_PIPELINE_PATTERNS = [
+  /&&/,
+  /\|\|/,
+  /(?<![|>])\|(?!\|)/,
+  /;/,
+  />/,
+  /<(?!=)/,
+  /\$\(/,
+  /`/,
+];
 const PNPM_SCRIPT_RE = /^pnpm\s+([^\s]+)/;
 const NODE_FILE_RE = /^node\s+("([^"]+)"|([^\s]+))/;
 
@@ -198,13 +203,7 @@ export function commandTargetExists(command, rootDir, pkgScripts = null) {
   return false;
 }
 
-export function validateLocalTierEquivalent(
-  entry,
-  ownerLabel,
-  rootDir,
-  pkgScripts,
-  failFn = fail,
-) {
+export function validateLocalTierEquivalent(entry, ownerLabel, rootDir, pkgScripts, failFn = fail) {
   const eq = entry.localTierEquivalent;
   if (eq === undefined || eq === null) return;
   if (typeof eq !== 'object' || Array.isArray(eq)) {

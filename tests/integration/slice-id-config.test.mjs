@@ -27,9 +27,7 @@
 
 import { describe, test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
-import {
-  mkdtempSync, mkdirSync, writeFileSync, rmSync, existsSync, readFileSync,
-} from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync, existsSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -68,7 +66,11 @@ function makeRepo(label) {
 /** Write .coa/slice-id-config.json with the given fields. */
 function writeConfig(root, config) {
   mkdirSync(join(root, '.coa'), { recursive: true });
-  writeFileSync(join(root, '.coa', 'slice-id-config.json'), JSON.stringify(config, null, 2) + '\n', 'utf8');
+  writeFileSync(
+    join(root, '.coa', 'slice-id-config.json'),
+    JSON.stringify(config, null, 2) + '\n',
+    'utf8',
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -77,16 +79,30 @@ function writeConfig(root, config) {
 
 describe('readSliceIdConfig: missing config', () => {
   let root;
-  before(() => { root = mkdtempSync(join(tmpdir(), 'sic-t1-')); });
-  after(() => { try { rmSync(root, { recursive: true, force: true }); } catch { /* best effort */ } });
+  before(() => {
+    root = mkdtempSync(join(tmpdir(), 'sic-t1-'));
+  });
+  after(() => {
+    try {
+      rmSync(root, { recursive: true, force: true });
+    } catch {
+      /* best effort */
+    }
+  });
 
   test('T1: throws ConfigMissingError when .coa/slice-id-config.json absent', () => {
     assert.throws(
       () => readSliceIdConfig(root),
       (err) => {
-        assert.ok(err instanceof ConfigMissingError, `expected ConfigMissingError, got ${err.constructor.name}`);
+        assert.ok(
+          err instanceof ConfigMissingError,
+          `expected ConfigMissingError, got ${err.constructor.name}`,
+        );
         assert.strictEqual(err.code, 'CONFIG_MISSING');
-        assert.ok(err.message.includes('bootstrap.mjs --init-slice-config'), `recovery hint missing: ${err.message}`);
+        assert.ok(
+          err.message.includes('bootstrap.mjs --init-slice-config'),
+          `recovery hint missing: ${err.message}`,
+        );
         assert.ok(err.message.includes('slice-id-config.md'), `guide link missing: ${err.message}`);
         return true;
       },
@@ -104,7 +120,13 @@ describe('detectDefaultPrefix: reads from config', () => {
     root = makeRepo('t2');
     writeConfig(root, { prefix: 'MYAPP', numbering_start: 1, padding: 3 });
   });
-  after(() => { try { rmSync(root, { recursive: true, force: true }); } catch { /* best effort */ } });
+  after(() => {
+    try {
+      rmSync(root, { recursive: true, force: true });
+    } catch {
+      /* best effort */
+    }
+  });
 
   test('T2: detectDefaultPrefix returns config.prefix', () => {
     const prefix = detectDefaultPrefix(root);
@@ -128,7 +150,10 @@ describe('validateSliceIdConfig: schema violations', () => {
     assert.throws(
       () => validateSliceIdConfig({ numbering_start: 1 }),
       (err) => {
-        assert.ok(err instanceof ConfigSchemaError, `expected ConfigSchemaError, got ${err.constructor.name}`);
+        assert.ok(
+          err instanceof ConfigSchemaError,
+          `expected ConfigSchemaError, got ${err.constructor.name}`,
+        );
         assert.strictEqual(err.field, 'prefix');
         return true;
       },
@@ -169,12 +194,14 @@ describe('validateSliceIdConfig: schema violations', () => {
   });
 
   test('T3e: valid config passes without throwing', () => {
-    assert.doesNotThrow(() => validateSliceIdConfig({
-      prefix: 'DEV',
-      format: 'DEV-{NNN}',
-      numbering_start: 100,
-      padding: 3,
-    }));
+    assert.doesNotThrow(() =>
+      validateSliceIdConfig({
+        prefix: 'DEV',
+        format: 'DEV-{NNN}',
+        numbering_start: 100,
+        padding: 3,
+      }),
+    );
   });
 
   // TPL-303 — multi-segment prefix support
@@ -226,8 +253,16 @@ describe('validateSliceIdConfig: schema violations', () => {
 
 describe('runCreate: fails cleanly without config', () => {
   let root;
-  before(() => { root = makeRepo('t4'); });
-  after(() => { try { rmSync(root, { recursive: true, force: true }); } catch { /* best effort */ } });
+  before(() => {
+    root = makeRepo('t4');
+  });
+  after(() => {
+    try {
+      rmSync(root, { recursive: true, force: true });
+    } catch {
+      /* best effort */
+    }
+  });
 
   test('T4: runCreate auto-pick without config returns exitCode=1 with recovery hint', () => {
     // No .coa/slice-id-config.json in this repo
@@ -259,8 +294,16 @@ describe('runCreate: fails cleanly without config', () => {
 
 describe('writeDefaultSliceIdConfig: creates config', () => {
   let root;
-  before(() => { root = mkdtempSync(join(tmpdir(), 'sic-t5-')); });
-  after(() => { try { rmSync(root, { recursive: true, force: true }); } catch { /* best effort */ } });
+  before(() => {
+    root = mkdtempSync(join(tmpdir(), 'sic-t5-'));
+  });
+  after(() => {
+    try {
+      rmSync(root, { recursive: true, force: true });
+    } catch {
+      /* best effort */
+    }
+  });
 
   test('T5: creates .coa/slice-id-config.json with default prefix MYPROJ', () => {
     const result = writeDefaultSliceIdConfig(root);
@@ -283,7 +326,11 @@ describe('writeDefaultSliceIdConfig: creates config', () => {
       const config = JSON.parse(readFileSync(result.path, 'utf8'));
       assert.strictEqual(config.prefix, 'ACME');
     } finally {
-      try { rmSync(root2, { recursive: true, force: true }); } catch { /* best effort */ }
+      try {
+        rmSync(root2, { recursive: true, force: true });
+      } catch {
+        /* best effort */
+      }
     }
   });
 });
@@ -298,7 +345,13 @@ describe('writeDefaultSliceIdConfig: idempotent', () => {
     root = mkdtempSync(join(tmpdir(), 'sic-t6-'));
     writeConfig(root, { prefix: 'EXISTING', numbering_start: 42, padding: 4 });
   });
-  after(() => { try { rmSync(root, { recursive: true, force: true }); } catch { /* best effort */ } });
+  after(() => {
+    try {
+      rmSync(root, { recursive: true, force: true });
+    } catch {
+      /* best effort */
+    }
+  });
 
   test('T6: returns created=false and leaves config unchanged when file exists', () => {
     const result = writeDefaultSliceIdConfig(root, { prefix: 'DIFFERENT' });
@@ -321,7 +374,13 @@ describe('autoPickNextSliceId: respects numbering_start and padding from config'
     // Config: start IDs at 5, use 4-digit padding
     writeConfig(root, { prefix: 'TST', numbering_start: 5, padding: 4 });
   });
-  after(() => { try { rmSync(root, { recursive: true, force: true }); } catch { /* best effort */ } });
+  after(() => {
+    try {
+      rmSync(root, { recursive: true, force: true });
+    } catch {
+      /* best effort */
+    }
+  });
 
   test('T7: auto-pick picks numbering_start when no history exists', () => {
     const config = readSliceIdConfig(root);
@@ -341,7 +400,11 @@ describe('autoPickNextSliceId: respects numbering_start and padding from config'
     assert.strictEqual(exitCode, 0, `runCreate failed: ${result?.error}`);
     assert.ok(result.autoPicked, 'result must have autoPicked field');
     // Should be TST-0005 (4-digit, starting at 5)
-    assert.strictEqual(result.autoPicked, 'TST-0005', `expected TST-0005, got ${result.autoPicked}`);
+    assert.strictEqual(
+      result.autoPicked,
+      'TST-0005',
+      `expected TST-0005, got ${result.autoPicked}`,
+    );
   });
 });
 
@@ -355,7 +418,13 @@ describe('runCreate: custom prefix MYPROJ end-to-end', () => {
     root = makeRepo('t8');
     writeConfig(root, { prefix: 'MYPROJ', format: 'MYPROJ-{NNN}', numbering_start: 1, padding: 3 });
   });
-  after(() => { try { rmSync(root, { recursive: true, force: true }); } catch { /* best effort */ } });
+  after(() => {
+    try {
+      rmSync(root, { recursive: true, force: true });
+    } catch {
+      /* best effort */
+    }
+  });
 
   test('T8: runCreate auto-picks MYPROJ-001 with custom prefix config', () => {
     const { exitCode, result } = runCreate(root, {
@@ -365,7 +434,10 @@ describe('runCreate: custom prefix MYPROJ end-to-end', () => {
     });
     assert.strictEqual(exitCode, 0, `runCreate failed: ${result?.error}`);
     assert.ok(result.autoPicked, 'result must have autoPicked field');
-    assert.ok(result.autoPicked.startsWith('MYPROJ-'), `expected MYPROJ- prefix, got ${result.autoPicked}`);
+    assert.ok(
+      result.autoPicked.startsWith('MYPROJ-'),
+      `expected MYPROJ- prefix, got ${result.autoPicked}`,
+    );
     assert.strictEqual(result.autoPicked, 'MYPROJ-001');
   });
 

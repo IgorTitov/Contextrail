@@ -39,9 +39,7 @@
 
 import { describe, test, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
-import {
-  mkdtempSync, writeFileSync, mkdirSync, rmSync,
-} from 'node:fs';
+import { mkdtempSync, writeFileSync, mkdirSync, rmSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join, resolve, dirname } from 'node:path';
@@ -104,7 +102,11 @@ function runGuard(root, env = {}) {
 
 function cleanup(root) {
   if (!root) return;
-  try { rmSync(root, { recursive: true, force: true, maxRetries: 3 }); } catch { /* best effort */ }
+  try {
+    rmSync(root, { recursive: true, force: true, maxRetries: 3 });
+  } catch {
+    /* best effort */
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -168,7 +170,10 @@ test('b', () => { /* ... */ });
 
 describe('TPL-314 Phase 2.6 — pass paths', () => {
   let repo = null;
-  afterEach(() => { cleanup(repo); repo = null; });
+  afterEach(() => {
+    cleanup(repo);
+    repo = null;
+  });
 
   test('1. only additions: 5→6 test() blocks → exit 0', () => {
     repo = createFixture('p1');
@@ -194,7 +199,11 @@ describe('TPL-314 Phase 2.6 — pass paths', () => {
     stageEdit(repo, 'tests/unit/wrap.test.mjs', TWO_TESTS_AT_TOP_LEVEL);
     writeCommitMsg(repo, 'refactor(test): flatten describe wrapper\n\nrefs TPL-314\n');
     const r = runGuard(repo);
-    assert.strictEqual(r.status, 0, `expected exit 0 (describe removal must NOT block); stderr=${r.stderr}`);
+    assert.strictEqual(
+      r.status,
+      0,
+      `expected exit 0 (describe removal must NOT block); stderr=${r.stderr}`,
+    );
   });
 
   test('4. describe wrapper added around existing tests → exit 0', () => {
@@ -213,7 +222,10 @@ describe('TPL-314 Phase 2.6 — pass paths', () => {
 
 describe('TPL-314 Phase 2.6 — block paths', () => {
   let repo = null;
-  afterEach(() => { cleanup(repo); repo = null; });
+  afterEach(() => {
+    cleanup(repo);
+    repo = null;
+  });
 
   test('5. net deletion 5→4 (no env, no marker) → exit non-zero', () => {
     repo = createFixture('b5');
@@ -222,7 +234,11 @@ describe('TPL-314 Phase 2.6 — block paths', () => {
     writeCommitMsg(repo, 'chore(test): remove one\n\nrefs TPL-314\n');
     const r = runGuard(repo);
     assert.notStrictEqual(r.status, 0, `expected non-zero exit; stdout=${r.stdout}`);
-    assert.match(r.stderr + r.stdout, /tests\/unit\/example\.test\.mjs/, 'output should name the file');
+    assert.match(
+      r.stderr + r.stdout,
+      /tests\/unit\/example\.test\.mjs/,
+      'output should name the file',
+    );
     assert.match(r.stderr + r.stdout, /\b1\b/, 'output should report the count delta');
   });
 
@@ -260,10 +276,7 @@ describe('TPL-314 Phase 2.6 — block paths', () => {
     repo = createFixture('b9b');
     commitInitial(repo, { 'tests/unit/example.test.mjs': FIVE_TESTS });
     stageEdit(repo, 'tests/unit/example.test.mjs', FOUR_TESTS_FROM_FIVE);
-    writeCommitMsg(
-      repo,
-      'chore(test): remove\n\nAllow-test-deletion: x\n\nrefs TPL-314\n',
-    );
+    writeCommitMsg(repo, 'chore(test): remove\n\nAllow-test-deletion: x\n\nrefs TPL-314\n');
     const r = runGuard(repo, { COA_OPERATOR: '1' });
     assert.notStrictEqual(r.status, 0, `reason must be ≥3 chars after colon; stderr=${r.stderr}`);
   });
@@ -275,7 +288,10 @@ describe('TPL-314 Phase 2.6 — block paths', () => {
 
 describe('TPL-314 Phase 2.6 — override accepted', () => {
   let repo = null;
-  afterEach(() => { cleanup(repo); repo = null; });
+  afterEach(() => {
+    cleanup(repo);
+    repo = null;
+  });
 
   test('7. COA_OPERATOR=1 + Allow-test-deletion line with ≥3-char reason → exit 0; reason logged', () => {
     repo = createFixture('a7');
@@ -298,7 +314,10 @@ describe('TPL-314 Phase 2.6 — override accepted', () => {
 
 describe('TPL-314 Phase 2.6 — non-test paths skipped', () => {
   let repo = null;
-  afterEach(() => { cleanup(repo); repo = null; });
+  afterEach(() => {
+    cleanup(repo);
+    repo = null;
+  });
 
   test('10. non-test file with test()-shaped literal removed → exit 0 (out of scope)', () => {
     repo = createFixture('s10');
@@ -319,7 +338,10 @@ describe('TPL-314 Phase 2.6 — non-test paths skipped', () => {
 
 describe('TPL-314 Phase 2.6 — coa-merge passthrough (Test #11)', () => {
   let repo = null;
-  afterEach(() => { cleanup(repo); repo = null; });
+  afterEach(() => {
+    cleanup(repo);
+    repo = null;
+  });
 
   /**
    * coa-merge.mjs line 1631:
@@ -350,7 +372,11 @@ describe('TPL-314 Phase 2.6 — coa-merge passthrough (Test #11)', () => {
     writeCommitMsg(repo, ceremonyMessage);
 
     const r = runGuard(repo, { COA_OPERATOR: '1' });
-    assert.strictEqual(r.status, 0, `coa-merge passthrough must accept override; stderr=${r.stderr}`);
+    assert.strictEqual(
+      r.status,
+      0,
+      `coa-merge passthrough must accept override; stderr=${r.stderr}`,
+    );
     assert.match(r.stderr, new RegExp(reason), 'override reason must be logged for audit trail');
   });
 });
@@ -408,7 +434,10 @@ test('r', () => { /* active */ });
 
 describe('TPL-323 — whole-file deletion regression (Tests #13, #14, #15)', () => {
   let repo = null;
-  afterEach(() => { cleanup(repo); repo = null; });
+  afterEach(() => {
+    cleanup(repo);
+    repo = null;
+  });
 
   test('13. whole-file deletion of test file with 5 test() blocks → exit non-zero (CRITICAL bug regression)', () => {
     // RED baseline before fix: guard silently passed (exit 0) because parseDiff
@@ -420,17 +449,17 @@ describe('TPL-323 — whole-file deletion regression (Tests #13, #14, #15)', () 
     safeGitSpawn(repo, ['rm', '--', 'tests/unit/legacy.test.mjs']);
     writeCommitMsg(repo, 'chore: remove legacy suite\n\nrefs TPL-323\n');
     const r = runGuard(repo);
-    assert.notStrictEqual(r.status, 0, `whole-file deletion must be blocked; stderr=${r.stderr}\nstdout=${r.stdout}`);
+    assert.notStrictEqual(
+      r.status,
+      0,
+      `whole-file deletion must be blocked; stderr=${r.stderr}\nstdout=${r.stdout}`,
+    );
     assert.match(
       r.stderr + r.stdout,
       /tests\/unit\/legacy\.test\.mjs/,
       'output must name the deleted file',
     );
-    assert.match(
-      r.stderr + r.stdout,
-      /\b5\b/,
-      'output must report net deletion count of 5',
-    );
+    assert.match(r.stderr + r.stdout, /\b5\b/, 'output must report net deletion count of 5');
   });
 
   test('14. whole-file deletion with full two-factor override → exit 0; reason logged', () => {
@@ -443,8 +472,16 @@ describe('TPL-323 — whole-file deletion regression (Tests #13, #14, #15)', () 
       `chore: remove legacy suite\n\nAllow-test-deletion: ${reason}\n\nrefs TPL-323\n`,
     );
     const r = runGuard(repo, { COA_OPERATOR: '1' });
-    assert.strictEqual(r.status, 0, `two-factor override must allow whole-file deletion; stderr=${r.stderr}`);
-    assert.match(r.stderr, new RegExp(reason), 'override reason must be logged to stderr for traceability');
+    assert.strictEqual(
+      r.status,
+      0,
+      `two-factor override must allow whole-file deletion; stderr=${r.stderr}`,
+    );
+    assert.match(
+      r.stderr,
+      new RegExp(reason),
+      'override reason must be logged to stderr for traceability',
+    );
   });
 
   test('15. mixed diff — whole-file delete (3 blocks) + per-block edit (1 block removed) → 4 total net deletion blocked', () => {
@@ -459,15 +496,23 @@ describe('TPL-323 — whole-file deletion regression (Tests #13, #14, #15)', () 
     stageEdit(repo, 'tests/unit/active.test.mjs', THREE_TESTS_ACTIVE_AFTER);
     writeCommitMsg(repo, 'chore: cleanup old tests\n\nrefs TPL-323\n');
     const r = runGuard(repo);
-    assert.notStrictEqual(r.status, 0, `mixed deletion must be blocked; stderr=${r.stderr}\nstdout=${r.stdout}`);
+    assert.notStrictEqual(
+      r.status,
+      0,
+      `mixed deletion must be blocked; stderr=${r.stderr}\nstdout=${r.stdout}`,
+    );
     // Total net = 3 (whole-file) + 1 (per-block) = 4
+    assert.match(r.stderr + r.stdout, /\b4\b/, 'output must report total net deletion count of 4');
+    // Both affected files should appear in output
     assert.match(
       r.stderr + r.stdout,
-      /\b4\b/,
-      'output must report total net deletion count of 4',
+      /tests\/unit\/old\.test\.mjs/,
+      'must name the wholly-deleted file',
     );
-    // Both affected files should appear in output
-    assert.match(r.stderr + r.stdout, /tests\/unit\/old\.test\.mjs/, 'must name the wholly-deleted file');
-    assert.match(r.stderr + r.stdout, /tests\/unit\/active\.test\.mjs/, 'must name the per-block edited file');
+    assert.match(
+      r.stderr + r.stdout,
+      /tests\/unit\/active\.test\.mjs/,
+      'must name the per-block edited file',
+    );
   });
 });

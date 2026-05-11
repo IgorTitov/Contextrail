@@ -35,8 +35,15 @@
 import { describe, test, before, after, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  mkdtempSync, mkdirSync, writeFileSync, readFileSync,
-  appendFileSync, existsSync, rmSync, statSync, readdirSync,
+  mkdtempSync,
+  mkdirSync,
+  writeFileSync,
+  readFileSync,
+  appendFileSync,
+  existsSync,
+  rmSync,
+  statSync,
+  readdirSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve, basename } from 'node:path';
@@ -76,19 +83,22 @@ function createBaseRepo(label) {
   // Three header-bearing files — slim ADR-0009 inline header so the
   // stamp-only classifier has something realistic to chew on.
   for (const name of ['file-a.mjs', 'file-b.mjs', 'file-c.mjs']) {
-    writeFileSync(join(root, name), [
-      '/* @HEADER',
-      ' * @version 0.1.0 | 2026-04-29',
-      ` * @purpose Fixture file ${name}.`,
-      ' * @sidecar ' + name + '.header.md',
-      ' * @layer tests | @hex _none_ | @ctx _none_',
-      ' * @public false',
-      ' * @edit careful',
-      ' */',
-      '',
-      `export const NAME = ${JSON.stringify(name)};`,
-      '',
-    ].join('\n'));
+    writeFileSync(
+      join(root, name),
+      [
+        '/* @HEADER',
+        ' * @version 0.1.0 | 2026-04-29',
+        ` * @purpose Fixture file ${name}.`,
+        ' * @sidecar ' + name + '.header.md',
+        ' * @layer tests | @hex _none_ | @ctx _none_',
+        ' * @public false',
+        ' * @edit careful',
+        ' */',
+        '',
+        `export const NAME = ${JSON.stringify(name)};`,
+        '',
+      ].join('\n'),
+    );
   }
 
   writeFileSync(join(root, 'README.md'), '# fixture\n');
@@ -204,8 +214,12 @@ function withSilencedStdout(fn) {
 describe('runAudit — verdict taxonomy reachable end-to-end', () => {
   let fixture;
 
-  before(() => { fixture = createBaseRepo('audit-clean'); });
-  after(() => { rmSync(fixture.root, { recursive: true, force: true }); });
+  before(() => {
+    fixture = createBaseRepo('audit-clean');
+  });
+  after(() => {
+    rmSync(fixture.root, { recursive: true, force: true });
+  });
 
   test('1. clean primary worktree (main, no dirty) → clean-active', () => {
     const { result } = runAudit(fixture.root, { silent: true });
@@ -445,15 +459,22 @@ describe('runRefresh — claim and cwd guards', () => {
   test('15. refresh refuses if a claim references the branch', () => {
     const claimsDir = join(fixture.root, '.claims');
     mkdirSync(claimsDir, { recursive: true });
-    writeFileSync(join(claimsDir, 'clm-test01.json'), JSON.stringify({
-      id: 'clm-test01',
-      agent: 'someone-else',
-      slice: 'TPL-X',
-      targets: ['file-a.mjs'],
-      action: 'modify',
-      status: 'active',
-      notes: `working on branch ${branch}`,
-    }, null, 2));
+    writeFileSync(
+      join(claimsDir, 'clm-test01.json'),
+      JSON.stringify(
+        {
+          id: 'clm-test01',
+          agent: 'someone-else',
+          slice: 'TPL-X',
+          targets: ['file-a.mjs'],
+          action: 'modify',
+          status: 'active',
+          notes: `working on branch ${branch}`,
+        },
+        null,
+        2,
+      ),
+    );
 
     const { result, exitCode } = runRefresh(fixture.root, {
       name: basename(wtPath),
@@ -470,7 +491,11 @@ describe('runTeardownStale — dry-run & execute', () => {
 
   beforeEach(() => {
     fixture = createBaseRepo('teardown');
-    ({ path: wtMerged, branch: wtMergedBranch } = addWorktree(fixture.root, 'merged', 'merged-branch'));
+    ({ path: wtMerged, branch: wtMergedBranch } = addWorktree(
+      fixture.root,
+      'merged',
+      'merged-branch',
+    ));
     applyLogicEdit(wtMerged, 'file-a.mjs', 'merged-work');
     commitInWorktree(wtMerged, 'merged work');
     mergeBranchIntoMain(fixture.root, wtMergedBranch);
@@ -568,8 +593,10 @@ describe('runTeardownStale — dry-run & execute', () => {
     const { result } = runTeardownStale(fixture.root, { silent: true });
     assert.equal(result.eligible.length, 0);
     assert.ok(
-      result.ineligible.some((i) =>
-        basename(i.path) === basename(wtMerged) && i.reason === VERDICTS.STALE_MERGED_WITH_STAMP_RESIDUE,
+      result.ineligible.some(
+        (i) =>
+          basename(i.path) === basename(wtMerged) &&
+          i.reason === VERDICTS.STALE_MERGED_WITH_STAMP_RESIDUE,
       ),
       'stamp-residue worktree must be marked ineligible by verdict',
     );
@@ -604,20 +631,29 @@ describe('runTeardownStale — dry-run & execute', () => {
   test('22. teardown-stale skips candidate when claim references the branch', () => {
     const claimsDir = join(fixture.root, '.claims');
     mkdirSync(claimsDir, { recursive: true });
-    writeFileSync(join(claimsDir, 'clm-block.json'), JSON.stringify({
-      id: 'clm-block',
-      agent: 'someone',
-      slice: 'TPL-X',
-      targets: ['file-a.mjs'],
-      action: 'modify',
-      status: 'active',
-      notes: `coordinating on ${wtMergedBranch}`,
-    }, null, 2));
+    writeFileSync(
+      join(claimsDir, 'clm-block.json'),
+      JSON.stringify(
+        {
+          id: 'clm-block',
+          agent: 'someone',
+          slice: 'TPL-X',
+          targets: ['file-a.mjs'],
+          action: 'modify',
+          status: 'active',
+          notes: `coordinating on ${wtMergedBranch}`,
+        },
+        null,
+        2,
+      ),
+    );
 
     const { result } = runTeardownStale(fixture.root, { silent: true });
     assert.equal(result.eligible.length, 0);
     assert.ok(
-      result.ineligible.some((i) => basename(i.path) === basename(wtMerged) && i.reason === 'claim-active'),
+      result.ineligible.some(
+        (i) => basename(i.path) === basename(wtMerged) && i.reason === 'claim-active',
+      ),
       'claim-blocked worktree must appear ineligible with claim-active reason',
     );
   });
@@ -629,7 +665,9 @@ describe('runTeardownStale — dry-run & execute', () => {
     });
     assert.equal(result.eligible.length, 0);
     assert.ok(
-      result.ineligible.some((i) => basename(i.path) === basename(wtMerged) && i.reason === 'preserved'),
+      result.ineligible.some(
+        (i) => basename(i.path) === basename(wtMerged) && i.reason === 'preserved',
+      ),
       'preserve list must keep the named branch out of eligibility',
     );
   });
@@ -653,40 +691,67 @@ describe('TPL-263 Bug1: stale REBASE_HEAD artifact does not trigger merge-in-pro
     writeFileSync(join(gitDir, 'REBASE_HEAD'), 'deadbeef\n');
   });
 
-  after(() => { if (fixture) rmSync(fixture.root, { recursive: true, force: true }); });
+  after(() => {
+    if (fixture) rmSync(fixture.root, { recursive: true, force: true });
+  });
 
   test('REBASE_HEAD file alone does not classify as merge-in-progress', () => {
     const { result } = runAudit(fixture.root, { silent: true });
     const r = result.worktrees.find((w) => basename(w.path) === basename(wtPath));
     assert.ok(r, 'worktree must appear in audit results');
-    assert.equal(r.status.rebaseInProgress, false, 'rebaseInProgress must be false without directory markers');
-    assert.notEqual(r.verdict, VERDICTS.MERGE_IN_PROGRESS, 'stale REBASE_HEAD must not produce merge-in-progress verdict');
+    assert.equal(
+      r.status.rebaseInProgress,
+      false,
+      'rebaseInProgress must be false without directory markers',
+    );
+    assert.notEqual(
+      r.verdict,
+      VERDICTS.MERGE_IN_PROGRESS,
+      'stale REBASE_HEAD must not produce merge-in-progress verdict',
+    );
   });
 });
 
 describe('TPL-263 Bug2: primary trunk worktree with WIP classified clean-active', () => {
   let fixture;
 
-  before(() => { fixture = createBaseRepo('primary-wip'); });
-  after(() => { if (fixture) rmSync(fixture.root, { recursive: true, force: true }); });
+  before(() => {
+    fixture = createBaseRepo('primary-wip');
+  });
+  after(() => {
+    if (fixture) rmSync(fixture.root, { recursive: true, force: true });
+  });
 
   test('primary worktree on main with uncommitted changes returns clean-active', () => {
     applyLogicEdit(fixture.root, 'file-a.mjs', 'primary-wip');
     const { result } = runAudit(fixture.root, { silent: true });
     const primary = result.worktrees.find((w) => w.isPrimary && w.isMainBranch);
     assert.ok(primary, 'primary trunk worktree must appear in audit results');
-    assert.ok(primary.status.dirtyCount > 0, 'primary must have dirty files for this test to be meaningful');
-    assert.equal(primary.verdict, VERDICTS.CLEAN_ACTIVE, 'primary trunk with WIP must be clean-active, not stale-merged-with-wip');
+    assert.ok(
+      primary.status.dirtyCount > 0,
+      'primary must have dirty files for this test to be meaningful',
+    );
+    assert.equal(
+      primary.verdict,
+      VERDICTS.CLEAN_ACTIVE,
+      'primary trunk with WIP must be clean-active, not stale-merged-with-wip',
+    );
   });
 });
 
 describe('TPL-263 Bug3: audit display table suppresses dirty-count hint for clean-active verdicts', () => {
   let fixture;
 
-  before(() => { fixture = createBaseRepo('hint-suppress'); });
+  before(() => {
+    fixture = createBaseRepo('hint-suppress');
+  });
   after(() => {
     // Restore file-a.mjs so subsequent tests are not polluted.
-    try { safeGitSpawn(fixture.root, ['checkout', '--', 'file-a.mjs']); } catch { /* best effort */ }
+    try {
+      safeGitSpawn(fixture.root, ['checkout', '--', 'file-a.mjs']);
+    } catch {
+      /* best effort */
+    }
     if (fixture) rmSync(fixture.root, { recursive: true, force: true });
   });
 
@@ -711,14 +776,19 @@ describe('TPL-263 TPL-255: --teardown resolves worktree path via git worktree li
     ({ path: wtPath, branch } = addWorktree(fixture.root, 'tx-slice', 'tx-TPL-255'));
   });
 
-  after(() => { if (fixture) rmSync(fixture.root, { recursive: true, force: true }); });
+  after(() => {
+    if (fixture) rmSync(fixture.root, { recursive: true, force: true });
+  });
 
   test('resolveWorktreePath matches by branch name (tx-TPL-255 → full path)', () => {
     const resolved = resolveWorktreePath(fixture.root, 'tx-TPL-255');
     assert.ok(resolved, 'resolveWorktreePath must find worktree by branch name');
     // Normalize slashes: git porcelain uses / on Windows; mkdtempSync uses \.
-    assert.equal(resolved.replaceAll('\\', '/'), wtPath.replaceAll('\\', '/'),
-      'resolved path must equal the actual worktree path');
+    assert.equal(
+      resolved.replaceAll('\\', '/'),
+      wtPath.replaceAll('\\', '/'),
+      'resolved path must equal the actual worktree path',
+    );
   });
 
   test('resolveWorktreePath matches by basename', () => {
@@ -826,10 +896,14 @@ describe('TPL-312: --teardown-stale --include-dirty bulk cleanup', () => {
   test('4. --include-dirty does NOT touch unmerged tx-* (ancestor safety preserved)', () => {
     const { result } = runTeardownStale(fixture.root, { includeDirty: true, silent: true });
     const eligiblePaths = result.eligible.map((e) => basename(e.path));
-    assert.ok(!eligiblePaths.includes(basename(wtUnmerged)),
-      'unmerged worktree must never appear in eligible set');
-    assert.ok(result.ineligible.some((i) => basename(i.path) === basename(wtUnmerged)),
-      'unmerged worktree must appear in ineligible list');
+    assert.ok(
+      !eligiblePaths.includes(basename(wtUnmerged)),
+      'unmerged worktree must never appear in eligible set',
+    );
+    assert.ok(
+      result.ineligible.some((i) => basename(i.path) === basename(wtUnmerged)),
+      'unmerged worktree must appear in ineligible list',
+    );
   });
 
   test('5. audit log entry for dirty teardown uses worktree-teardown-dirty event', () => {
@@ -838,7 +912,9 @@ describe('TPL-312: --teardown-stale --include-dirty bulk cleanup', () => {
     try {
       runTeardownStale(fixture.root, { execute: true, includeDirty: true, silent: true });
       const log = readFileSync(resolveAuditLogPath(fixture.root), 'utf8')
-        .split('\n').filter(Boolean).map((l) => JSON.parse(l));
+        .split('\n')
+        .filter(Boolean)
+        .map((l) => JSON.parse(l));
       const dirtyEvents = log.filter((e) => e.event === 'worktree-teardown-dirty');
       assert.equal(dirtyEvents.length, 1);
       assert.equal(basename(dirtyEvents[0].path), basename(wtDirty));

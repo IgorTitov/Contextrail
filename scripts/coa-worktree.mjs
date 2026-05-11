@@ -67,14 +67,8 @@ import {
   isKnownInfraWorktree,
   VERDICTS,
 } from './lib/worktree-audit.mjs';
-import {
-  isValidSliceId,
-  transportBranchNameForSlice,
-} from './lib/transport-branch.mjs';
-import {
-  readSliceIdConfig,
-  ConfigMissingError,
-} from './lib/slice-id-config.mjs';
+import { isValidSliceId, transportBranchNameForSlice } from './lib/transport-branch.mjs';
+import { readSliceIdConfig, ConfigMissingError } from './lib/slice-id-config.mjs';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -163,7 +157,10 @@ export function parseWorktreeArgs(argv = process.argv.slice(2)) {
   }
   return {
     has: (k) => map.has(k),
-    get: (k) => { const v = map.get(k); return v === true ? undefined : v; },
+    get: (k) => {
+      const v = map.get(k);
+      return v === true ? undefined : v;
+    },
   };
 }
 
@@ -306,13 +303,11 @@ function detectMergeState(worktreePath) {
   let gitDir = probe.stdout.trim();
   if (!isAbsolute(gitDir)) gitDir = resolve(worktreePath, gitDir);
   const mergeInProgress =
-    existsSync(join(gitDir, 'MERGE_HEAD')) ||
-    existsSync(join(gitDir, 'CHERRY_PICK_HEAD'));
+    existsSync(join(gitDir, 'MERGE_HEAD')) || existsSync(join(gitDir, 'CHERRY_PICK_HEAD'));
   // rebase-merge / rebase-apply directories are the authoritative signal;
   // REBASE_HEAD can linger as a stale artifact after an interrupted rebase.
   const rebaseInProgress =
-    existsSync(join(gitDir, 'rebase-merge')) ||
-    existsSync(join(gitDir, 'rebase-apply'));
+    existsSync(join(gitDir, 'rebase-merge')) || existsSync(join(gitDir, 'rebase-apply'));
   return { mergeInProgress, rebaseInProgress };
 }
 
@@ -410,7 +405,7 @@ function buildAuditRecord(repoRoot, entry, opts = {}) {
   const isMainBranch = branch === trunkBranch;
 
   const headProbe = gitIn(wtPath, ['rev-parse', '--short=8', 'HEAD']);
-  const head = headProbe.ok ? headProbe.stdout.trim() : (entry.head || '');
+  const head = headProbe.ok ? headProbe.stdout.trim() : entry.head || '';
 
   // Age — time since the branch's last commit, as a usable proxy for
   // "how long has this worktree been sitting around". The exact
@@ -444,7 +439,10 @@ function buildAuditRecord(repoRoot, entry, opts = {}) {
     const ancestorProbe = gitIn(wtPath, ['merge-base', '--is-ancestor', 'HEAD', trunkBranch]);
     isMerged = ancestorProbe.status === 0;
     const revListProbe = gitIn(wtPath, [
-      'rev-list', '--left-right', '--count', `HEAD...${trunkBranch}`,
+      'rev-list',
+      '--left-right',
+      '--count',
+      `HEAD...${trunkBranch}`,
     ]);
     if (revListProbe.ok) {
       const parts = revListProbe.stdout.trim().split(/\s+/);
@@ -623,7 +621,10 @@ function hashCandidateSet(paths, opts = {}) {
   // remove), so the marker MUST differ — a clean dry-run cannot
   // authorize a dirty execute even on the same path set.
   const flag = opts.includeDirty ? '\nINCLUDE_DIRTY=1' : '';
-  return createHash('sha256').update(sorted.join('\n') + flag).digest('hex').slice(0, 16);
+  return createHash('sha256')
+    .update(sorted.join('\n') + flag)
+    .digest('hex')
+    .slice(0, 16);
 }
 
 function teardownMarkerPath(repoRoot, hash) {
@@ -706,9 +707,7 @@ export function unsetStaleCoreWorktree(repoRoot, removedPath) {
     console.log(`coa-worktree: unset stale core.worktree (${reason}): was "${value}"`);
     return { unset: true, value, reason };
   }
-  console.warn(
-    `coa-worktree: failed to unset core.worktree: ${unsetResult.stderr.trim()}`,
-  );
+  console.warn(`coa-worktree: failed to unset core.worktree: ${unsetResult.stderr.trim()}`);
   return { unset: false, value, reason: `unset-failed: ${unsetResult.stderr.trim()}` };
 }
 
@@ -764,7 +763,7 @@ export function detectDefaultPrefix(repoRoot) {
 export function autoPickNextSliceId(repoRoot, prefix, claimsDir, opts = {}) {
   const padding = opts.padding ?? 3;
   const numberingStart = opts.numberingStart ?? 1;
-  const allowClaimBump = opts.allowClaimBump ?? (process.env.COA_ALLOW_CLAIM_BUMP === '1');
+  const allowClaimBump = opts.allowClaimBump ?? process.env.COA_ALLOW_CLAIM_BUMP === '1';
   const effectiveClaimsDir = claimsDir || join(repoRoot, '.claims');
 
   // 1. Scan git history
@@ -773,7 +772,7 @@ export function autoPickNextSliceId(repoRoot, prefix, claimsDir, opts = {}) {
     encoding: 'utf8',
     stdio: 'pipe',
   });
-  const histText = histResult.status === 0 ? (histResult.stdout || '') : '';
+  const histText = histResult.status === 0 ? histResult.stdout || '' : '';
   const re = new RegExp(`\\b${prefix}-(\\d+)\\b`, 'g');
   let gitLogMaxN = 0;
   for (const m of histText.matchAll(re)) {
@@ -785,7 +784,11 @@ export function autoPickNextSliceId(repoRoot, prefix, claimsDir, opts = {}) {
   let claimMaxN = 0;
   if (existsSync(effectiveClaimsDir)) {
     let entries;
-    try { entries = readdirSync(effectiveClaimsDir); } catch { entries = []; }
+    try {
+      entries = readdirSync(effectiveClaimsDir);
+    } catch {
+      entries = [];
+    }
     for (const name of entries) {
       if (!name.endsWith('.json') || name === 'config.json') continue;
       try {
@@ -797,7 +800,9 @@ export function autoPickNextSliceId(repoRoot, prefix, claimsDir, opts = {}) {
           const n = Number(cm[1]);
           if (n > claimMaxN) claimMaxN = n;
         }
-      } catch { /* skip malformed files */ }
+      } catch {
+        /* skip malformed files */
+      }
     }
   }
 
@@ -807,10 +812,10 @@ export function autoPickNextSliceId(repoRoot, prefix, claimsDir, opts = {}) {
     const gitId = gitLogMaxN > 0 ? `${prefix}-${gitLogMaxN}` : '(none)';
     const err = new Error(
       `auto-pick refused: claim-derived max (${claimId}) is suspiciously\n` +
-      `larger than git-log-derived max (${gitId}). Likely stale fixture\n` +
-      `claim pollution in .claims/.\n\n` +
-      `Run \`node scripts/coa-worktree.mjs --audit-claims\` to investigate.\n` +
-      `To override and use the claim-derived value, pass --allow-claim-bump.`,
+        `larger than git-log-derived max (${gitId}). Likely stale fixture\n` +
+        `claim pollution in .claims/.\n\n` +
+        `Run \`node scripts/coa-worktree.mjs --audit-claims\` to investigate.\n` +
+        `To override and use the claim-derived value, pass --allow-claim-bump.`,
     );
     err.anomaly = true;
     err.claimMaxId = claimId;
@@ -848,7 +853,12 @@ export function autoPickNextSliceId(repoRoot, prefix, claimsDir, opts = {}) {
  * then atomically acquires the claim. Bounded retry on collision (ADR-0029).
  */
 export function runCreate(repoRoot, opts = {}) {
-  const { wantJson = false, sessionName, sliceId, silent = false, trunk,
+  const {
+    wantJson = false,
+    sessionName,
+    sliceId,
+    silent = false,
+    trunk,
     // skipSliceCheck: internal test seam — bypasses C4 claim-check --acquire.
     // ONLY for unit tests that pre-date C4 and use retired slice IDs.
     // Production callers must never set this.
@@ -895,11 +905,11 @@ export function runCreate(repoRoot, opts = {}) {
   if (enforceAgent && isTransport && !callerAgent) {
     return fail(
       `--create requires --agent=<role> or COA_AGENT env in transport mode.\n\n` +
-      `Why: .coa-session.agent must record caller identity so coa-merge step 0.5\n` +
-      `ownership check matches without COA_OPERATOR override (ADR-0038).\n\n` +
-      `Examples:\n` +
-      `  node scripts/coa-worktree.mjs --create --agent=feature-implementer\n` +
-      `  COA_AGENT=frontend-specialist node scripts/coa-worktree.mjs --create --slice=TPL-NNN\n`,
+        `Why: .coa-session.agent must record caller identity so coa-merge step 0.5\n` +
+        `ownership check matches without COA_OPERATOR override (ADR-0038).\n\n` +
+        `Examples:\n` +
+        `  node scripts/coa-worktree.mjs --create --agent=feature-implementer\n` +
+        `  COA_AGENT=frontend-specialist node scripts/coa-worktree.mjs --create --slice=TPL-NNN\n`,
     );
   }
 
@@ -941,7 +951,11 @@ export function runCreate(repoRoot, opts = {}) {
       let candidate;
       if (attempt === 0) {
         try {
-          candidate = autoPickNextSliceId(repoRoot, prefix, claimsDir, { padding, numberingStart, allowClaimBump });
+          candidate = autoPickNextSliceId(repoRoot, prefix, claimsDir, {
+            padding,
+            numberingStart,
+            allowClaimBump,
+          });
         } catch (err) {
           if (err.anomaly) return fail(err.message);
           throw err;
@@ -964,19 +978,23 @@ export function runCreate(repoRoot, opts = {}) {
       }
 
       // Production path: atomically acquire claim for the candidate.
-      const claimResult = spawnSync(process.execPath, [
-        join(__dirname, 'checks/claim-check.mjs'),
-        '--acquire',
-        `--agent=coa-worktree`,
-        `--slice=${candidate}`,
-        `--targets=${transportBranchNameForSlice(candidate)}`,
-        '--action=extend',
-      ], {
-        cwd: repoRoot,
-        encoding: 'utf8',
-        stdio: 'pipe',
-        env: { ...process.env, COA_HISTORY_ROOT: ROOT },
-      });
+      const claimResult = spawnSync(
+        process.execPath,
+        [
+          join(__dirname, 'checks/claim-check.mjs'),
+          '--acquire',
+          `--agent=coa-worktree`,
+          `--slice=${candidate}`,
+          `--targets=${transportBranchNameForSlice(candidate)}`,
+          '--action=extend',
+        ],
+        {
+          cwd: repoRoot,
+          encoding: 'utf8',
+          stdio: 'pipe',
+          env: { ...process.env, COA_HISTORY_ROOT: ROOT },
+        },
+      );
 
       if (claimResult.status === 0) {
         pickedId = candidate;
@@ -1018,7 +1036,8 @@ export function runCreate(repoRoot, opts = {}) {
     // silently reuses an existing branch in some edge cases, which can
     // land a new worktree on stale orphan commits (AIC-118 incident).
     const branchExists = spawnSync(
-      'git', ['rev-parse', '--verify', '--quiet', `refs/heads/${branchName}`],
+      'git',
+      ['rev-parse', '--verify', '--quiet', `refs/heads/${branchName}`],
       { cwd: repoRoot, encoding: 'utf8', stdio: 'pipe' },
     );
     if (branchExists.status === 0) {
@@ -1038,20 +1057,20 @@ export function runCreate(repoRoot, opts = {}) {
         : `       (no worktree path registered)`;
       return fail(
         `branch '${branchName}' already exists.\n\n` +
-        `STOP. Do NOT cd into the existing worktree or reuse it.\n` +
-        `The worktree may belong to:\n` +
-        `  - Another active session (slice in progress)\n` +
-        `  - An aborted ceremony with uncommitted work\n` +
-        `  - A namespace collision with another session's slice ID\n\n` +
-        `${wtPathLine}\n\n` +
-        `Recovery options (escalate to operator if unclear):\n` +
-        `  1. Pick a different slice ID. Try auto-pick (omit --slice):\n` +
-        `       node scripts/coa-worktree.mjs --create\n` +
-        `  2. Investigate ownership of existing worktree:\n` +
-        `${sessionFileCmd}\n` +
-        `  3. If confirmed safe to delete (OPERATOR-AUTHORIZED only):\n` +
-        `${wtRemoveCmd}\n\n` +
-        `DO NOT proceed by reusing the existing worktree without explicit operator approval.`,
+          `STOP. Do NOT cd into the existing worktree or reuse it.\n` +
+          `The worktree may belong to:\n` +
+          `  - Another active session (slice in progress)\n` +
+          `  - An aborted ceremony with uncommitted work\n` +
+          `  - A namespace collision with another session's slice ID\n\n` +
+          `${wtPathLine}\n\n` +
+          `Recovery options (escalate to operator if unclear):\n` +
+          `  1. Pick a different slice ID. Try auto-pick (omit --slice):\n` +
+          `       node scripts/coa-worktree.mjs --create\n` +
+          `  2. Investigate ownership of existing worktree:\n` +
+          `${sessionFileCmd}\n` +
+          `  3. If confirmed safe to delete (OPERATOR-AUTHORIZED only):\n` +
+          `${wtRemoveCmd}\n\n` +
+          `DO NOT proceed by reusing the existing worktree without explicit operator approval.`,
       );
     }
 
@@ -1075,7 +1094,8 @@ export function runCreate(repoRoot, opts = {}) {
       });
       if (claimResult.status !== 0) {
         const errMsg = (claimResult.stderr || claimResult.stdout || '').trim();
-        if (!silent && !wantJson) console.error(`coa-worktree --create: claim-check failed:\n${errMsg}`);
+        if (!silent && !wantJson)
+          console.error(`coa-worktree --create: claim-check failed:\n${errMsg}`);
         return { exitCode: 1, result: { ok: false, error: errMsg } };
       }
     }
@@ -1091,13 +1111,13 @@ export function runCreate(repoRoot, opts = {}) {
   if (existsSync(wtPath)) {
     return fail(
       `worktree directory already exists: ${wtPath}\n\n` +
-      `STOP. Do NOT proceed into this directory.\n` +
-      `Recovery options (escalate to operator if unclear):\n` +
-      `  1. Pick a different slice ID. Try auto-pick (omit --slice):\n` +
-      `       node scripts/coa-worktree.mjs --create\n` +
-      `  2. If the directory is truly orphaned (OPERATOR-AUTHORIZED only):\n` +
-      `       git worktree remove --force ${wtPath}\n` +
-      `       rm -rf ${wtPath}`,
+        `STOP. Do NOT proceed into this directory.\n` +
+        `Recovery options (escalate to operator if unclear):\n` +
+        `  1. Pick a different slice ID. Try auto-pick (omit --slice):\n` +
+        `       node scripts/coa-worktree.mjs --create\n` +
+        `  2. If the directory is truly orphaned (OPERATOR-AUTHORIZED only):\n` +
+        `       git worktree remove --force ${wtPath}\n` +
+        `       rm -rf ${wtPath}`,
     );
   }
 
@@ -1130,7 +1150,9 @@ export function runCreate(repoRoot, opts = {}) {
       nodeModulesLinked = true;
     } catch (err) {
       if (!silent && !wantJson) {
-        console.warn(`coa-worktree: node_modules link failed (${err.message}), run pnpm install in worktree`);
+        console.warn(
+          `coa-worktree: node_modules link failed (${err.message}), run pnpm install in worktree`,
+        );
       }
     }
   }
@@ -1139,7 +1161,11 @@ export function runCreate(repoRoot, opts = {}) {
   const srcEnv = join(repoRoot, '.env');
   const dstEnv = join(wtPath, '.env');
   if (existsSync(srcEnv) && !existsSync(dstEnv)) {
-    try { copyFileSync(srcEnv, dstEnv); } catch { /* non-fatal */ }
+    try {
+      copyFileSync(srcEnv, dstEnv);
+    } catch {
+      /* non-fatal */
+    }
   }
 
   // Copy .claude/settings*.json so operator permissions apply in the transport
@@ -1151,15 +1177,16 @@ export function runCreate(repoRoot, opts = {}) {
   if (existsSync(mainClaudeDir)) {
     try {
       mkdirSync(transportClaudeDir, { recursive: true });
-      const settingsFiles = readdirSync(mainClaudeDir)
-        .filter((f) => /^settings.*\.json$/i.test(f));
+      const settingsFiles = readdirSync(mainClaudeDir).filter((f) => /^settings.*\.json$/i.test(f));
       for (const f of settingsFiles) {
         const src = join(mainClaudeDir, f);
         const dst = join(transportClaudeDir, f);
         try {
           if (existsSync(dst) && readFileSync(src, 'utf8') === readFileSync(dst, 'utf8')) continue;
           copyFileSync(src, dst);
-        } catch { /* non-fatal — worktree is usable without local settings */ }
+        } catch {
+          /* non-fatal — worktree is usable without local settings */
+        }
       }
     } catch (err) {
       if (!silent && !wantJson) {
@@ -1168,7 +1195,7 @@ export function runCreate(repoRoot, opts = {}) {
     }
   }
 
-  const effectiveName = effectiveSliceId ? branchName : (sessionName || basename(wtPath));
+  const effectiveName = effectiveSliceId ? branchName : sessionName || basename(wtPath);
   const sessionMeta = {
     sessionName: effectiveName,
     created: new Date().toISOString(),
@@ -1267,7 +1294,7 @@ export function runTeardown(repoRoot, opts = {}) {
   // Capture branch name from git worktree list while the worktree still exists.
   const all = listWorktrees(repoRoot);
   const record = all.find((w) => w.path.replaceAll('\\', '/') === wtPath.replaceAll('\\', '/'));
-  const rawBranch = record ? (record.branch || '') : '';
+  const rawBranch = record ? record.branch || '' : '';
   // Strip refs/heads/ prefix — git worktree list --porcelain emits full ref names.
   const branchName = rawBranch.startsWith('refs/heads/') ? rawBranch.slice(11) : rawBranch || null;
 
@@ -1275,25 +1302,34 @@ export function runTeardown(repoRoot, opts = {}) {
   if (!force) {
     const { clean, status } = checkUncommitted(wtPath);
     if (!clean) {
-      return fail(
-        `Worktree has uncommitted changes. Use --force to override.\n${status}`,
-        { uncommitted: status },
-      );
+      return fail(`Worktree has uncommitted changes. Use --force to override.\n${status}`, {
+        uncommitted: status,
+      });
     }
   }
 
   // Remove node_modules symlink first (prevents git worktree remove from traversing it)
   const dstModules = join(wtPath, 'node_modules');
   if (existsSync(dstModules)) {
-    try { rmSync(dstModules, { recursive: false }); } catch {
-      try { rmSync(dstModules, { recursive: true, force: true }); } catch { /* best effort */ }
+    try {
+      rmSync(dstModules, { recursive: false });
+    } catch {
+      try {
+        rmSync(dstModules, { recursive: true, force: true });
+      } catch {
+        /* best effort */
+      }
     }
   }
 
   // Remove .coa-session file
   const sessionFile = join(wtPath, '.coa-session');
   if (existsSync(sessionFile)) {
-    try { rmSync(sessionFile); } catch { /* best effort */ }
+    try {
+      rmSync(sessionFile);
+    } catch {
+      /* best effort */
+    }
   }
 
   // git worktree remove
@@ -1313,14 +1349,15 @@ export function runTeardown(repoRoot, opts = {}) {
 
   // TPL-285: delete the local branch ref strictly (-d, never -D).
   // Mirrors step 9e trust model: zero-information-loss, unmerged branches preserved.
-  let branchDeleted = null;   // null = no branch ref found / not applicable
+  let branchDeleted = null; // null = no branch ref found / not applicable
   let branchPreserved = null; // branch name when -d refused (unmerged work)
   if (branchName && branchName !== 'HEAD' && branchName !== '(detached)') {
     // Confirm ref exists (worktree teardown does not auto-delete the branch ref).
-    const refCheck = spawnSync(
-      'git', ['for-each-ref', `refs/heads/${branchName}`],
-      { cwd: repoRoot, encoding: 'utf8', stdio: 'pipe' },
-    );
+    const refCheck = spawnSync('git', ['for-each-ref', `refs/heads/${branchName}`], {
+      cwd: repoRoot,
+      encoding: 'utf8',
+      stdio: 'pipe',
+    });
     if (refCheck.stdout.trim()) {
       const del = spawnSync('git', ['branch', '-d', branchName], {
         cwd: repoRoot,
@@ -1446,7 +1483,8 @@ export function runRefresh(repoRoot, opts = {}) {
   if (record.isPrimary) return fail('refusing to refresh the primary worktree');
   if (record.status.mergeInProgress) return fail('merge in progress — complete or abort first');
   if (record.status.rebaseInProgress) return fail('rebase in progress — complete or abort first');
-  if (record.status.stagedCount > 0) return fail('staged changes present — operator must commit or unstage first');
+  if (record.status.stagedCount > 0)
+    return fail('staged changes present — operator must commit or unstage first');
   if (isCwdInside(process.cwd(), record.path)) {
     return fail('refusing to refresh the worktree your shell is currently inside');
   }
@@ -1459,9 +1497,7 @@ export function runRefresh(repoRoot, opts = {}) {
   // already counted but did not retain per-file verdicts; we want
   // explicit lists for the report).
   const statusProbe = gitIn(record.path, ['status', '--porcelain']);
-  const status = statusProbe.ok
-    ? parsePorcelain(statusProbe.stdout)
-    : { modified: [] };
+  const status = statusProbe.ok ? parsePorcelain(statusProbe.stdout) : { modified: [] };
 
   const stampOnly = [];
   const hasLogic = [];
@@ -1638,14 +1674,17 @@ export function runTeardownStale(repoRoot, opts = {}) {
         dirtyCount: r.status?.dirtyCount || 0,
       })),
       ineligible,
-      next: candidates.length > 0
-        ? `re-run with COA_OPERATOR=1 ... --teardown-stale --execute${includeDirty ? ' --include-dirty' : ''} (within 1 hour)`
-        : 'nothing to teardown',
+      next:
+        candidates.length > 0
+          ? `re-run with COA_OPERATOR=1 ... --teardown-stale --execute${includeDirty ? ' --include-dirty' : ''} (within 1 hour)`
+          : 'nothing to teardown',
     };
     if (!silent) {
       if (wantJson) console.log(JSON.stringify(result, null, 2));
       else {
-        console.log(`coa-worktree --teardown-stale (dry-run${includeDirty ? ', --include-dirty' : ''}): ${candidates.length} eligible`);
+        console.log(
+          `coa-worktree --teardown-stale (dry-run${includeDirty ? ', --include-dirty' : ''}): ${candidates.length} eligible`,
+        );
         if (cleanCandidates.length > 0) {
           console.log(`  Clean (will delete with --execute):`);
           for (const r of cleanCandidates) console.log(`    ${r.path}  [${r.branch}]  ${r.head}`);
@@ -1662,12 +1701,15 @@ export function runTeardownStale(repoRoot, opts = {}) {
         if (ineligible.length > 0) {
           console.log('');
           console.log(`  skipped (${ineligible.length}):`);
-          for (const i of ineligible) console.log(`    ${i.path}  [${i.branch}]  reason: ${i.reason}`);
+          for (const i of ineligible)
+            console.log(`    ${i.path}  [${i.branch}]  reason: ${i.reason}`);
         }
         if (candidates.length > 0) {
           console.log('');
           console.log(`  marker: ${hash} (valid 1h)`);
-          console.log(`  next: COA_OPERATOR=1 node scripts/coa-worktree.mjs --teardown-stale --execute${includeDirty ? ' --include-dirty' : ''}`);
+          console.log(
+            `  next: COA_OPERATOR=1 node scripts/coa-worktree.mjs --teardown-stale --execute${includeDirty ? ' --include-dirty' : ''}`,
+          );
         }
       }
     }
@@ -1739,7 +1781,10 @@ export function runTeardownStale(repoRoot, opts = {}) {
       : ['worktree', 'remove', r.path];
     const remove = gitIn(repoRoot, removeArgs);
     if (!remove.ok) {
-      failures.push({ path: r.path, reason: `git worktree remove failed: ${remove.stderr.trim()}` });
+      failures.push({
+        path: r.path,
+        reason: `git worktree remove failed: ${remove.stderr.trim()}`,
+      });
       continue;
     }
     // Defensive cleanup: unset stale core.worktree from main .git/config
@@ -1759,14 +1804,21 @@ export function runTeardownStale(repoRoot, opts = {}) {
 
   // Marker is single-use: clean it up so a second --execute cannot
   // ride the same authorization without a fresh --dry-run.
-  try { rmSync(teardownMarkerPath(repoRoot, hash)); } catch { /* best effort */ }
+  try {
+    rmSync(teardownMarkerPath(repoRoot, hash));
+  } catch {
+    /* best effort */
+  }
 
   const result = { ok: failures.length === 0, mode: 'execute', torn, failures };
   if (!silent) {
     if (wantJson) console.log(JSON.stringify(result, null, 2));
     else {
-      console.log(`coa-worktree --teardown-stale (execute): ${torn.length} torn down, ${failures.length} failed`);
-      for (const t of torn) console.log(`  removed ${t.path}  [${t.branch}]  branch-deleted=${t.branchDeleted}`);
+      console.log(
+        `coa-worktree --teardown-stale (execute): ${torn.length} torn down, ${failures.length} failed`,
+      );
+      for (const t of torn)
+        console.log(`  removed ${t.path}  [${t.branch}]  branch-deleted=${t.branchDeleted}`);
       for (const f of failures) console.log(`  FAILED ${f.path}  reason: ${f.reason}`);
     }
   }
@@ -1808,7 +1860,11 @@ export function runAuditClaims(repoRoot, opts = {}) {
   // Gather all active claims
   let entries = [];
   if (existsSync(claimsDir)) {
-    try { entries = readdirSync(claimsDir); } catch { entries = []; }
+    try {
+      entries = readdirSync(claimsDir);
+    } catch {
+      entries = [];
+    }
   }
 
   const activeClaims = [];
@@ -1819,7 +1875,9 @@ export function runAuditClaims(repoRoot, opts = {}) {
       const claim = JSON.parse(raw);
       if (claim.status !== 'active') continue;
       activeClaims.push({ file: name, claim });
-    } catch { /* skip malformed */ }
+    } catch {
+      /* skip malformed */
+    }
   }
 
   if (activeClaims.length === 0) {
@@ -1843,7 +1901,7 @@ export function runAuditClaims(repoRoot, opts = {}) {
         encoding: 'utf8',
         stdio: 'pipe',
       });
-      const histText = histResult.status === 0 ? (histResult.stdout || '') : '';
+      const histText = histResult.status === 0 ? histResult.stdout || '' : '';
       const re = new RegExp(`\\b${pfx}-(\\d+)\\b`, 'g');
       let gitMax = 0;
       for (const hm of histText.matchAll(re)) {
@@ -1869,7 +1927,13 @@ export function runAuditClaims(repoRoot, opts = {}) {
     const sliceStr = claim.slice || '';
     const m = sliceStr.match(prefixRe);
     if (!m) {
-      rows.push({ file, slice: sliceStr, status: 'no-slice-id', classification: 'unknown', age: '-' });
+      rows.push({
+        file,
+        slice: sliceStr,
+        status: 'no-slice-id',
+        classification: 'unknown',
+        age: '-',
+      });
       continue;
     }
     const pfx = m[1];
@@ -1879,10 +1943,14 @@ export function runAuditClaims(repoRoot, opts = {}) {
 
     const createdAt = claim.createdAt ? new Date(claim.createdAt).getTime() : 0;
     const ageMs = createdAt ? now - createdAt : null;
-    const ageLabel = ageMs === null ? 'unknown'
-      : ageMs < 60000 ? `${Math.round(ageMs / 1000)}s`
-      : ageMs < 3600000 ? `${Math.round(ageMs / 60000)}m`
-      : `${(ageMs / 3600000).toFixed(1)}h`;
+    const ageLabel =
+      ageMs === null
+        ? 'unknown'
+        : ageMs < 60000
+          ? `${Math.round(ageMs / 1000)}s`
+          : ageMs < 3600000
+            ? `${Math.round(ageMs / 60000)}m`
+            : `${(ageMs / 3600000).toFixed(1)}h`;
 
     let classification;
     if (num > gitMax + AUTO_PICK_ANOMALY_THRESHOLD) {
@@ -1893,7 +1961,9 @@ export function runAuditClaims(repoRoot, opts = {}) {
     } else {
       // Not in history — determine in-flight vs stale by age
       const likelyInFlight = ageMs !== null && ageMs < SIX_HOURS_MS;
-      classification = likelyInFlight ? 'reserved-no-history (likely in-flight)' : 'reserved-no-history (likely stale/orphaned)';
+      classification = likelyInFlight
+        ? 'reserved-no-history (likely in-flight)'
+        : 'reserved-no-history (likely stale/orphaned)';
     }
 
     rows.push({ file, slice: sliceStr, classification, age: ageLabel });
@@ -1910,7 +1980,9 @@ export function runAuditClaims(repoRoot, opts = {}) {
   console.log(
     `${pad('File', colWidths.file)}  ${pad('Slice', colWidths.slice)}  ${pad('Classification', colWidths.classification)}  Age`,
   );
-  console.log('-'.repeat(colWidths.file + colWidths.slice + colWidths.classification + colWidths.age + 8));
+  console.log(
+    '-'.repeat(colWidths.file + colWidths.slice + colWidths.classification + colWidths.age + 8),
+  );
   for (const r of rows) {
     console.log(
       `${pad(r.file, colWidths.file)}  ${pad(r.slice, colWidths.slice)}  ${pad(r.classification, colWidths.classification)}  ${r.age}`,
@@ -1927,7 +1999,12 @@ export function runAuditClaims(repoRoot, opts = {}) {
     for (const { file, claim } of toExpire) {
       const filePath = join(claimsDir, file);
       try {
-        const updated = { ...claim, status: 'expired', expiredAt: new Date().toISOString(), expiredReason: 'anomalous-numbering (audit-claims --execute)' };
+        const updated = {
+          ...claim,
+          status: 'expired',
+          expiredAt: new Date().toISOString(),
+          expiredReason: 'anomalous-numbering (audit-claims --execute)',
+        };
         writeFileSync(filePath, JSON.stringify(updated, null, 2) + '\n', 'utf8');
         appendAuditLog(repoRoot, {
           event: 'claim-expired-anomalous',
@@ -1955,17 +2032,33 @@ export function runAuditClaims(repoRoot, opts = {}) {
 
 function usage() {
   console.error('Usage:');
-  console.error('  node scripts/coa-worktree.mjs --create                          (auto-pick slice ID — default)');
-  console.error('  node scripts/coa-worktree.mjs --create --slice=<TPL-XXX>        (explicit slice ID)');
-  console.error('  node scripts/coa-worktree.mjs --create --auto-pick [--auto-pick-prefix=<PREFIX>]');
-  console.error('  node scripts/coa-worktree.mjs --create [--allow-claim-bump]     (bypass anomaly guard — operator override)');
-  console.error('  node scripts/coa-worktree.mjs --create --name=<session-name>    (session worktree, no branch)');
+  console.error(
+    '  node scripts/coa-worktree.mjs --create                          (auto-pick slice ID — default)',
+  );
+  console.error(
+    '  node scripts/coa-worktree.mjs --create --slice=<TPL-XXX>        (explicit slice ID)',
+  );
+  console.error(
+    '  node scripts/coa-worktree.mjs --create --auto-pick [--auto-pick-prefix=<PREFIX>]',
+  );
+  console.error(
+    '  node scripts/coa-worktree.mjs --create [--allow-claim-bump]     (bypass anomaly guard — operator override)',
+  );
+  console.error(
+    '  node scripts/coa-worktree.mjs --create --name=<session-name>    (session worktree, no branch)',
+  );
   console.error('  node scripts/coa-worktree.mjs --teardown --name=<session-name> [--force]');
   console.error('  node scripts/coa-worktree.mjs --list');
   console.error('  node scripts/coa-worktree.mjs --audit [--json] [--name=<X>] [--trunk=<branch>]');
-  console.error('  node scripts/coa-worktree.mjs --audit-claims [--execute]        (classify active claims; --execute expires anomalous ones — requires COA_OPERATOR=1)');
-  console.error('  node scripts/coa-worktree.mjs --refresh --name=<X> [--dry-run|--execute] [--json] [--trunk=<branch>]');
-  console.error('  node scripts/coa-worktree.mjs --teardown-stale [--dry-run|--execute] [--include-dirty] [--preserve=<branch1,branch2>] [--trunk=<branch>] [--json]');
+  console.error(
+    '  node scripts/coa-worktree.mjs --audit-claims [--execute]        (classify active claims; --execute expires anomalous ones — requires COA_OPERATOR=1)',
+  );
+  console.error(
+    '  node scripts/coa-worktree.mjs --refresh --name=<X> [--dry-run|--execute] [--json] [--trunk=<branch>]',
+  );
+  console.error(
+    '  node scripts/coa-worktree.mjs --teardown-stale [--dry-run|--execute] [--include-dirty] [--preserve=<branch1,branch2>] [--trunk=<branch>] [--json]',
+  );
 }
 
 function main() {
@@ -1993,7 +2086,16 @@ function main() {
     }
 
     const agentArg = args.get('--agent');
-    const { exitCode } = runCreate(ROOT, { wantJson, sessionName, sliceId, autoPick, autoPickPrefix, agent: agentArg, enforceAgent: true, allowClaimBump });
+    const { exitCode } = runCreate(ROOT, {
+      wantJson,
+      sessionName,
+      sliceId,
+      autoPick,
+      autoPickPrefix,
+      agent: agentArg,
+      enforceAgent: true,
+      allowClaimBump,
+    });
     process.exit(exitCode);
   } else if (args.has('--audit-claims')) {
     const { exitCode } = runAuditClaims(ROOT, {
@@ -2039,7 +2141,8 @@ function main() {
   }
 }
 
-const isDirectRun = process.argv[1] &&
+const isDirectRun =
+  process.argv[1] &&
   (process.argv[1].endsWith('coa-worktree.mjs') || process.argv[1].endsWith('coa-worktree'));
 
 if (isDirectRun) {

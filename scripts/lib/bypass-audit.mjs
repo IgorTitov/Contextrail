@@ -127,7 +127,7 @@ export function correlateCommitsToPhases(commitShas, auditRecords) {
  */
 export function validateNonSkippablePresent(record, requiredPhases) {
   const ran = new Set(record.phases || []);
-  return requiredPhases.filter(p => !ran.has(p));
+  return requiredPhases.filter((p) => !ran.has(p));
 }
 
 // ---------------------------------------------------------------------------

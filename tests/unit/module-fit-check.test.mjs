@@ -196,19 +196,13 @@ describe('module-fit-check: file pickers + measureWorkSurface (fixture)', () => 
   });
 
   test('pickRepresentativeTest finds <name>.test.mjs in tests/unit/ first', () => {
-    const dirs = [
-      join(FIXTURE_ROOT, 'tests', 'unit'),
-      join(FIXTURE_ROOT, 'tests', 'contract'),
-    ];
+    const dirs = [join(FIXTURE_ROOT, 'tests', 'unit'), join(FIXTURE_ROOT, 'tests', 'contract')];
     const picked = pickRepresentativeTest('alpha', dirs);
     assert.ok(picked && picked.endsWith('alpha.test.mjs'));
   });
 
   test('pickRepresentativeTest falls back to tests/contract/ when unit has no match', () => {
-    const dirs = [
-      join(FIXTURE_ROOT, 'tests', 'unit'),
-      join(FIXTURE_ROOT, 'tests', 'contract'),
-    ];
+    const dirs = [join(FIXTURE_ROOT, 'tests', 'unit'), join(FIXTURE_ROOT, 'tests', 'contract')];
     const picked = pickRepresentativeTest('beta', dirs);
     assert.ok(picked && picked.endsWith('beta.test.mjs'));
   });
@@ -240,11 +234,11 @@ describe('module-fit-check: file pickers + measureWorkSurface (fixture)', () => 
     assert.ok(result.parts.impl > 0, 'impl tokens missing');
     assert.ok(result.parts.test > 0, 'test tokens missing');
     const sum =
-      result.parts.manifest
-      + result.parts.publicApi
-      + result.parts.sidecars
-      + result.parts.impl
-      + result.parts.test;
+      result.parts.manifest +
+      result.parts.publicApi +
+      result.parts.sidecars +
+      result.parts.impl +
+      result.parts.test;
     assert.equal(result.totalTokens, sum, 'totalTokens must equal sum of parts');
     assert.deepStrictEqual(result.missing, []);
     // File paths reported relative to rootAbs and POSIX-normalized

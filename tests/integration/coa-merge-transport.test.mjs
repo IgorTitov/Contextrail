@@ -27,9 +27,7 @@
 
 import { describe, test, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
-import {
-  mkdtempSync, writeFileSync, readFileSync, mkdirSync, rmSync,
-} from 'node:fs';
+import { mkdtempSync, writeFileSync, readFileSync, mkdirSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { safeGitSpawn } from '../_setup/safe-git.mjs';
@@ -99,7 +97,11 @@ describe('TPL-265 integration: captureGitConfig + restoreGitConfig with real git
 
   afterEach(() => {
     if (mainRepo) {
-      try { rmSync(mainRepo, { recursive: true, force: true }); } catch { /* best effort */ }
+      try {
+        rmSync(mainRepo, { recursive: true, force: true });
+      } catch {
+        /* best effort */
+      }
       mainRepo = null;
     }
   });
@@ -115,26 +117,38 @@ describe('TPL-265 integration: captureGitConfig + restoreGitConfig with real git
 
     // Capture the config (Step 9c does this before the push).
     const captured = captureGitConfig(mainRepo);
-    assert.ok(captured.includes('denyCurrentBranch = updateInstead'), 'captured config should include the key');
+    assert.ok(
+      captured.includes('denyCurrentBranch = updateInstead'),
+      'captured config should include the key',
+    );
 
     // Simulate a mutation that could happen if Step 9c code set additional
     // keys (mirrors the Cockpit AIC-116 corruption scenario).
     const configPath = join(mainRepo, '.git', 'config');
-    const corrupt = captured +
-      '\n[corruption-marker]\n\tbare = true\n\tmalicious-remote = http://bad.example\n';
+    const corrupt =
+      captured + '\n[corruption-marker]\n\tbare = true\n\tmalicious-remote = http://bad.example\n';
     writeFileSync(configPath, corrupt, 'utf8');
 
     const afterMutation = readFileSync(configPath, 'utf8');
-    assert.ok(afterMutation.includes('corruption-marker'), 'config should show mutation before restore');
+    assert.ok(
+      afterMutation.includes('corruption-marker'),
+      'config should show mutation before restore',
+    );
 
     // Rollback (Step 9c calls this when push.ok === false).
     restoreGitConfig(mainRepo, captured);
 
     const afterRestore = readFileSync(configPath, 'utf8');
     assert.equal(afterRestore, captured, 'restored content must equal pre-mutation snapshot');
-    assert.ok(!afterRestore.includes('corruption-marker'), 'corruption-marker must be gone after restore');
+    assert.ok(
+      !afterRestore.includes('corruption-marker'),
+      'corruption-marker must be gone after restore',
+    );
     assert.ok(!afterRestore.includes('bare = true'), 'bare=true must be gone after restore');
-    assert.ok(afterRestore.includes('denyCurrentBranch = updateInstead'), 'legitimate config key must survive restore');
+    assert.ok(
+      afterRestore.includes('denyCurrentBranch = updateInstead'),
+      'legitimate config key must survive restore',
+    );
   });
 
   test('capture → mutate → restore is idempotent (multiple restores leave config stable)', () => {
@@ -153,6 +167,10 @@ describe('TPL-265 integration: captureGitConfig + restoreGitConfig with real git
     restoreGitConfig(mainRepo, captured);
 
     const afterSecondRestore = readFileSync(configPath, 'utf8');
-    assert.equal(afterSecondRestore, captured, 'second restore should also match original captured content');
+    assert.equal(
+      afterSecondRestore,
+      captured,
+      'second restore should also match original captured content',
+    );
   });
 });

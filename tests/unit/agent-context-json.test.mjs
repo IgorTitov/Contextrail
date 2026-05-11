@@ -18,7 +18,9 @@ import { fileURLToPath } from 'node:url';
 
 import { parseArgs } from '../../scripts/agent-context.mjs';
 
-const __dirname = import.meta.dirname ?? (import.meta.url ? fileURLToPath(import.meta.url).replace(/[/\\][^/\\]+$/, '') : process.cwd());
+const __dirname =
+  import.meta.dirname ??
+  (import.meta.url ? fileURLToPath(import.meta.url).replace(/[/\\][^/\\]+$/, '') : process.cwd());
 const ROOT = resolve(__dirname, '..', '..');
 const SCRIPT = join(ROOT, 'scripts', 'agent-context.mjs');
 
@@ -72,7 +74,7 @@ describe('parseArgs: --format and --explain', () => {
     assert.throws(
       () => parseArgs(['--files=README.md', '--budget=1000', '--format=yaml']),
       /invalid.*format/i,
-      'invalid format must throw a clear error'
+      'invalid format must throw a clear error',
     );
   });
 
@@ -120,7 +122,17 @@ describe('--format CLI output', () => {
     assert.ok(existsSync(join(ROOT, AUTH_FILE)), `test requires ${AUTH_FILE}`);
     const out = run([`--files=${AUTH_FILE}`, '--budget=16000', '--format=json']);
     const parsed = JSON.parse(out);
-    const REQUIRED_KEYS = ['version', 'slice', 'files', 'profile', 'budget', 'tiers', 'totalTokens', 'headings', 'explain'];
+    const REQUIRED_KEYS = [
+      'version',
+      'slice',
+      'files',
+      'profile',
+      'budget',
+      'tiers',
+      'totalTokens',
+      'headings',
+      'explain',
+    ];
     for (const key of REQUIRED_KEYS) {
       assert.ok(key in parsed, `JSON must have top-level key "${key}"`);
     }
@@ -164,7 +176,11 @@ describe('--format CLI output', () => {
     assert.ok(existsSync(join(ROOT, AUTH_FILE)), `test requires ${AUTH_FILE}`);
     const result = runSafe([`--files=${AUTH_FILE}`, '--budget=16000', '--format=yaml']);
     assert.notEqual(result.status, 0, 'invalid --format=yaml must exit non-zero');
-    assert.match(result.stderr, /invalid.*format|format.*invalid/i, 'error message must mention format');
+    assert.match(
+      result.stderr,
+      /invalid.*format|format.*invalid/i,
+      'error message must mention format',
+    );
   });
 });
 
@@ -181,11 +197,11 @@ describe('pnpm context:brief shortcut', () => {
       return;
     }
 
-    const result = spawnSync(
-      'pnpm',
-      ['context:brief', `--files=README.md`, '--budget=64000'],
-      { cwd: ROOT, encoding: 'utf8', shell: true }
-    );
+    const result = spawnSync('pnpm', ['context:brief', `--files=README.md`, '--budget=64000'], {
+      cwd: ROOT,
+      encoding: 'utf8',
+      shell: true,
+    });
 
     if (result.error) {
       // pnpm not runnable; skip
@@ -194,7 +210,10 @@ describe('pnpm context:brief shortcut', () => {
 
     const out = result.stdout;
     for (const heading of EXPECTED_HEADINGS) {
-      assert.ok(out.includes(heading), `pnpm context:brief output must contain heading "${heading}"`);
+      assert.ok(
+        out.includes(heading),
+        `pnpm context:brief output must contain heading "${heading}"`,
+      );
     }
   });
 });

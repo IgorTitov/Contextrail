@@ -27,9 +27,7 @@
 
 import { describe, test, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
-import {
-  mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync, existsSync,
-} from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -67,7 +65,11 @@ function createBaseFixture(label) {
   // TPL-304: step 0.5 requires a .coa-session file identifying the session owner.
   writeFileSync(
     join(root, '.coa-session'),
-    JSON.stringify({ sessionName: 'tx-FXT-test', agent: 'test-agent-teardown', created: new Date().toISOString() }) + '\n',
+    JSON.stringify({
+      sessionName: 'tx-FXT-test',
+      agent: 'test-agent-teardown',
+      created: new Date().toISOString(),
+    }) + '\n',
   );
   safeGitSpawn(root, ['add', 'VERSION', 'CHANGELOG.md', 'package.json', '.claims']);
   safeGitSpawn(root, ['commit', '-m', 'init']);
@@ -80,16 +82,20 @@ function createActiveClaim(root, claimId, agent, targets) {
   const expires = new Date(now.getTime() + 6 * 24 * 60 * 60 * 1000);
   writeFileSync(
     join(root, '.claims', `${claimId}.json`),
-    JSON.stringify({
-      id: claimId,
-      agent,
-      slice: 'FXT-test',
-      targets: targets.map((path) => ({ path, action: 'modify' })),
-      status: 'active',
-      strategy: 'modify-in-place',
-      created: now.toISOString(),
-      expires: expires.toISOString(),
-    }, null, 2) + '\n',
+    JSON.stringify(
+      {
+        id: claimId,
+        agent,
+        slice: 'FXT-test',
+        targets: targets.map((path) => ({ path, action: 'modify' })),
+        status: 'active',
+        strategy: 'modify-in-place',
+        created: now.toISOString(),
+        expires: expires.toISOString(),
+      },
+      null,
+      2,
+    ) + '\n',
   );
 }
 
@@ -98,24 +104,31 @@ function createStaleClaim(root, claimId, agent) {
   const expired = new Date(now.getTime() - 2 * 60 * 60 * 1000);
   writeFileSync(
     join(root, '.claims', `${claimId}.json`),
-    JSON.stringify({
-      id: claimId,
-      agent,
-      slice: 'FXT-stale',
-      targets: [{ path: 'some/old/file.mjs', action: 'modify' }],
-      status: 'active',
-      strategy: 'modify-in-place',
-      created: new Date(now.getTime() - 4 * 60 * 60 * 1000).toISOString(),
-      expires: expired.toISOString(),
-    }, null, 2) + '\n',
+    JSON.stringify(
+      {
+        id: claimId,
+        agent,
+        slice: 'FXT-stale',
+        targets: [{ path: 'some/old/file.mjs', action: 'modify' }],
+        status: 'active',
+        strategy: 'modify-in-place',
+        created: new Date(now.getTime() - 4 * 60 * 60 * 1000).toISOString(),
+        expires: expired.toISOString(),
+      },
+      null,
+      2,
+    ) + '\n',
   );
 }
 
 function subprocessEnv(fixtureRoot) {
   const env = { ...process.env };
   for (const key of [
-    'GIT_DIR', 'GIT_WORK_TREE', 'GIT_INDEX_FILE',
-    'GIT_OBJECT_DIRECTORY', 'GIT_ALTERNATE_OBJECT_DIRECTORIES',
+    'GIT_DIR',
+    'GIT_WORK_TREE',
+    'GIT_INDEX_FILE',
+    'GIT_OBJECT_DIRECTORY',
+    'GIT_ALTERNATE_OBJECT_DIRECTORIES',
     'GIT_COMMON_DIR',
   ]) {
     delete env[key];
@@ -128,16 +141,12 @@ function subprocessEnv(fixtureRoot) {
 }
 
 function runCoaMerge(root, extraArgs = []) {
-  return spawnSync(
-    process.execPath,
-    [COA_MERGE, '--no-snapshot', ...extraArgs],
-    {
-      cwd: root,
-      encoding: 'utf8',
-      stdio: 'pipe',
-      env: subprocessEnv(root),
-    },
-  );
+  return spawnSync(process.execPath, [COA_MERGE, '--no-snapshot', ...extraArgs], {
+    cwd: root,
+    encoding: 'utf8',
+    stdio: 'pipe',
+    env: subprocessEnv(root),
+  });
 }
 
 function listBranches(root) {
@@ -214,7 +223,11 @@ describe('coa-merge step 9e: auto-teardown merged tx- branches', () => {
 
   afterEach(() => {
     if (fixtureRoot && existsSync(fixtureRoot)) {
-      try { rmSync(fixtureRoot, { recursive: true, force: true }); } catch { /* best effort */ }
+      try {
+        rmSync(fixtureRoot, { recursive: true, force: true });
+      } catch {
+        /* best effort */
+      }
       fixtureRoot = undefined;
     }
   });
@@ -249,8 +262,11 @@ describe('coa-merge step 9e: auto-teardown merged tx- branches', () => {
       '--message=test(teardown): scenario 1 two merged tx- branches (TPL-283)',
     ]);
 
-    assert.strictEqual(result.status, 0,
-      `coa-merge failed:\nSTDOUT:\n${result.stdout}\nSTDERR:\n${result.stderr}`);
+    assert.strictEqual(
+      result.status,
+      0,
+      `coa-merge failed:\nSTDOUT:\n${result.stdout}\nSTDERR:\n${result.stderr}`,
+    );
 
     const branches = listBranches(fixtureRoot);
     assert.ok(
@@ -295,14 +311,20 @@ describe('coa-merge step 9e: auto-teardown merged tx- branches', () => {
     writeFileSync(join(fixtureRoot, 'feature2.mjs'), 'export const y = 2;\n');
     safeGitSpawn(fixtureRoot, ['add', 'CHANGELOG.md', 'feature2.mjs']);
 
-    createActiveClaim(fixtureRoot, 'clm-s2-test', 'test-agent-s2', ['CHANGELOG.md', 'feature2.mjs']);
+    createActiveClaim(fixtureRoot, 'clm-s2-test', 'test-agent-s2', [
+      'CHANGELOG.md',
+      'feature2.mjs',
+    ]);
 
     const result = runCoaMerge(fixtureRoot, [
       '--message=test(teardown): scenario 2 unmerged branch preserved (TPL-283)',
     ]);
 
-    assert.strictEqual(result.status, 0,
-      `coa-merge failed:\nSTDOUT:\n${result.stdout}\nSTDERR:\n${result.stderr}`);
+    assert.strictEqual(
+      result.status,
+      0,
+      `coa-merge failed:\nSTDOUT:\n${result.stdout}\nSTDERR:\n${result.stderr}`,
+    );
 
     const branches = listBranches(fixtureRoot);
     assert.ok(
@@ -344,14 +366,20 @@ describe('coa-merge step 9e: auto-teardown merged tx- branches', () => {
     writeFileSync(join(fixtureRoot, 'feature4.mjs'), 'export const z = 4;\n');
     safeGitSpawn(fixtureRoot, ['add', 'CHANGELOG.md', 'feature4.mjs']);
 
-    createActiveClaim(fixtureRoot, 'clm-s4-test', 'test-agent-s4', ['CHANGELOG.md', 'feature4.mjs']);
+    createActiveClaim(fixtureRoot, 'clm-s4-test', 'test-agent-s4', [
+      'CHANGELOG.md',
+      'feature4.mjs',
+    ]);
 
     const result = runCoaMerge(fixtureRoot, [
       '--message=test(teardown): scenario 4 dirty worktree preserved (TPL-283)',
     ]);
 
-    assert.strictEqual(result.status, 0,
-      `coa-merge failed:\nSTDOUT:\n${result.stdout}\nSTDERR:\n${result.stderr}`);
+    assert.strictEqual(
+      result.status,
+      0,
+      `coa-merge failed:\nSTDOUT:\n${result.stdout}\nSTDERR:\n${result.stderr}`,
+    );
 
     // Branch and worktree must still exist (dirty work not destroyed).
     const branches = listBranches(fixtureRoot);
@@ -362,8 +390,16 @@ describe('coa-merge step 9e: auto-teardown merged tx- branches', () => {
     assert.ok(existsSync(wtPath), `Worktree dir must still exist when dirty: ${wtPath}`);
 
     // Cleanup leftover worktree (best-effort).
-    try { safeGitSpawn(fixtureRoot, ['worktree', 'remove', '--force', wtPath]); } catch { /* ok */ }
-    try { rmSync(wtPath, { recursive: true, force: true }); } catch { /* ok */ }
+    try {
+      safeGitSpawn(fixtureRoot, ['worktree', 'remove', '--force', wtPath]);
+    } catch {
+      /* ok */
+    }
+    try {
+      rmSync(wtPath, { recursive: true, force: true });
+    } catch {
+      /* ok */
+    }
   });
 
   // -------------------------------------------------------------------------
@@ -384,14 +420,20 @@ describe('coa-merge step 9e: auto-teardown merged tx- branches', () => {
     writeFileSync(join(fixtureRoot, 'feature5.mjs'), 'export const q = 5;\n');
     safeGitSpawn(fixtureRoot, ['add', 'CHANGELOG.md', 'feature5.mjs']);
 
-    createActiveClaim(fixtureRoot, 'clm-s5-active', 'test-agent-s5', ['CHANGELOG.md', 'feature5.mjs']);
+    createActiveClaim(fixtureRoot, 'clm-s5-active', 'test-agent-s5', [
+      'CHANGELOG.md',
+      'feature5.mjs',
+    ]);
 
     const result = runCoaMerge(fixtureRoot, [
       '--message=test(teardown): scenario 5 stale claim auto-expired (TPL-283)',
     ]);
 
-    assert.strictEqual(result.status, 0,
-      `coa-merge failed:\nSTDOUT:\n${result.stdout}\nSTDERR:\n${result.stderr}`);
+    assert.strictEqual(
+      result.status,
+      0,
+      `coa-merge failed:\nSTDOUT:\n${result.stdout}\nSTDERR:\n${result.stderr}`,
+    );
 
     // Stale claim file must still exist (audit trail preserved).
     const staleClaimPath = join(fixtureRoot, '.claims', 'clm-s5-stale.json');

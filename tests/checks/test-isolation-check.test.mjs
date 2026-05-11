@@ -116,10 +116,7 @@ describe('R1 meta-test — detection contract per fixture', () => {
         return;
       }
       // expect violation
-      assert.ok(
-        result.violations.length > 0,
-        `expected at least one violation, got none`,
-      );
+      assert.ok(result.violations.length > 0, `expected at least one violation, got none`);
       for (const wantPat of exp.patterns) {
         const found = result.violations.some((v) => v.pattern === wantPat);
         assert.ok(
@@ -221,8 +218,10 @@ describe('R1 meta-test — raw-git-call pattern (TPL-272)', () => {
       execSync('git init', { cwd: dir, env: { ...process.env, GIT_DIR: '', GIT_WORK_TREE: '' }, stdio: 'pipe' });
     `;
     const v = detect(src);
-    assert.ok(v.some((x) => x.pattern === 'raw-git-call'),
-      `expected raw-git-call violation; got [${v.map((x) => x.pattern).join(', ')}]`);
+    assert.ok(
+      v.some((x) => x.pattern === 'raw-git-call'),
+      `expected raw-git-call violation; got [${v.map((x) => x.pattern).join(', ')}]`,
+    );
   });
 
   test('spawnSync("git", [...]) with proper cwd+env still produces raw-git-call', () => {
@@ -234,8 +233,10 @@ describe('R1 meta-test — raw-git-call pattern (TPL-272)', () => {
       spawnSync('git', ['init'], { cwd: dir, env: { ...process.env, GIT_DIR: '', GIT_WORK_TREE: '' }, stdio: 'pipe' });
     `;
     const v = detect(src);
-    assert.ok(v.some((x) => x.pattern === 'raw-git-call'),
-      `expected raw-git-call violation; got [${v.map((x) => x.pattern).join(', ')}]`);
+    assert.ok(
+      v.some((x) => x.pattern === 'raw-git-call'),
+      `expected raw-git-call violation; got [${v.map((x) => x.pattern).join(', ')}]`,
+    );
   });
 
   test('safeGit call does not produce raw-git-call', () => {
@@ -247,8 +248,11 @@ describe('R1 meta-test — raw-git-call pattern (TPL-272)', () => {
       safeGit(dir, 'init', { stdio: 'pipe' });
     `;
     const v = detect(src);
-    assert.equal(v.filter((x) => x.pattern === 'raw-git-call').length, 0,
-      `safeGit must not produce raw-git-call; got [${v.map((x) => x.pattern).join(', ')}]`);
+    assert.equal(
+      v.filter((x) => x.pattern === 'raw-git-call').length,
+      0,
+      `safeGit must not produce raw-git-call; got [${v.map((x) => x.pattern).join(', ')}]`,
+    );
   });
 });
 
@@ -387,7 +391,11 @@ describe('R1 meta-test — SAFE_GIT_ENV_KEYS contract', () => {
     }
     // Tampering check: the export must be exactly these 6 (no more, no less)
     // until a deliberate change updates this assertion.
-    assert.equal(SAFE_GIT_ENV_KEYS.length, 6, 'unexpected SAFE_GIT_ENV_KEYS size — review and update the meta-test');
+    assert.equal(
+      SAFE_GIT_ENV_KEYS.length,
+      6,
+      'unexpected SAFE_GIT_ENV_KEYS size — review and update the meta-test',
+    );
   });
 });
 
@@ -420,7 +428,10 @@ describe('R1 meta-test — pre-commit hook wiring', () => {
     // Either an explicit NON_SKIPPABLE_PHASES list contains "2.5" / "r1",
     // or COA_SKIP_GATES handling must hardcode an exclusion for the phase.
     const hasList = /NON_SKIPPABLE_PHASES\s*=\s*[("'][^)"']*\b(2\.5|r1)\b/.test(preCommit);
-    const hasInline = /(?:test-isolation|2\.5|r1)[\s\S]{0,200}cannot be skipped|never skip|always run/i.test(preCommit);
+    const hasInline =
+      /(?:test-isolation|2\.5|r1)[\s\S]{0,200}cannot be skipped|never skip|always run/i.test(
+        preCommit,
+      );
     const hardcoded = /should_run_r1|R1_NEVER_SKIP|always.*test-isolation/i.test(preCommit);
     assert.ok(
       hasList || hasInline || hardcoded,

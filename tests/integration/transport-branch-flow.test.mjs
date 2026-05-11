@@ -26,18 +26,13 @@
 
 import { describe, test, before, after, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
-import {
-  mkdtempSync, mkdirSync, writeFileSync, readFileSync,
-  existsSync, rmSync,
-} from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, basename } from 'node:path';
 import { spawnSync } from 'node:child_process';
 
 import { safeGit, safeGitSpawn } from '../_setup/safe-git.mjs';
-import {
-  runPreCommit,
-} from '../../scripts/checks/transport-branch-check.mjs';
+import { runPreCommit } from '../../scripts/checks/transport-branch-check.mjs';
 import {
   mergingMarkerPath,
   mergingMarkerContent,
@@ -50,9 +45,7 @@ import {
   FF_UPDATE_METHODS,
   composeUpdateInsteadSetupHint,
 } from '../../scripts/lib/transport-branch.mjs';
-import {
-  classifyCoaMergeMode,
-} from '../../scripts/coa-merge.mjs';
+import { classifyCoaMergeMode } from '../../scripts/coa-merge.mjs';
 
 // ---------------------------------------------------------------------------
 // Fixture helpers — every git call goes through safeGit/safeGitSpawn (R1).
@@ -79,10 +72,7 @@ function createBaseRepo(label) {
   // sets later without git complaining about missing files.
   writeFileSync(join(root, 'README.md'), '# fixture\n');
   writeFileSync(join(root, 'VERSION'), '0.0.1\n');
-  writeFileSync(
-    join(root, 'CHANGELOG.md'),
-    '# Changelog\n\n## [Unreleased]\n\n- seed\n',
-  );
+  writeFileSync(join(root, 'CHANGELOG.md'), '# Changelog\n\n## [Unreleased]\n\n- seed\n');
   writeFileSync(
     join(root, 'package.json'),
     JSON.stringify({ name: 'r2-fixture', version: '0.0.1' }, null, 2) + '\n',
@@ -126,15 +116,15 @@ function touchFile(root, path, marker) {
  */
 function writeMarker(root, { branch, pid = process.pid, ts = Date.now() }) {
   mkdirSync(join(root, '.claims'), { recursive: true });
-  writeFileSync(
-    mergingMarkerPath(root),
-    mergingMarkerContent({ pid, branch, ts }),
-    'utf8',
-  );
+  writeFileSync(mergingMarkerPath(root), mergingMarkerContent({ pid, branch, ts }), 'utf8');
 }
 
 function removeMarker(root) {
-  try { rmSync(mergingMarkerPath(root)); } catch { /* best-effort */ }
+  try {
+    rmSync(mergingMarkerPath(root));
+  } catch {
+    /* best-effort */
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -143,14 +133,19 @@ function removeMarker(root) {
 
 describe('runPreCommit — branch-shape gate', () => {
   let fixture;
-  beforeEach(() => { fixture = createBaseRepo('branch-shape'); });
-  afterEach(() => { rmSync(fixture.root, { recursive: true, force: true }); });
+  beforeEach(() => {
+    fixture = createBaseRepo('branch-shape');
+  });
+  afterEach(() => {
+    rmSync(fixture.root, { recursive: true, force: true });
+  });
 
   test('1. main branch + plain code commit → pass', () => {
     touchFile(fixture.root, 'README.md', 'code-edit');
     stage(fixture.root, ['README.md']);
     const { exitCode, result } = runPreCommit({
-      repoRoot: fixture.root, silent: true,
+      repoRoot: fixture.root,
+      silent: true,
     });
     assert.equal(exitCode, 0);
     assert.equal(result.ok, true);
@@ -162,7 +157,8 @@ describe('runPreCommit — branch-shape gate', () => {
     touchFile(fixture.root, 'README.md', 'code-edit');
     stage(fixture.root, ['README.md']);
     const { exitCode, result } = runPreCommit({
-      repoRoot: fixture.root, silent: true,
+      repoRoot: fixture.root,
+      silent: true,
     });
     assert.equal(exitCode, 0);
     assert.equal(result.mode, 'transport-code');
@@ -173,7 +169,8 @@ describe('runPreCommit — branch-shape gate', () => {
     touchFile(fixture.root, 'README.md');
     stage(fixture.root, ['README.md']);
     const { exitCode, result } = runPreCommit({
-      repoRoot: fixture.root, silent: true,
+      repoRoot: fixture.root,
+      silent: true,
     });
     assert.equal(exitCode, 1);
     assert.equal(result.ok, false);
@@ -186,7 +183,8 @@ describe('runPreCommit — branch-shape gate', () => {
     touchFile(fixture.root, 'README.md');
     stage(fixture.root, ['README.md']);
     const { exitCode, result } = runPreCommit({
-      repoRoot: fixture.root, silent: true,
+      repoRoot: fixture.root,
+      silent: true,
     });
     assert.equal(exitCode, 1);
     assert.match(result.reason, /anti-pattern/);
@@ -197,7 +195,8 @@ describe('runPreCommit — branch-shape gate', () => {
     touchFile(fixture.root, 'README.md');
     stage(fixture.root, ['README.md']);
     const { exitCode, result } = runPreCommit({
-      repoRoot: fixture.root, silent: true,
+      repoRoot: fixture.root,
+      silent: true,
     });
     assert.equal(exitCode, 1);
     assert.match(result.reason, /neither trunk.*nor a transport branch/);
@@ -208,7 +207,8 @@ describe('runPreCommit — branch-shape gate', () => {
     touchFile(fixture.root, 'README.md');
     stage(fixture.root, ['README.md']);
     const { exitCode, result } = runPreCommit({
-      repoRoot: fixture.root, silent: true,
+      repoRoot: fixture.root,
+      silent: true,
     });
     assert.equal(exitCode, 1);
     assert.match(result.reason, /neither trunk.*nor a transport branch/);
@@ -221,13 +221,16 @@ describe('runPreCommit — ceremony-marker gate', () => {
     fixture = createBaseRepo('marker');
     checkoutBranch(fixture.root, 'tx-TPL-234');
   });
-  afterEach(() => { rmSync(fixture.root, { recursive: true, force: true }); });
+  afterEach(() => {
+    rmSync(fixture.root, { recursive: true, force: true });
+  });
 
   test('7. tx-* + VERSION staged but NO marker → REFUSE', () => {
     writeFileSync(join(fixture.root, 'VERSION'), '0.0.2\n');
     stage(fixture.root, ['VERSION']);
     const { exitCode, result } = runPreCommit({
-      repoRoot: fixture.root, silent: true,
+      repoRoot: fixture.root,
+      silent: true,
     });
     assert.equal(exitCode, 1);
     assert.match(result.reason, /Refusing to commit ceremony files/);
@@ -239,7 +242,8 @@ describe('runPreCommit — ceremony-marker gate', () => {
     stage(fixture.root, ['VERSION']);
     writeMarker(fixture.root, { branch: 'tx-TPL-234' });
     const { exitCode, result } = runPreCommit({
-      repoRoot: fixture.root, silent: true,
+      repoRoot: fixture.root,
+      silent: true,
     });
     assert.equal(exitCode, 0);
     assert.equal(result.mode, 'transport-ceremony');
@@ -252,7 +256,8 @@ describe('runPreCommit — ceremony-marker gate', () => {
     stage(fixture.root, ['VERSION']);
     writeMarker(fixture.root, { branch: 'tx-TPL-999' });
     const { exitCode, result } = runPreCommit({
-      repoRoot: fixture.root, silent: true,
+      repoRoot: fixture.root,
+      silent: true,
     });
     assert.equal(exitCode, 1);
     assert.match(result.markerError, /marker is for branch.*tx-TPL-999/);
@@ -267,7 +272,8 @@ describe('runPreCommit — ceremony-marker gate', () => {
       ts: Date.now() - 10 * 60 * 1000, // 10 min ago
     });
     const { exitCode, result } = runPreCommit({
-      repoRoot: fixture.root, silent: true,
+      repoRoot: fixture.root,
+      silent: true,
     });
     assert.equal(exitCode, 1);
     assert.match(result.markerError, /marker is \d+s old/);
@@ -279,7 +285,8 @@ describe('runPreCommit — ceremony-marker gate', () => {
     stage(fixture.root, ['VERSION']);
     writeFileSync(mergingMarkerPath(fixture.root), 'not json');
     const { exitCode, result } = runPreCommit({
-      repoRoot: fixture.root, silent: true,
+      repoRoot: fixture.root,
+      silent: true,
     });
     assert.equal(exitCode, 1);
     assert.match(result.markerError, /malformed/);
@@ -292,7 +299,8 @@ describe('runPreCommit — ceremony-marker gate', () => {
     // Importantly, no marker is written — code-only commits don't need one.
     assert.equal(existsSync(mergingMarkerPath(fixture.root)), false);
     const { exitCode, result } = runPreCommit({
-      repoRoot: fixture.root, silent: true,
+      repoRoot: fixture.root,
+      silent: true,
     });
     assert.equal(exitCode, 0);
     assert.equal(result.mode, 'transport-code');
@@ -305,7 +313,8 @@ describe('runPreCommit — ceremony-marker gate', () => {
     stage(fixture.root, ['VERSION']);
     writeMarker(fixture.root, { branch: 'tx-TPL-234', pid: 1 });
     const { exitCode, result } = runPreCommit({
-      repoRoot: fixture.root, silent: true,
+      repoRoot: fixture.root,
+      silent: true,
     });
     // ancestorPids() may fail on the test platform — when the chain
     // probe fails the checker soft-passes with a stderr warning. The
@@ -323,14 +332,19 @@ describe('runPreCommit — ceremony-marker gate', () => {
 
 describe('runPreCommit — main + ceremony stays the trunk-direct path', () => {
   let fixture;
-  beforeEach(() => { fixture = createBaseRepo('main-ceremony'); });
-  afterEach(() => { rmSync(fixture.root, { recursive: true, force: true }); });
+  beforeEach(() => {
+    fixture = createBaseRepo('main-ceremony');
+  });
+  afterEach(() => {
+    rmSync(fixture.root, { recursive: true, force: true });
+  });
 
   test('14. main + VERSION staged WITHOUT marker → PASS (trunk-direct preserved)', () => {
     writeFileSync(join(fixture.root, 'VERSION'), '0.0.2\n');
     stage(fixture.root, ['VERSION']);
     const { exitCode, result } = runPreCommit({
-      repoRoot: fixture.root, silent: true,
+      repoRoot: fixture.root,
+      silent: true,
     });
     assert.equal(exitCode, 0);
     assert.equal(result.mode, 'trunk');
@@ -399,20 +413,25 @@ describe('marker as mutex — second concurrent coa-merge sees existing marker',
     fixture = createBaseRepo('marker-race');
     checkoutBranch(fixture.root, 'tx-TPL-234');
   });
-  afterEach(() => { rmSync(fixture.root, { recursive: true, force: true }); });
+  afterEach(() => {
+    rmSync(fixture.root, { recursive: true, force: true });
+  });
 
   test('25. existing marker is observable to a second runPreCommit', () => {
     // First run writes a marker for the ceremony; second run reads it.
     writeMarker(fixture.root, { branch: 'tx-TPL-234' });
     const { exitCode, result } = runPreCommit({
-      repoRoot: fixture.root, silent: true,
+      repoRoot: fixture.root,
+      silent: true,
     });
     // No ceremony files staged → marker presence doesn't gate the
     // simple code-commit case, but it stays on disk for the race
     // semantics.
     assert.equal(exitCode, 0);
-    assert.ok(existsSync(mergingMarkerPath(fixture.root)),
-      'marker file should still exist after pre-commit check');
+    assert.ok(
+      existsSync(mergingMarkerPath(fixture.root)),
+      'marker file should still exist after pre-commit check',
+    );
     // Now stage a ceremony file and confirm the same marker authorizes.
     writeFileSync(join(fixture.root, 'VERSION'), '0.0.2\n');
     stage(fixture.root, ['VERSION']);
@@ -481,10 +500,7 @@ function createF12Fixture(label, { setUpdateInstead = true } = {}) {
 
   writeFileSync(join(mainWt, 'README.md'), '# fixture\n');
   writeFileSync(join(mainWt, 'VERSION'), '0.0.1\n');
-  writeFileSync(
-    join(mainWt, 'CHANGELOG.md'),
-    '# Changelog\n\n## [Unreleased]\n\n- seed\n',
-  );
+  writeFileSync(join(mainWt, 'CHANGELOG.md'), '# Changelog\n\n## [Unreleased]\n\n- seed\n');
   safeGitSpawn(mainWt, ['add', 'README.md', 'VERSION', 'CHANGELOG.md']);
   safeGitSpawn(mainWt, ['commit', '-m', 'init']);
 
@@ -514,12 +530,11 @@ function createF12Fixture(label, { setUpdateInstead = true } = {}) {
  * non-zero so the dirty-main-refused case can be observed.
  */
 function pushUpdateInstead(txWt, mainWtPath, leaseSha) {
-  const result = safeGitSpawn(txWt, [
-    'push',
-    `--force-with-lease=main:${leaseSha}`,
-    mainWtPath,
-    'HEAD:refs/heads/main',
-  ], { stdio: 'pipe', encoding: 'utf8' });
+  const result = safeGitSpawn(
+    txWt,
+    ['push', `--force-with-lease=main:${leaseSha}`, mainWtPath, 'HEAD:refs/heads/main'],
+    { stdio: 'pipe', encoding: 'utf8' },
+  );
   return {
     ok: result.status === 0,
     status: result.status,
@@ -530,16 +545,19 @@ function pushUpdateInstead(txWt, mainWtPath, leaseSha) {
 
 describe('F12 — non-bare repo, main checked out, updateInstead set', () => {
   let fx;
-  beforeEach(() => { fx = createF12Fixture('happy'); });
-  afterEach(() => { rmSync(fx.root, { recursive: true, force: true }); });
+  beforeEach(() => {
+    fx = createF12Fixture('happy');
+  });
+  afterEach(() => {
+    rmSync(fx.root, { recursive: true, force: true });
+  });
 
   test('F12.1. push-update-instead succeeds; main worktree synced to new HEAD', () => {
     // Pre-condition: main is at initialSha; transport at txSha.
     assert.equal(gitText(fx.mainWt, ['rev-parse', 'HEAD']), fx.initialSha);
 
     const push = pushUpdateInstead(fx.txWt, fx.mainWt, fx.initialSha);
-    assert.equal(push.ok, true,
-      `expected push to succeed; got: ${push.stderr}`);
+    assert.equal(push.ok, true, `expected push to succeed; got: ${push.stderr}`);
 
     // Main ref advanced to txSha.
     const mainSha = gitText(fx.mainWt, ['rev-parse', 'main']);
@@ -553,20 +571,15 @@ describe('F12 — non-bare repo, main checked out, updateInstead set', () => {
 
     // And `git diff HEAD` is clean (no stale tracked files).
     const diff = gitText(fx.mainWt, ['diff', 'HEAD', '--stat']);
-    assert.equal(diff, '',
-      'main worktree must be clean post-push');
+    assert.equal(diff, '', 'main worktree must be clean post-push');
   });
 
   test('F12.2. dirty main worktree → push refused; ref does NOT advance', () => {
     // Make main worktree dirty (modify a tracked file).
-    writeFileSync(
-      join(fx.mainWt, 'README.md'),
-      '# fixture (dirty)\n',
-    );
+    writeFileSync(join(fx.mainWt, 'README.md'), '# fixture (dirty)\n');
 
     const push = pushUpdateInstead(fx.txWt, fx.mainWt, fx.initialSha);
-    assert.equal(push.ok, false,
-      'push must refuse against dirty main worktree');
+    assert.equal(push.ok, false, 'push must refuse against dirty main worktree');
 
     // Stderr mentions "uncommitted changes" / "working" — git's
     // updateInstead refusal text. Accept either pattern.
@@ -578,15 +591,18 @@ describe('F12 — non-bare repo, main checked out, updateInstead set', () => {
 
     // Main ref did NOT move.
     const mainSha = gitText(fx.mainWt, ['rev-parse', 'main']);
-    assert.equal(mainSha, fx.initialSha,
-      'main ref must NOT advance when main worktree is dirty');
+    assert.equal(mainSha, fx.initialSha, 'main ref must NOT advance when main worktree is dirty');
   });
 });
 
 describe('F12 — receive.denyCurrentBranch NOT set to updateInstead', () => {
   let fx;
-  beforeEach(() => { fx = createF12Fixture('no-config', { setUpdateInstead: false }); });
-  afterEach(() => { rmSync(fx.root, { recursive: true, force: true }); });
+  beforeEach(() => {
+    fx = createF12Fixture('no-config', { setUpdateInstead: false });
+  });
+  afterEach(() => {
+    rmSync(fx.root, { recursive: true, force: true });
+  });
 
   test('F12.3. classify under no config → REFUSE_NEEDS_CONFIG; ref does NOT advance', () => {
     // Probe the config the same way coa-merge step 9c would.
@@ -594,36 +610,41 @@ describe('F12 — receive.denyCurrentBranch NOT set to updateInstead', () => {
     const mainWt = findMainWorktree(wtListRaw);
     assert.ok(mainWt, 'fixture should expose a main worktree to the parser');
 
-    const denyProbe = safeGitSpawn(mainWt.path,
-      ['config', '--get', 'receive.denyCurrentBranch'],
-      { stdio: 'pipe', encoding: 'utf8' },
-    );
+    const denyProbe = safeGitSpawn(mainWt.path, ['config', '--get', 'receive.denyCurrentBranch'], {
+      stdio: 'pipe',
+      encoding: 'utf8',
+    });
     // git config exits 1 when the key is unset — denyValue stays null.
-    const denyValue = denyProbe.status === 0
-      ? (denyProbe.stdout || '').toString().trim()
-      : null;
-    assert.equal(denyValue, null,
-      'fixture configured without updateInstead should expose null');
+    const denyValue = denyProbe.status === 0 ? (denyProbe.stdout || '').toString().trim() : null;
+    assert.equal(denyValue, null, 'fixture configured without updateInstead should expose null');
 
     const verdict = classifyFfUpdateMethod({
       isBare: false,
       mainWorktree: mainWt,
       denyCurrentBranchValue: denyValue,
     });
-    assert.equal(verdict, FF_UPDATE_METHODS.REFUSE_NEEDS_CONFIG,
-      'classifier must refuse when updateInstead is not set');
+    assert.equal(
+      verdict,
+      FF_UPDATE_METHODS.REFUSE_NEEDS_CONFIG,
+      'classifier must refuse when updateInstead is not set',
+    );
 
     // The setup-hint surfaces the operator-actionable command.
     const hint = composeUpdateInsteadSetupHint(mainWt.path);
     assert.match(hint, /receive\.denyCurrentBranch updateInstead/);
-    assert.ok(hint.includes(`git -C ${mainWt.path} config`),
-      `hint should include the exact one-time command for ${mainWt.path}; got:\n${hint}`);
+    assert.ok(
+      hint.includes(`git -C ${mainWt.path} config`),
+      `hint should include the exact one-time command for ${mainWt.path}; got:\n${hint}`,
+    );
 
     // Ref did NOT advance — coa-merge would have refused before push.
     // We don't push here because that's the whole point: the gate.
     const mainSha = gitText(fx.mainWt, ['rev-parse', 'main']);
-    assert.equal(mainSha, fx.initialSha,
-      'main ref must remain at initial when ceremony refuses pre-push');
+    assert.equal(
+      mainSha,
+      fx.initialSha,
+      'main ref must remain at initial when ceremony refuses pre-push',
+    );
   });
 });
 
@@ -656,7 +677,9 @@ describe('F12 — bare repo path unchanged from R2 baseline', () => {
     safeGitSpawn(txWt, ['add', 'CHANGED.md']);
     safeGitSpawn(txWt, ['commit', '-m', 'feat(test): bare F12 fixture commit']);
   });
-  afterEach(() => { rmSync(root, { recursive: true, force: true }); });
+  afterEach(() => {
+    rmSync(root, { recursive: true, force: true });
+  });
 
   test('F12.4. bare repo classifies as update-ref-bare; update-ref advances ref cleanly', () => {
     // The bare flag is on the central .git dir; coa-merge cross-checks
@@ -669,8 +692,10 @@ describe('F12 — bare repo path unchanged from R2 baseline', () => {
     const wtListRaw = gitText(txWt, ['worktree', 'list', '--porcelain']);
     const parsed = parseWorktreeListPorcelain(wtListRaw);
     // The bare entry appears with `bare` flag. findMainWorktree skips it.
-    assert.ok(parsed.some((e) => e.bare === true),
-      'porcelain parser must mark bare entry');
+    assert.ok(
+      parsed.some((e) => e.bare === true),
+      'porcelain parser must mark bare entry',
+    );
     const mainWt = findMainWorktree(wtListRaw);
     // No main worktree (bare + transport only).
     assert.equal(mainWt, null);
@@ -685,11 +710,15 @@ describe('F12 — bare repo path unchanged from R2 baseline', () => {
     // R2-baseline update-ref still works against bare's main ref.
     const initial = gitText(bareDir, ['rev-parse', 'main']);
     const txSha = gitText(txWt, ['rev-parse', 'HEAD']);
-    const update = safeGitSpawn(txWt, [
-      'update-ref', 'refs/heads/main', txSha, initial,
-    ], { stdio: 'pipe', encoding: 'utf8' });
-    assert.equal(update.status, 0,
-      `update-ref against bare must succeed; status=${update.status}, stderr=${update.stderr}`);
+    const update = safeGitSpawn(txWt, ['update-ref', 'refs/heads/main', txSha, initial], {
+      stdio: 'pipe',
+      encoding: 'utf8',
+    });
+    assert.equal(
+      update.status,
+      0,
+      `update-ref against bare must succeed; status=${update.status}, stderr=${update.stderr}`,
+    );
     const finalMain = gitText(bareDir, ['rev-parse', 'main']);
     assert.equal(finalMain, txSha);
   });
@@ -720,13 +749,14 @@ describe('F12 — non-bare orphan setup (main not checked out anywhere)', () => 
     safeGitSpawn(repoDir, ['add', 'CHANGED.md']);
     safeGitSpawn(repoDir, ['commit', '-m', 'feat(test): orphan F12 fixture commit']);
   });
-  afterEach(() => { rmSync(root, { recursive: true, force: true }); });
+  afterEach(() => {
+    rmSync(root, { recursive: true, force: true });
+  });
 
   test('F12.5. no main worktree → classify as update-ref-no-main; update-ref still works', () => {
     const wtListRaw = gitText(txWt, ['worktree', 'list', '--porcelain']);
     const mainWt = findMainWorktree(wtListRaw);
-    assert.equal(mainWt, null,
-      'main is not checked out anywhere in this fixture');
+    assert.equal(mainWt, null, 'main is not checked out anywhere in this fixture');
 
     const verdict = classifyFfUpdateMethod({
       isBare: false,
@@ -738,9 +768,10 @@ describe('F12 — non-bare orphan setup (main not checked out anywhere)', () => 
     // update-ref path still advances the ref (no working tree to sync).
     const initial = gitText(txWt, ['rev-parse', 'main']);
     const txSha = gitText(txWt, ['rev-parse', 'HEAD']);
-    const update = safeGitSpawn(txWt, [
-      'update-ref', 'refs/heads/main', txSha, initial,
-    ], { stdio: 'pipe', encoding: 'utf8' });
+    const update = safeGitSpawn(txWt, ['update-ref', 'refs/heads/main', txSha, initial], {
+      stdio: 'pipe',
+      encoding: 'utf8',
+    });
     assert.equal(update.status, 0);
     const finalSha = gitText(txWt, ['rev-parse', 'main']);
     assert.equal(finalSha, txSha);

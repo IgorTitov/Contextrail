@@ -10,9 +10,7 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import {
-  mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, rmSync,
-} from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
@@ -58,7 +56,11 @@ describe('resolveBackfillVersion() — TPL-233', () => {
       runResolveHash: () => 'olderhash',
       runResolveVersionAtHash: () => null,
     });
-    assert.deepEqual(result, { resolved: '0.7.34', hash: 'olderhash', fallback: 'no-version-file' });
+    assert.deepEqual(result, {
+      resolved: '0.7.34',
+      hash: 'olderhash',
+      fallback: 'no-version-file',
+    });
   });
 
   test('returns hash from runResolveHash even when fallback fires (audit trail)', () => {
@@ -88,19 +90,22 @@ function git(cwd, args) {
 }
 
 function writeSlim(file, version, body) {
-  writeFileSync(file, [
-    '/* @HEADER',
-    ` * @version ${version} | 2026-01-01`,
-    ` * @purpose ${file} fixture for backfill test.`,
-    ` * @sidecar ${file.split(/[\\/]/).pop()}.header.md`,
-    ' * @layer tooling | @hex _none_ | @ctx _none_',
-    ' * @public false',
-    ' * @edit careful',
-    ' */',
-    '',
-    body,
-    '',
-  ].join('\n'));
+  writeFileSync(
+    file,
+    [
+      '/* @HEADER',
+      ` * @version ${version} | 2026-01-01`,
+      ` * @purpose ${file} fixture for backfill test.`,
+      ` * @sidecar ${file.split(/[\\/]/).pop()}.header.md`,
+      ' * @layer tooling | @hex _none_ | @ctx _none_',
+      ' * @public false',
+      ' * @edit careful',
+      ' */',
+      '',
+      body,
+      '',
+    ].join('\n'),
+  );
 }
 
 function setupBackfillRepo(name) {
@@ -110,7 +115,10 @@ function setupBackfillRepo(name) {
   git(dir, ['config', 'user.name', 'Test']);
 
   writeFileSync(join(dir, 'VERSION'), '0.1.0\n');
-  writeFileSync(join(dir, 'package.json'), JSON.stringify({ name: 'tmp', version: '0.1.0' }, null, 2) + '\n');
+  writeFileSync(
+    join(dir, 'package.json'),
+    JSON.stringify({ name: 'tmp', version: '0.1.0' }, null, 2) + '\n',
+  );
   mkdirSync(join(dir, 'scripts'), { recursive: true });
 
   // Commit 1 (VERSION 0.1.0): create a.mjs and b.mjs.
@@ -140,7 +148,9 @@ describe('header-backfill CLI — TPL-233 integration', () => {
     const dir = setupBackfillRepo('multi-commit');
     try {
       const out = spawnSync(process.execPath, [HEADER_BACKFILL, '--json'], {
-        cwd: dir, encoding: 'utf8', stdio: 'pipe',
+        cwd: dir,
+        encoding: 'utf8',
+        stdio: 'pipe',
       });
       assert.equal(out.status, 0, `header-backfill failed: ${out.stderr}\n${out.stdout}`);
       const json = JSON.parse(out.stdout);
@@ -178,7 +188,9 @@ describe('header-backfill CLI — TPL-233 integration', () => {
       writeSlim(join(dir, 'scripts', 'wt-only.mjs'), '0.1.0', 'export const x = 1;');
 
       const out = spawnSync(process.execPath, [HEADER_BACKFILL, '--json'], {
-        cwd: dir, encoding: 'utf8', stdio: 'pipe',
+        cwd: dir,
+        encoding: 'utf8',
+        stdio: 'pipe',
       });
       assert.equal(out.status, 0, `header-backfill failed: ${out.stderr}`);
 
@@ -200,7 +212,9 @@ describe('header-backfill CLI — TPL-233 integration', () => {
     const dir = setupBackfillRepo('idempotent');
     try {
       const first = spawnSync(process.execPath, [HEADER_BACKFILL, '--json'], {
-        cwd: dir, encoding: 'utf8', stdio: 'pipe',
+        cwd: dir,
+        encoding: 'utf8',
+        stdio: 'pipe',
       });
       assert.equal(first.status, 0);
       const reportPath = join(dir, 'docs', '_generated', 'header-backfill-report.json');
@@ -208,11 +222,17 @@ describe('header-backfill CLI — TPL-233 integration', () => {
       assert.ok(firstReport.counts.drifted >= 1, 'first run should drift at least one file');
 
       const second = spawnSync(process.execPath, [HEADER_BACKFILL, '--json'], {
-        cwd: dir, encoding: 'utf8', stdio: 'pipe',
+        cwd: dir,
+        encoding: 'utf8',
+        stdio: 'pipe',
       });
       assert.equal(second.status, 0);
       const secondReport = JSON.parse(readFileSync(reportPath, 'utf8'));
-      assert.equal(secondReport.counts.drifted, 0, 'second run must drift nothing on a converged tree');
+      assert.equal(
+        secondReport.counts.drifted,
+        0,
+        'second run must drift nothing on a converged tree',
+      );
       assert.equal(secondReport.counts.alreadyCorrect, firstReport.counts.walked);
     } finally {
       rmSync(dir, { recursive: true, force: true });
@@ -223,7 +243,9 @@ describe('header-backfill CLI — TPL-233 integration', () => {
     const dir = setupBackfillRepo('dry-run');
     try {
       const out = spawnSync(process.execPath, [HEADER_BACKFILL, '--dry-run', '--json'], {
-        cwd: dir, encoding: 'utf8', stdio: 'pipe',
+        cwd: dir,
+        encoding: 'utf8',
+        stdio: 'pipe',
       });
       assert.equal(out.status, 0, `header-backfill failed: ${out.stderr}`);
       const reportPath = join(dir, 'docs', '_generated', 'header-backfill-report.json');
@@ -237,4 +259,3 @@ describe('header-backfill CLI — TPL-233 integration', () => {
     }
   });
 });
-

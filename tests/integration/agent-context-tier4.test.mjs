@@ -17,7 +17,9 @@ import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 
-const __dirname = import.meta.dirname ?? (import.meta.url ? fileURLToPath(import.meta.url).replace(/[/\\][^/\\]+$/, '') : process.cwd());
+const __dirname =
+  import.meta.dirname ??
+  (import.meta.url ? fileURLToPath(import.meta.url).replace(/[/\\][^/\\]+$/, '') : process.cwd());
 const ROOT = resolve(__dirname, '..', '..');
 const SCRIPT = join(ROOT, 'scripts', 'agent-context.mjs');
 
@@ -83,15 +85,19 @@ describe('Tier-4 touched-file source emission', () => {
 
     const tier4Start = out.indexOf('## Touched files (full source)');
     const tier4End = out.indexOf('\n## Token budget');
-    const tier4Section = tier4Start !== -1 && tier4End !== -1
-      ? out.slice(tier4Start, tier4End)
-      : out.slice(tier4Start === -1 ? 0 : tier4Start);
+    const tier4Section =
+      tier4Start !== -1 && tier4End !== -1
+        ? out.slice(tier4Start, tier4End)
+        : out.slice(tier4Start === -1 ? 0 : tier4Start);
 
     const t4IdxA = tier4Section.indexOf('auth-state.mjs');
     const t4IdxB = tier4Section.indexOf('public-api.mjs');
     assert.ok(t4IdxA !== -1, 'auth-state.mjs must appear in Tier-4');
     assert.ok(t4IdxB !== -1, 'public-api.mjs must appear in Tier-4');
-    assert.ok(t4IdxA < t4IdxB, 'auth-state.mjs must appear before public-api.mjs (matches --files order)');
+    assert.ok(
+      t4IdxA < t4IdxB,
+      'auth-state.mjs must appear before public-api.mjs (matches --files order)',
+    );
   });
 
   it('section ordering: Architectural map → Module manifests → Sidecar neighborhood → Touched files → Token budget', () => {
@@ -170,14 +176,17 @@ describe('Tier-4 touched-file source emission', () => {
     // Tier-1 must still be present (never dropped)
     assert.ok(tightOut.includes('## Architectural map'), 'Tier-1 must survive tight budget');
     // Tier-4 must still be present (never dropped)
-    assert.ok(tightOut.includes('## Touched files (full source)'), 'Tier-4 must survive tight budget');
+    assert.ok(
+      tightOut.includes('## Touched files (full source)'),
+      'Tier-4 must survive tight budget',
+    );
 
     // Check that Tier-3 is dropped first — check footer for truncation info
     const budgetIdx = tightOut.indexOf('## Token budget');
     if (budgetIdx !== -1) {
       const footerSection = tightOut.slice(budgetIdx);
-      const tier3Line = footerSection.split('\n').find(l => l.includes('Tier-3'));
-      const tier2Line = footerSection.split('\n').find(l => l.includes('Tier-2'));
+      const tier3Line = footerSection.split('\n').find((l) => l.includes('Tier-3'));
+      const tier2Line = footerSection.split('\n').find((l) => l.includes('Tier-2'));
 
       // Either Tier-3 is dropped (indicated by [truncated:]) OR
       // the sidecar section is missing entirely
@@ -187,7 +196,7 @@ describe('Tier-4 touched-file source emission', () => {
       // Either Tier-3 was dropped or Tier-2 was also dropped (both acceptable under tight budget)
       assert.ok(
         tier3DroppedInFooter || sidecarMissing || (tier2Line && tier2Line.includes('[truncated:')),
-        `Budget-tight brief must show truncation in footer: tier3="${tier3Line}", tier2="${tier2Line}"`
+        `Budget-tight brief must show truncation in footer: tier3="${tier3Line}", tier2="${tier2Line}"`,
       );
     }
   });
@@ -198,17 +207,24 @@ describe('Tier-4 touched-file source emission', () => {
 
     // Count fence markers (``` at start of line)
     const fenceCount = (out.match(/^```/gm) || []).length;
-    assert.equal(fenceCount % 2, 0, `fenced code blocks must be balanced (found ${fenceCount} fences)`);
+    assert.equal(
+      fenceCount % 2,
+      0,
+      `fenced code blocks must be balanced (found ${fenceCount} fences)`,
+    );
   });
 
   it('missing touched file: exits non-zero with clear error', () => {
     const r = runExpectFail(['--files=does/not/exist.mjs', '--budget=64000']);
     assert.ok(r.status !== 0, 'must exit non-zero for missing file');
     assert.ok(
-      r.stderr.includes('not found') || r.stderr.includes('does not exist') ||
-      r.stderr.includes('ENOENT') || r.stderr.includes('missing') ||
-      r.stderr.includes('does/not/exist') || r.stderr.toLowerCase().includes('error'),
-      `stderr must mention missing file: "${r.stderr}"`
+      r.stderr.includes('not found') ||
+        r.stderr.includes('does not exist') ||
+        r.stderr.includes('ENOENT') ||
+        r.stderr.includes('missing') ||
+        r.stderr.includes('does/not/exist') ||
+        r.stderr.toLowerCase().includes('error'),
+      `stderr must mention missing file: "${r.stderr}"`,
     );
   });
 
@@ -216,7 +232,7 @@ describe('Tier-4 touched-file source emission', () => {
     // Create a temp binary file with null bytes
     const dir = mkdtempSync(join(tmpdir(), 'tpl293-'));
     const binFile = join(dir, 'image.bin');
-    writeFileSync(binFile, Buffer.from([0x00, 0xFF, 0xFE, 0x00, 0x42, 0x00, 0x01]));
+    writeFileSync(binFile, Buffer.from([0x00, 0xff, 0xfe, 0x00, 0x42, 0x00, 0x01]));
 
     // Run briefer with this binary file using absolute path (no SYSTEM_MAP needed for non-module path)
     // We use a large budget so the binary placeholder fits

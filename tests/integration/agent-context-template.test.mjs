@@ -16,7 +16,9 @@ import { existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const __dirname = import.meta.dirname ?? (import.meta.url ? fileURLToPath(import.meta.url).replace(/[/\\][^/\\]+$/, '') : process.cwd());
+const __dirname =
+  import.meta.dirname ??
+  (import.meta.url ? fileURLToPath(import.meta.url).replace(/[/\\][^/\\]+$/, '') : process.cwd());
 const ROOT = resolve(__dirname, '..', '..');
 const SCRIPT = join(ROOT, 'scripts', 'agent-context.mjs');
 
@@ -50,7 +52,7 @@ function assertHeadingsInOrder(output, label) {
     assert.ok(idx !== -1, `${label}: missing heading "${heading}"`);
     assert.ok(
       idx > lastIdx,
-      `${label}: heading "${heading}" appears out of order (at ${idx}, expected after ${lastIdx})`
+      `${label}: heading "${heading}" appears out of order (at ${idx}, expected after ${lastIdx})`,
     );
     lastIdx = idx;
   }
@@ -72,14 +74,13 @@ describe('TPL-294: 8-heading brief template invariant', () => {
 
     // Find the next heading after How to read this brief
     const nextHeadingIdx = out.indexOf('\n## ', howToReadIdx + 1);
-    const howToReadSection = nextHeadingIdx === -1
-      ? out.slice(howToReadIdx)
-      : out.slice(howToReadIdx, nextHeadingIdx);
+    const howToReadSection =
+      nextHeadingIdx === -1 ? out.slice(howToReadIdx) : out.slice(howToReadIdx, nextHeadingIdx);
 
     assert.ok(
       howToReadSection.toLowerCase().includes('deep-read only the touched files') ||
-      howToReadSection.toLowerCase().includes('deep-read only the touched files'),
-      `## How to read this brief must contain "deep-read only the Touched files"\nActual section:\n${howToReadSection}`
+        howToReadSection.toLowerCase().includes('deep-read only the touched files'),
+      `## How to read this brief must contain "deep-read only the Touched files"\nActual section:\n${howToReadSection}`,
     );
   });
 
@@ -92,13 +93,15 @@ describe('TPL-294: 8-heading brief template invariant', () => {
 
     // Find the next heading
     const nextHeadingIdx = out.indexOf('\n## ', snaIdx + 1);
-    const snaSection = nextHeadingIdx === -1
-      ? out.slice(snaIdx)
-      : out.slice(snaIdx, nextHeadingIdx);
+    const snaSection =
+      nextHeadingIdx === -1 ? out.slice(snaIdx) : out.slice(snaIdx, nextHeadingIdx);
 
     // Must have at least one bullet
     const hasBullet = /^[*-] /m.test(snaSection);
-    assert.ok(hasBullet, `## Suggested next actions must contain at least one bullet line\nActual section:\n${snaSection}`);
+    assert.ok(
+      hasBullet,
+      `## Suggested next actions must contain at least one bullet line\nActual section:\n${snaSection}`,
+    );
   });
 
   it('Empty-tier marker: non-module file still has all 8 headings; Tier-2/3 show empty-tier marker', () => {
@@ -125,7 +128,7 @@ describe('TPL-294: 8-heading brief template invariant', () => {
     // For apps/starter/index.mjs which is NOT under modules/, we expect empty-tier markers
     assert.ok(
       !manifestHasContent || manifestSection.includes('no modules in scope'),
-      `Tier-2 section for non-module file should be empty or have "no modules in scope" marker`
+      `Tier-2 section for non-module file should be empty or have "no modules in scope" marker`,
     );
   });
 
@@ -138,7 +141,10 @@ describe('TPL-294: 8-heading brief template invariant', () => {
 
     // Extract just the heading lines (lines starting with # or ##)
     function extractHeadings(text) {
-      return text.split('\n').filter(line => /^#{1,3} /.test(line)).join('\n');
+      return text
+        .split('\n')
+        .filter((line) => /^#{1,3} /.test(line))
+        .join('\n');
     }
 
     const headings1 = extractHeadings(out1);
@@ -147,7 +153,7 @@ describe('TPL-294: 8-heading brief template invariant', () => {
     assert.strictEqual(
       headings1,
       headings2,
-      'Heading structure must be byte-stable across two runs'
+      'Heading structure must be byte-stable across two runs',
     );
 
     // Also verify all 8 stable headings appear in first run

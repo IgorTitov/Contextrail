@@ -13,10 +13,7 @@ import { readFileSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import {
-  isHeaderExempt,
-  HEADER_EXEMPT_PREFIXES,
-} from '../../scripts/lib/header.mjs';
+import { isHeaderExempt, HEADER_EXEMPT_PREFIXES } from '../../scripts/lib/header.mjs';
 import { checkNotesForLLMFiller } from '../../scripts/checks/header-check.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -137,7 +134,8 @@ describe('checkNotesForLLMFiller', () => {
   });
 
   test('returns ok for a specific, non-filler note', () => {
-    const sidecar = 'notesForLLM: Never call this after the index is sealed — causes silent data loss\n';
+    const sidecar =
+      'notesForLLM: Never call this after the index is sealed — causes silent data loss\n';
     assert.deepEqual(checkNotesForLLMFiller(sidecar), { ok: true });
   });
 

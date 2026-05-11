@@ -60,15 +60,13 @@ export function collectWarnState(repoRoot) {
 
   let pkgName = 'repo';
   try {
-    pkgName = JSON.parse(
-      readFileSync(join(repoRoot, 'package.json'), 'utf8'),
-    ).name || 'repo';
-  } catch { /* fallback */ }
+    pkgName = JSON.parse(readFileSync(join(repoRoot, 'package.json'), 'utf8')).name || 'repo';
+  } catch {
+    /* fallback */
+  }
 
   const backupsDir = join(repoRoot, '.backups');
-  const backupFiles = existsSync(backupsDir)
-    ? readdirSync(backupsDir)
-    : [];
+  const backupFiles = existsSync(backupsDir) ? readdirSync(backupsDir) : [];
 
   return { newVersion, prevVersion, backupFiles, pkgName };
 }
@@ -84,22 +82,24 @@ export function runPostCommitWarn(repoRoot) {
   const result = snapshotWarnCheck(state);
   if (!result.shouldWarn) return false;
 
-  const missing = [
-    result.missingTxt && '.txt',
-    result.missingZip && '.zip',
-  ].filter(Boolean).join(' + ');
+  const missing = [result.missingTxt && '.txt', result.missingZip && '.zip']
+    .filter(Boolean)
+    .join(' + ');
 
   console.log('');
-  console.log('WARNING (TPL-260): VERSION ' + state.newVersion + ' committed without snapshot in .backups/');
+  console.log(
+    'WARNING (TPL-260): VERSION ' + state.newVersion + ' committed without snapshot in .backups/',
+  );
   console.log('  Missing: ' + missing);
   console.log('  Run: pnpm mergezip:no-bump');
   console.log('');
   return true;
 }
 
-const isDirectRun = process.argv[1]
-  && (process.argv[1].endsWith('post-commit-snapshot-warn.mjs')
-    || process.argv[1].endsWith('post-commit-snapshot-warn'));
+const isDirectRun =
+  process.argv[1] &&
+  (process.argv[1].endsWith('post-commit-snapshot-warn.mjs') ||
+    process.argv[1].endsWith('post-commit-snapshot-warn'));
 
 if (isDirectRun) {
   const repoRoot = process.cwd();

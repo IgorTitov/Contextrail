@@ -136,11 +136,13 @@ function main() {
   const refspecs = parsePushRefspecs(stdinContent);
 
   // Filter to trunk-bound refspecs only
-  const trunkRefspecs = refspecs.filter(rs => isPushToTrunk(rs, TRUNK_BRANCHES));
+  const trunkRefspecs = refspecs.filter((rs) => isPushToTrunk(rs, TRUNK_BRANCHES));
 
   if (trunkRefspecs.length === 0) {
     if (jsonMode) {
-      process.stdout.write(JSON.stringify({ ok: true, skipped: true, reason: 'no trunk refs in push' }) + '\n');
+      process.stdout.write(
+        JSON.stringify({ ok: true, skipped: true, reason: 'no trunk refs in push' }) + '\n',
+      );
     } else {
       console.log('[trunk-integrity] OK: no trunk refs in this push.');
     }
@@ -148,7 +150,7 @@ function main() {
   }
 
   // Check ancestry for each trunk refspec
-  const classified = trunkRefspecs.map(refspec => ({
+  const classified = trunkRefspecs.map((refspec) => ({
     refspec,
     remoteIsAncestor: isAncestor(refspec.remoteSha, refspec.localSha),
   }));
@@ -166,29 +168,35 @@ function main() {
       ts: new Date().toISOString(),
       event: 'force-trunk-override',
       operator: process.env.USER || process.env.USERNAME || 'unknown',
-      refs: result.forcePushRefspecs.map(r => r.remoteRef),
+      refs: result.forcePushRefspecs.map((r) => r.remoteRef),
     });
 
     if (jsonMode) {
-      process.stdout.write(JSON.stringify({
-        ok: true,
-        operatorOverride: true,
-        refs: result.forcePushRefspecs.map(r => r.remoteRef),
-      }) + '\n');
+      process.stdout.write(
+        JSON.stringify({
+          ok: true,
+          operatorOverride: true,
+          refs: result.forcePushRefspecs.map((r) => r.remoteRef),
+        }) + '\n',
+      );
     } else {
-      console.warn('[trunk-integrity] WARN: force-push to trunk allowed via COA_OPERATOR=1 COA_FORCE_TRUNK=1 (audited).');
+      console.warn(
+        '[trunk-integrity] WARN: force-push to trunk allowed via COA_OPERATOR=1 COA_FORCE_TRUNK=1 (audited).',
+      );
     }
     return 0;
   }
 
   if (!result.allowed) {
     if (jsonMode) {
-      process.stdout.write(JSON.stringify({
-        ok: false,
-        denied: true,
-        reason: result.deniedReason,
-        refs: (result.forcePushRefspecs || []).map(r => r.remoteRef),
-      }) + '\n');
+      process.stdout.write(
+        JSON.stringify({
+          ok: false,
+          denied: true,
+          reason: result.deniedReason,
+          refs: (result.forcePushRefspecs || []).map((r) => r.remoteRef),
+        }) + '\n',
+      );
     } else {
       console.error('[trunk-integrity] FATAL: ' + result.deniedReason);
       console.error('');
@@ -196,7 +204,9 @@ function main() {
       console.error('  COA_OPERATOR=1 COA_FORCE_TRUNK=1 git push --force');
       console.error('');
       console.error('Note: configure branch protection on your remote (GitHub / GitLab)');
-      console.error('  as the second-layer defense — local hooks can be bypassed with --no-verify.');
+      console.error(
+        '  as the second-layer defense — local hooks can be bypassed with --no-verify.',
+      );
     }
     return 1;
   }
@@ -205,7 +215,9 @@ function main() {
   if (jsonMode) {
     process.stdout.write(JSON.stringify({ ok: true, checked: trunkRefspecs.length }) + '\n');
   } else {
-    console.log(`[trunk-integrity] OK: ${trunkRefspecs.length} trunk ref(s) — no force-push detected.`);
+    console.log(
+      `[trunk-integrity] OK: ${trunkRefspecs.length} trunk ref(s) — no force-push detected.`,
+    );
   }
   return 0;
 }

@@ -347,11 +347,11 @@ export async function findRecentClaimWithSlice(sliceId, claimsDir, windowSeconds
 export async function findCommittedSliceUse(sliceId, repoRoot) {
   // Escape special regex characters in sliceId for use with --grep
   const escapedId = sliceId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const result = spawnSync(
-    'git',
-    ['log', '--all', '--oneline', `--grep=(${escapedId})`],
-    { cwd: repoRoot, encoding: 'utf8', stdio: 'pipe' },
-  );
+  const result = spawnSync('git', ['log', '--all', '--oneline', `--grep=(${escapedId})`], {
+    cwd: repoRoot,
+    encoding: 'utf8',
+    stdio: 'pipe',
+  });
   if (result.status !== 0 || !result.stdout) return null;
   const firstLine = result.stdout.split('\n').find((l) => l.trim().length > 0);
   if (!firstLine) return null;
@@ -387,7 +387,13 @@ function moduleFromPath(filePath) {
  * while genuine cross-session conflicts continue to be detected. Default
  * behaviour (null/undefined) is byte-identical to the unfiltered case.
  */
-export function detectOverlaps(activeClaims, targetPaths, intendedAction, protectedPaths, selfStagedFiles) {
+export function detectOverlaps(
+  activeClaims,
+  targetPaths,
+  intendedAction,
+  protectedPaths,
+  selfStagedFiles,
+) {
   // Default to the canonical protected paths list if not provided
   if (!protectedPaths) {
     protectedPaths = ['VERSION', 'CHANGELOG.md', 'package.json'];
@@ -421,8 +427,10 @@ export function detectOverlaps(activeClaims, targetPaths, intendedAction, protec
         const bothExtend = claimAction === 'extend' && intendedAction === 'extend';
         // Escalate extend+extend to conflict on protected paths (VERSION, CHANGELOG, package.json).
         // Two sessions cannot safely extend these files simultaneously — last writer wins.
-        const isProtected = protectedPaths.some((pp) => claimPath === pp || claimPath.endsWith('/' + pp));
-        const severity = (bothExtend && !isProtected) ? 'advisory' : 'conflict';
+        const isProtected = protectedPaths.some(
+          (pp) => claimPath === pp || claimPath.endsWith('/' + pp),
+        );
+        const severity = bothExtend && !isProtected ? 'advisory' : 'conflict';
         overlaps.push({
           claimId: claim.id,
           agent: claim.agent,
@@ -651,7 +659,9 @@ export function checkClaimAbandoned({ claim, gitCmd, stashCmd, now } = {}) {
     );
   } else {
     ageSignal = 'abandoned';
-    signals.push(`claim is ${ageSec}s old (past the ${MIN_FORCE_EXPIRE_AGE_MINUTES}-min young-claim guard)`);
+    signals.push(
+      `claim is ${ageSec}s old (past the ${MIN_FORCE_EXPIRE_AGE_MINUTES}-min young-claim guard)`,
+    );
   }
 
   // Signal 2: git activity by claim.agent since claim.created.
@@ -1234,7 +1244,8 @@ export function verifyAgentAuthorization({ claim, callerAgent, hasReally, reason
     return {
       authorized: false,
       classification: 'cross-agent-no-reason',
-      reason: 'cross-agent --auto-complete with --really requires --reason="<short text>" (non-empty)',
+      reason:
+        'cross-agent --auto-complete with --really requires --reason="<short text>" (non-empty)',
     };
   }
   return { authorized: true, classification: 'cross-agent' };
@@ -1382,12 +1393,7 @@ export function verifyClaimWorkCommitted({ claim, gitCmd, commitHash, fromPreCom
  * own agent. Cross-session extend would silently change another agent's claim
  * scope and is exactly the trust boundary --force-expire was built to defend.
  */
-export function tryExtendClaim({
-  claim,
-  callerAgent,
-  addTargets,
-  action = 'modify',
-} = {}) {
+export function tryExtendClaim({ claim, callerAgent, addTargets, action = 'modify' } = {}) {
   if (!claim) {
     return { success: false, error: 'claim not found', claim: null, addedTargets: [] };
   }
@@ -1437,9 +1443,7 @@ export function tryExtendClaim({
     };
   }
   const existingTargets = Array.isArray(claim.targets) ? claim.targets : [];
-  const existingPathSet = new Set(
-    existingTargets.map((t) => String(t.path).replaceAll('\\', '/')),
-  );
+  const existingPathSet = new Set(existingTargets.map((t) => String(t.path).replaceAll('\\', '/')));
   const newTargets = [];
   const seen = new Set();
   for (const p of rawPaths) {
@@ -1826,7 +1830,10 @@ async function main() {
     const frozenRaw = args.get('--frozen');
     const frozenPaths =
       typeof frozenRaw === 'string'
-        ? frozenRaw.split(',').map((t) => t.trim()).filter(Boolean)
+        ? frozenRaw
+            .split(',')
+            .map((t) => t.trim())
+            .filter(Boolean)
         : [];
     const invalidFrozen = frozenPaths.filter((p) => !isValidTargetPath(p));
     if (invalidFrozen.length > 0) {
@@ -1913,15 +1920,23 @@ async function main() {
           }
         }
 
-        if (!collisionError && slice && slice !== 'unknown' && !allowIdCollision &&
-            process.env.COA_SKIP_HISTORY_CHECK !== '1') {
+        if (
+          !collisionError &&
+          slice &&
+          slice !== 'unknown' &&
+          !allowIdCollision &&
+          process.env.COA_SKIP_HISTORY_CHECK !== '1'
+        ) {
           // The history check uses COA_HISTORY_ROOT when set (passed by coa-worktree to
           // force checking the live repo regardless of cwd), otherwise defaults to
           // SCRIPT_ROOT when cwd matches the live repo. Tests in tmpdir repos that do
           // NOT set COA_HISTORY_ROOT will skip the history check to avoid false positives
           // from the live repo's commit history. (TPL-282 / C4)
-          const historyRoot = process.env.COA_HISTORY_ROOT ||
-            (CLAIMS_DIR.replaceAll('\\', '/') === join(SCRIPT_ROOT, '.claims').replaceAll('\\', '/') ? SCRIPT_ROOT : null);
+          const historyRoot =
+            process.env.COA_HISTORY_ROOT ||
+            (CLAIMS_DIR.replaceAll('\\', '/') === join(SCRIPT_ROOT, '.claims').replaceAll('\\', '/')
+              ? SCRIPT_ROOT
+              : null);
           const historyMatch = historyRoot ? await findCommittedSliceUse(slice, historyRoot) : null;
           if (historyMatch) {
             const prefix = slice.replace(/-\d+$/, '');
@@ -2061,7 +2076,10 @@ async function main() {
     }
     const addTargets =
       typeof addTargetsRaw === 'string'
-        ? addTargetsRaw.split(',').map((t) => t.trim()).filter(Boolean)
+        ? addTargetsRaw
+            .split(',')
+            .map((t) => t.trim())
+            .filter(Boolean)
         : [];
 
     const release = await acquireLock('claim-create');
@@ -2078,11 +2096,7 @@ async function main() {
       });
       if (extendResult.success && extendResult.addedTargets.length > 0) {
         const filePath = join(CLAIMS_DIR, claimBefore._file);
-        await writeFile(
-          filePath,
-          JSON.stringify(extendResult.claim, null, 2) + '\n',
-          'utf8',
-        );
+        await writeFile(filePath, JSON.stringify(extendResult.claim, null, 2) + '\n', 'utf8');
       }
     } finally {
       await release();
@@ -2200,9 +2214,7 @@ async function main() {
       const msg =
         '--agent=<your-agent> is required for --auto-complete --staged (caller must self-identify; J3.5)';
       if (wantJson) {
-        console.log(
-          JSON.stringify(result('claim-check:auto-complete', false, [msg]), null, 2),
-        );
+        console.log(JSON.stringify(result('claim-check:auto-complete', false, [msg]), null, 2));
       } else {
         console.error(`claim-check --auto-complete: REJECTED — ${msg}`);
         console.error(
@@ -2218,7 +2230,8 @@ async function main() {
     // gitCmd is a thin sync wrapper. Built here so unit tests can stub
     // verifyClaimWorkCommitted with their own gitCmd, and so production
     // calls share a single child-process configuration.
-    const gitCmd = (gitArgs) => spawnSync('git', gitArgs, { encoding: 'utf8', shell: false, cwd: ROOT });
+    const gitCmd = (gitArgs) =>
+      spawnSync('git', gitArgs, { encoding: 'utf8', shell: false, cwd: ROOT });
 
     // Derive the candidate source set:
     //   - If --commit-hash=<H>, use the files modified by that commit. The
@@ -2466,7 +2479,9 @@ async function main() {
     const targetId = args.get('--id');
     if (!targetId) {
       console.error('claim-check --force-expire: --id=<claim-id> required');
-      console.error('  Usage: --force-expire --id=<id> --agent=<your-agent> [--really] [--reason="<text>"]');
+      console.error(
+        '  Usage: --force-expire --id=<id> --agent=<your-agent> [--really] [--reason="<text>"]',
+      );
       process.exit(1);
     }
     const claim = localClaims.find((c) => c.id === targetId);
@@ -2478,7 +2493,15 @@ async function main() {
     }
     if (claim.status === 'completed' || claim.status === 'abandoned') {
       const msg = `claim ${targetId} is already ${claim.status} — no action needed`;
-      if (wantJson) console.log(JSON.stringify(result('claim-check:force-expire', true, [], [msg], { claimId: targetId, status: claim.status })));
+      if (wantJson)
+        console.log(
+          JSON.stringify(
+            result('claim-check:force-expire', true, [], [msg], {
+              claimId: targetId,
+              status: claim.status,
+            }),
+          ),
+        );
       else console.log(`claim-check --force-expire: ${msg}`);
       return;
     }
@@ -2503,11 +2526,17 @@ async function main() {
         );
       } else {
         console.error(`claim-check --force-expire: REJECTED — ${msg}`);
-        console.error('  Usage: --force-expire --id=<id> --agent=<your-agent> [--really] [--reason="<text>"]');
+        console.error(
+          '  Usage: --force-expire --id=<id> --agent=<your-agent> [--really] [--reason="<text>"]',
+        );
         if (decision.classification === 'cross-agent') {
-          console.error('  Cross-agent override requires both --really and --reason="<short text>".');
+          console.error(
+            '  Cross-agent override requires both --really and --reason="<short text>".',
+          );
         } else if (decision.classification === 'young-claim-override') {
-          console.error(`  Same-agent override on a claim younger than ${MIN_FORCE_EXPIRE_AGE_MINUTES} min requires --really.`);
+          console.error(
+            `  Same-agent override on a claim younger than ${MIN_FORCE_EXPIRE_AGE_MINUTES} min requires --really.`,
+          );
         }
       }
       process.exit(1);
@@ -2525,7 +2554,8 @@ async function main() {
       abandonedCheck = checkClaimAbandoned({
         claim,
         gitCmd: (a) => spawnSync('git', a, { encoding: 'utf8', shell: false, cwd: ROOT }),
-        stashCmd: (a) => spawnSync('git', ['stash', ...a], { encoding: 'utf8', shell: false, cwd: ROOT }),
+        stashCmd: (a) =>
+          spawnSync('git', ['stash', ...a], { encoding: 'utf8', shell: false, cwd: ROOT }),
         now,
       });
 
@@ -2580,7 +2610,9 @@ async function main() {
           console.error(`  abandoned-check confidence: ${tier}`);
           for (const s of abandonedCheck.signals) console.error(`    signal: ${s}`);
           console.error('  Operator path:');
-          console.error('    1. Verify the claim is truly abandoned (see .claims/README.md "Force-expiring claims").');
+          console.error(
+            '    1. Verify the claim is truly abandoned (see .claims/README.md "Force-expiring claims").',
+          );
           console.error('    2. In the operator shell: export COA_OPERATOR=1');
           console.error('    3. Re-run with --operator-confirmed.');
         }
@@ -2605,23 +2637,37 @@ async function main() {
     await appendAuditEvent(auditEvent);
 
     if (wantJson) {
-      console.log(JSON.stringify(result('claim-check:force-expire', true, [], [], {
-        claimId: targetId, agent: claim.agent, slice: claim.slice,
-        targets: (claim.targets || []).map((t) => t.path),
-        classification: decision.classification,
-        ageSeconds: decision.ageSeconds,
-        abandonedCheck,
-        operatorConfirmed,
-        auditEvent,
-      }), null, 2));
+      console.log(
+        JSON.stringify(
+          result('claim-check:force-expire', true, [], [], {
+            claimId: targetId,
+            agent: claim.agent,
+            slice: claim.slice,
+            targets: (claim.targets || []).map((t) => t.path),
+            classification: decision.classification,
+            ageSeconds: decision.ageSeconds,
+            abandonedCheck,
+            operatorConfirmed,
+            auditEvent,
+          }),
+          null,
+          2,
+        ),
+      );
     } else {
-      console.log(`claim-check --force-expire: expired ${targetId} (${claim.agent}, ${claim.slice}) [${decision.classification}]`);
+      console.log(
+        `claim-check --force-expire: expired ${targetId} (${claim.agent}, ${claim.slice}) [${decision.classification}]`,
+      );
       for (const t of claim.targets || []) console.log(`  target: ${t.path}`);
       if (abandonedCheck) {
-        console.log(`  abandoned-check: confidence=${abandonedCheck.confidence}${operatorConfirmed ? ' (operator-confirmed)' : ''}`);
+        console.log(
+          `  abandoned-check: confidence=${abandonedCheck.confidence}${operatorConfirmed ? ' (operator-confirmed)' : ''}`,
+        );
         for (const s of abandonedCheck.signals) console.log(`    signal: ${s}`);
       }
-      console.log(`  audit: .claims/${AUDIT_LOG_FILE} (${auditEvent.event} by ${auditEvent.callerAgent})`);
+      console.log(
+        `  audit: .claims/${AUDIT_LOG_FILE} (${auditEvent.event} by ${auditEvent.callerAgent})`,
+      );
     }
     return;
   }
@@ -2839,9 +2885,7 @@ async function main() {
       }
       if (frozenClaims.length > 0) {
         console.log('');
-        console.log(
-          `  FROZEN: ${frozenClaims.length} active claim(s) freeze ${queryPath}`,
-        );
+        console.log(`  FROZEN: ${frozenClaims.length} active claim(s) freeze ${queryPath}`);
         for (const c of frozenClaims) {
           console.log(`    ${c.id} (${c.agent}, ${c.slice})`);
         }
@@ -2884,10 +2928,7 @@ async function main() {
       ...c,
       frozenCount: Array.isArray(c.frozen) ? c.frozen.length : 0,
     }));
-    const totalFrozenPaths = activeClaimsWithFrozen.reduce(
-      (n, c) => n + c.frozenCount,
-      0,
-    );
+    const totalFrozenPaths = activeClaimsWithFrozen.reduce((n, c) => n + c.frozenCount, 0);
 
     if (wantJson) {
       console.log(
@@ -2947,12 +2988,16 @@ async function main() {
       }
       if (auditEvents.length > 0) {
         console.log('');
-        console.log(`  AUDIT LOG: last ${auditEvents.length} event(s) from .claims/${AUDIT_LOG_FILE}`);
+        console.log(
+          `  AUDIT LOG: last ${auditEvents.length} event(s) from .claims/${AUDIT_LOG_FILE}`,
+        );
         for (const ev of auditEvents) {
           const flags = [
             ev.crossAgent ? 'cross-agent' : null,
             ev.youngClaimOverride ? 'young-claim-override' : null,
-          ].filter(Boolean).join(', ');
+          ]
+            .filter(Boolean)
+            .join(', ');
           const flagStr = flags ? ` [${flags}]` : '';
           const reasonStr = ev.reason ? ` — "${ev.reason}"` : '';
           console.log(
@@ -3040,8 +3085,14 @@ async function main() {
   // In --enforce --staged mode, pass stagedFiles as selfStagedFiles so the
   // committer's own claim is filtered (it authorizes the current commit) while
   // claims from other parallel sessions are still surfaced as conflicts.
-  const selfStagedForDetect = (enforceMode && stagedMode) ? stagedFiles : null;
-  const overlaps = detectOverlaps(activeClaims, targets, action, mainProtectedPaths, selfStagedForDetect);
+  const selfStagedForDetect = enforceMode && stagedMode ? stagedFiles : null;
+  const overlaps = detectOverlaps(
+    activeClaims,
+    targets,
+    action,
+    mainProtectedPaths,
+    selfStagedForDetect,
+  );
   const conflicts = overlaps.filter((o) => o.severity === 'conflict');
   const warnings = overlaps.map(
     (o) =>
@@ -3132,9 +3183,7 @@ async function main() {
       const reason = extractFrozenOverrideReason(commitMsg);
 
       if (operatorEnv && reason) {
-        process.stderr.write(
-          `[claim-check] frozen-paths override accepted: ${reason}\n`,
-        );
+        process.stderr.write(`[claim-check] frozen-paths override accepted: ${reason}\n`);
         // Audit log — best-effort observability of every override use.
         await appendAuditEvent({
           ts: new Date().toISOString(),
@@ -3162,9 +3211,7 @@ async function main() {
             `  FROZEN: ${frozenViolations.length} staged file(s) match a claim's frozen list:`,
           );
           for (const v of frozenViolations) {
-            console.log(
-              `    ${v.path} (claim ${v.claimId}, slice ${v.slice}, agent ${v.agent})`,
-            );
+            console.log(`    ${v.path} (claim ${v.claimId}, slice ${v.slice}, agent ${v.agent})`);
           }
           console.log('');
           console.log('  To override BOTH factors are required:');
@@ -3174,9 +3221,7 @@ async function main() {
           );
           if (!operatorEnv) console.log('  Currently: COA_OPERATOR is NOT set.');
           if (!reason) {
-            console.log(
-              '  Currently: Allow-frozen-write line missing or reason is too short.',
-            );
+            console.log('  Currently: Allow-frozen-write line missing or reason is too short.');
           }
         }
         process.exit(1);

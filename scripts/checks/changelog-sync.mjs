@@ -109,7 +109,14 @@ async function main() {
         `       then re-release once via: node scripts/checks/changelog-release.mjs --version=<N>`,
       ].join('\n');
       if (wantJson) {
-        console.log(JSON.stringify({ ok: false, error: msg, duplicate: dupe.version, occurrences: dupe.occurrences }));
+        console.log(
+          JSON.stringify({
+            ok: false,
+            error: msg,
+            duplicate: dupe.version,
+            occurrences: dupe.occurrences,
+          }),
+        );
       } else {
         console.error(msg);
       }

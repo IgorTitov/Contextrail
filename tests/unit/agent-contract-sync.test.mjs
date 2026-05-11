@@ -144,21 +144,30 @@ test('validateLocalAdapter: rejects empty input', () => {
 test('validateLocalAdapter: rejects missing signature', () => {
   const errs = [];
   validateLocalAdapter('# LOCAL\n\nNo signature here.', LOCAL_TOKEN_HARD_CAP, (m) => errs.push(m));
-  assert.ok(errs.some((e) => e.includes('canonical signature')), `expected signature error: ${errs.join('; ')}`);
+  assert.ok(
+    errs.some((e) => e.includes('canonical signature')),
+    `expected signature error: ${errs.join('; ')}`,
+  );
 });
 
 test('validateLocalAdapter: rejects oversized input', () => {
   const oversized = `<!-- ${SIGNATURE_NEEDLE} -->\n` + 'x'.repeat(LOCAL_TOKEN_HARD_CAP * 4 + 100);
   const errs = [];
   validateLocalAdapter(oversized, LOCAL_TOKEN_HARD_CAP, (m) => errs.push(m));
-  assert.ok(errs.some((e) => e.includes('hard cap')), `expected cap error: ${errs.join('; ')}`);
+  assert.ok(
+    errs.some((e) => e.includes('hard cap')),
+    `expected cap error: ${errs.join('; ')}`,
+  );
 });
 
 test('validateMicroAdapter: rejects oversized input', () => {
   const oversized = `<!-- ${SIGNATURE_NEEDLE} -->\n` + 'x'.repeat(MICRO_TOKEN_HARD_CAP * 4 + 100);
   const errs = [];
   validateMicroAdapter(oversized, MICRO_TOKEN_HARD_CAP, (m) => errs.push(m));
-  assert.ok(errs.some((e) => e.includes('hard cap')), `expected cap error: ${errs.join('; ')}`);
+  assert.ok(
+    errs.some((e) => e.includes('hard cap')),
+    `expected cap error: ${errs.join('; ')}`,
+  );
 });
 
 test('round-trip: generated LOCAL.md on disk passes the same validator', async () => {
@@ -183,7 +192,10 @@ test('stripLeadingInlineHeader: preserves later HTML comments', () => {
   const stamped =
     '<!-- @HEADER\n@version x -->\n<!-- generated from compatibility-contract.json — do not edit by hand -->\n# body';
   const stripped = stripLeadingInlineHeader(stamped);
-  assert.ok(stripped.startsWith('<!-- generated'), `expected later comment preserved, got: ${stripped}`);
+  assert.ok(
+    stripped.startsWith('<!-- generated'),
+    `expected later comment preserved, got: ${stripped}`,
+  );
 });
 
 test('round-trip: generated MICRO.md on disk passes the same validator', async () => {
@@ -272,7 +284,10 @@ test('regenerated AGENTS.md: header carries the live VERSION (not the bootstrap 
   // matching is intentionally omitted: during a pre-commit ceremony the VERSION
   // file is bumped before the commit but the post-commit hook stamps @version
   // after, so the two values legitimately differ by one patch during that window.
-  assert.ok(/@version \d+\.\d+\.\d+/.test(text), 'AGENTS.md header must carry a semver @version stamp');
+  assert.ok(
+    /@version \d+\.\d+\.\d+/.test(text),
+    'AGENTS.md header must carry a semver @version stamp',
+  );
   assert.ok(!text.includes('0.1.32'), 'AGENTS.md must not retain the bootstrap "0.1.32" stamp');
 });
 
@@ -286,9 +301,8 @@ const LOCAL_TIER_EQUIV_VALID = {
   limits: 'Cannot decide WHICH files need new sidecars.',
 };
 
-const pkgScripts = JSON.parse(
-  await readFile(path.join(CHECK_ROOT, 'package.json'), 'utf8'),
-).scripts ?? {};
+const pkgScripts =
+  JSON.parse(await readFile(path.join(CHECK_ROOT, 'package.json'), 'utf8')).scripts ?? {};
 
 function fakeContract(roles = [], skills = []) {
   return {
@@ -300,186 +314,292 @@ function fakeContract(roles = [], skills = []) {
 
 test('validateLocalTierEquivalents: accepts roles/skills with no field set', () => {
   const errs = [];
-  const contract = fakeContract([{ name: 'r1', capabilityTier: 'frontier' }], [{ name: 's1', capabilityTier: 'frontier' }]);
+  const contract = fakeContract(
+    [{ name: 'r1', capabilityTier: 'frontier' }],
+    [{ name: 's1', capabilityTier: 'frontier' }],
+  );
   validateLocalTierEquivalents(contract, CHECK_ROOT, pkgScripts, (m) => errs.push(m));
   assert.deepEqual(errs, [], `expected no errors, got: ${errs.join('; ')}`);
 });
 
 test('validateLocalTierEquivalents: accepts a valid node-script equivalent', () => {
   const errs = [];
-  const contract = fakeContract([], [{ name: 's1', capabilityTier: 'small', localTierEquivalent: { ...LOCAL_TIER_EQUIV_VALID } }]);
+  const contract = fakeContract(
+    [],
+    [{ name: 's1', capabilityTier: 'small', localTierEquivalent: { ...LOCAL_TIER_EQUIV_VALID } }],
+  );
   validateLocalTierEquivalents(contract, CHECK_ROOT, pkgScripts, (m) => errs.push(m));
   assert.deepEqual(errs, [], `expected no errors, got: ${errs.join('; ')}`);
 });
 
 test('validateLocalTierEquivalents: accepts a valid pnpm-script equivalent when the script exists', () => {
   const errs = [];
-  const contract = fakeContract([], [{
-    name: 's1',
-    capabilityTier: 'mid',
-    localTierEquivalent: {
-      command: 'pnpm test:bdd',
-      scope: 'Run BDD scenarios.',
-      limits: 'Authoring scenarios is reasoning.',
-    },
-  }]);
+  const contract = fakeContract(
+    [],
+    [
+      {
+        name: 's1',
+        capabilityTier: 'mid',
+        localTierEquivalent: {
+          command: 'pnpm test:bdd',
+          scope: 'Run BDD scenarios.',
+          limits: 'Authoring scenarios is reasoning.',
+        },
+      },
+    ],
+  );
   validateLocalTierEquivalents(contract, CHECK_ROOT, pkgScripts, (m) => errs.push(m));
   assert.deepEqual(errs, [], `expected no errors, got: ${errs.join('; ')}`);
 });
 
 test('validateLocalTierEquivalents: rejects a pnpm script that does not exist in package.json', () => {
   const errs = [];
-  const contract = fakeContract([], [{
-    name: 's1',
-    capabilityTier: 'mid',
-    localTierEquivalent: {
-      command: 'pnpm does-not-exist',
-      scope: 'X.',
-      limits: 'Y.',
-    },
-  }]);
+  const contract = fakeContract(
+    [],
+    [
+      {
+        name: 's1',
+        capabilityTier: 'mid',
+        localTierEquivalent: {
+          command: 'pnpm does-not-exist',
+          scope: 'X.',
+          limits: 'Y.',
+        },
+      },
+    ],
+  );
   validateLocalTierEquivalents(contract, CHECK_ROOT, pkgScripts, (m) => errs.push(m));
-  assert.ok(errs.some((e) => e.includes('does not exist')), `expected target-missing error: ${errs.join('; ')}`);
+  assert.ok(
+    errs.some((e) => e.includes('does not exist')),
+    `expected target-missing error: ${errs.join('; ')}`,
+  );
 });
 
 test('validateLocalTierEquivalents: rejects empty command', () => {
   const errs = [];
-  const contract = fakeContract([], [{
-    name: 's1',
-    capabilityTier: 'small',
-    localTierEquivalent: { command: '', scope: 'x', limits: 'y' },
-  }]);
+  const contract = fakeContract(
+    [],
+    [
+      {
+        name: 's1',
+        capabilityTier: 'small',
+        localTierEquivalent: { command: '', scope: 'x', limits: 'y' },
+      },
+    ],
+  );
   validateLocalTierEquivalents(contract, CHECK_ROOT, pkgScripts, (m) => errs.push(m));
-  assert.ok(errs.some((e) => e.includes('command')), `expected command error: ${errs.join('; ')}`);
+  assert.ok(
+    errs.some((e) => e.includes('command')),
+    `expected command error: ${errs.join('; ')}`,
+  );
 });
 
 test('validateLocalTierEquivalents: rejects shell pipeline (&&)', () => {
   const errs = [];
-  const contract = fakeContract([], [{
-    name: 's1',
-    capabilityTier: 'small',
-    localTierEquivalent: {
-      command: 'node scripts/checks/header-fix.mjs && node scripts/checks/readme-fix.mjs',
-      scope: 'x',
-      limits: 'y',
-    },
-  }]);
+  const contract = fakeContract(
+    [],
+    [
+      {
+        name: 's1',
+        capabilityTier: 'small',
+        localTierEquivalent: {
+          command: 'node scripts/checks/header-fix.mjs && node scripts/checks/readme-fix.mjs',
+          scope: 'x',
+          limits: 'y',
+        },
+      },
+    ],
+  );
   validateLocalTierEquivalents(contract, CHECK_ROOT, pkgScripts, (m) => errs.push(m));
-  assert.ok(errs.some((e) => e.includes('invocable directly')), `expected pipeline rejection: ${errs.join('; ')}`);
+  assert.ok(
+    errs.some((e) => e.includes('invocable directly')),
+    `expected pipeline rejection: ${errs.join('; ')}`,
+  );
 });
 
 test('validateLocalTierEquivalents: rejects shell pipe (|)', () => {
   const errs = [];
-  const contract = fakeContract([], [{
-    name: 's1',
-    capabilityTier: 'small',
-    localTierEquivalent: {
-      command: 'node scripts/checks/header-fix.mjs | grep error',
-      scope: 'x',
-      limits: 'y',
-    },
-  }]);
+  const contract = fakeContract(
+    [],
+    [
+      {
+        name: 's1',
+        capabilityTier: 'small',
+        localTierEquivalent: {
+          command: 'node scripts/checks/header-fix.mjs | grep error',
+          scope: 'x',
+          limits: 'y',
+        },
+      },
+    ],
+  );
   validateLocalTierEquivalents(contract, CHECK_ROOT, pkgScripts, (m) => errs.push(m));
-  assert.ok(errs.some((e) => e.includes('invocable directly')), `expected pipe rejection: ${errs.join('; ')}`);
+  assert.ok(
+    errs.some((e) => e.includes('invocable directly')),
+    `expected pipe rejection: ${errs.join('; ')}`,
+  );
 });
 
 test('validateLocalTierEquivalents: rejects redirect (>)', () => {
   const errs = [];
-  const contract = fakeContract([], [{
-    name: 's1',
-    capabilityTier: 'small',
-    localTierEquivalent: {
-      command: 'node scripts/checks/header-fix.mjs > out.log',
-      scope: 'x',
-      limits: 'y',
-    },
-  }]);
+  const contract = fakeContract(
+    [],
+    [
+      {
+        name: 's1',
+        capabilityTier: 'small',
+        localTierEquivalent: {
+          command: 'node scripts/checks/header-fix.mjs > out.log',
+          scope: 'x',
+          limits: 'y',
+        },
+      },
+    ],
+  );
   validateLocalTierEquivalents(contract, CHECK_ROOT, pkgScripts, (m) => errs.push(m));
-  assert.ok(errs.some((e) => e.includes('invocable directly')), `expected redirect rejection: ${errs.join('; ')}`);
+  assert.ok(
+    errs.some((e) => e.includes('invocable directly')),
+    `expected redirect rejection: ${errs.join('; ')}`,
+  );
 });
 
 test('validateLocalTierEquivalents: rejects command not starting with node or pnpm', () => {
   const errs = [];
-  const contract = fakeContract([], [{
-    name: 's1',
-    capabilityTier: 'small',
-    localTierEquivalent: {
-      command: 'bash scripts/checks/header-fix.mjs',
-      scope: 'x',
-      limits: 'y',
-    },
-  }]);
+  const contract = fakeContract(
+    [],
+    [
+      {
+        name: 's1',
+        capabilityTier: 'small',
+        localTierEquivalent: {
+          command: 'bash scripts/checks/header-fix.mjs',
+          scope: 'x',
+          limits: 'y',
+        },
+      },
+    ],
+  );
   validateLocalTierEquivalents(contract, CHECK_ROOT, pkgScripts, (m) => errs.push(m));
-  assert.ok(errs.some((e) => e.includes('node ') || e.includes('pnpm ')), `expected prefix rejection: ${errs.join('; ')}`);
+  assert.ok(
+    errs.some((e) => e.includes('node ') || e.includes('pnpm ')),
+    `expected prefix rejection: ${errs.join('; ')}`,
+  );
 });
 
 test('validateLocalTierEquivalents: rejects missing-file node command', () => {
   const errs = [];
-  const contract = fakeContract([], [{
-    name: 's1',
-    capabilityTier: 'small',
-    localTierEquivalent: {
-      command: 'node scripts/checks/does-not-exist.mjs',
-      scope: 'x',
-      limits: 'y',
-    },
-  }]);
+  const contract = fakeContract(
+    [],
+    [
+      {
+        name: 's1',
+        capabilityTier: 'small',
+        localTierEquivalent: {
+          command: 'node scripts/checks/does-not-exist.mjs',
+          scope: 'x',
+          limits: 'y',
+        },
+      },
+    ],
+  );
   validateLocalTierEquivalents(contract, CHECK_ROOT, pkgScripts, (m) => errs.push(m));
-  assert.ok(errs.some((e) => e.includes('does not exist')), `expected missing-file rejection: ${errs.join('; ')}`);
+  assert.ok(
+    errs.some((e) => e.includes('does not exist')),
+    `expected missing-file rejection: ${errs.join('; ')}`,
+  );
 });
 
 test('validateLocalTierEquivalents: rejects empty scope', () => {
   const errs = [];
-  const contract = fakeContract([], [{
-    name: 's1',
-    capabilityTier: 'small',
-    localTierEquivalent: { ...LOCAL_TIER_EQUIV_VALID, scope: '' },
-  }]);
+  const contract = fakeContract(
+    [],
+    [
+      {
+        name: 's1',
+        capabilityTier: 'small',
+        localTierEquivalent: { ...LOCAL_TIER_EQUIV_VALID, scope: '' },
+      },
+    ],
+  );
   validateLocalTierEquivalents(contract, CHECK_ROOT, pkgScripts, (m) => errs.push(m));
-  assert.ok(errs.some((e) => e.includes('scope')), `expected scope error: ${errs.join('; ')}`);
+  assert.ok(
+    errs.some((e) => e.includes('scope')),
+    `expected scope error: ${errs.join('; ')}`,
+  );
 });
 
 test('validateLocalTierEquivalents: rejects empty limits', () => {
   const errs = [];
-  const contract = fakeContract([], [{
-    name: 's1',
-    capabilityTier: 'small',
-    localTierEquivalent: { ...LOCAL_TIER_EQUIV_VALID, limits: '' },
-  }]);
+  const contract = fakeContract(
+    [],
+    [
+      {
+        name: 's1',
+        capabilityTier: 'small',
+        localTierEquivalent: { ...LOCAL_TIER_EQUIV_VALID, limits: '' },
+      },
+    ],
+  );
   validateLocalTierEquivalents(contract, CHECK_ROOT, pkgScripts, (m) => errs.push(m));
-  assert.ok(errs.some((e) => e.includes('limits')), `expected limits error: ${errs.join('; ')}`);
+  assert.ok(
+    errs.some((e) => e.includes('limits')),
+    `expected limits error: ${errs.join('; ')}`,
+  );
 });
 
 test('validateLocalTierEquivalents: rejects non-object value', () => {
   const errs = [];
-  const contract = fakeContract([], [{
-    name: 's1',
-    capabilityTier: 'small',
-    localTierEquivalent: 'node scripts/foo.mjs',
-  }]);
+  const contract = fakeContract(
+    [],
+    [
+      {
+        name: 's1',
+        capabilityTier: 'small',
+        localTierEquivalent: 'node scripts/foo.mjs',
+      },
+    ],
+  );
   validateLocalTierEquivalents(contract, CHECK_ROOT, pkgScripts, (m) => errs.push(m));
-  assert.ok(errs.some((e) => e.includes('object')), `expected object-type error: ${errs.join('; ')}`);
+  assert.ok(
+    errs.some((e) => e.includes('object')),
+    `expected object-type error: ${errs.join('; ')}`,
+  );
 });
 
 test('validateLocalTierEquivalents: also covers roles[]', () => {
   const errs = [];
-  const contract = fakeContract([{
-    name: 'r1',
-    capabilityTier: 'mid',
-    localTierEquivalent: { command: 'node scripts/checks/does-not-exist.mjs', scope: 'x', limits: 'y' },
-  }], []);
+  const contract = fakeContract(
+    [
+      {
+        name: 'r1',
+        capabilityTier: 'mid',
+        localTierEquivalent: {
+          command: 'node scripts/checks/does-not-exist.mjs',
+          scope: 'x',
+          limits: 'y',
+        },
+      },
+    ],
+    [],
+  );
   validateLocalTierEquivalents(contract, CHECK_ROOT, pkgScripts, (m) => errs.push(m));
-  assert.ok(errs.some((e) => e.includes('does not exist')), `expected missing-file rejection on role: ${errs.join('; ')}`);
+  assert.ok(
+    errs.some((e) => e.includes('does not exist')),
+    `expected missing-file rejection on role: ${errs.join('; ')}`,
+  );
 });
 
 test('collectLocalTierEquivalents: separates equipped roles/skills from reasoning-only ones', () => {
-  const contract = fakeContract([
-    { name: 'role-with', localTierEquivalent: { command: 'node x', scope: 's', limits: 'l' } },
-    { name: 'role-without' },
-  ], [
-    { name: 'skill-with', localTierEquivalent: { command: 'node y', scope: 's', limits: 'l' } },
-    { name: 'skill-without' },
-  ]);
+  const contract = fakeContract(
+    [
+      { name: 'role-with', localTierEquivalent: { command: 'node x', scope: 's', limits: 'l' } },
+      { name: 'role-without' },
+    ],
+    [
+      { name: 'skill-with', localTierEquivalent: { command: 'node y', scope: 's', limits: 'l' } },
+      { name: 'skill-without' },
+    ],
+  );
   const { equipped, reasoningOnly } = collectLocalTierEquivalents(contract);
   assert.equal(equipped.length, 2);
   assert.equal(equipped[0].name, 'role-with');
@@ -522,7 +642,10 @@ test('renderLocalMd: equivalents section lists reasoning-only entries when prese
   const out = renderLocalMd(contract);
   assert.ok(out.includes('Cannot run locally'), 'expected reasoning-only callout');
   assert.ok(out.includes('repo-architect'), 'expected repo-architect listed as reasoning-only');
-  assert.ok(out.includes('feature-implementer'), 'expected feature-implementer listed as reasoning-only');
+  assert.ok(
+    out.includes('feature-implementer'),
+    'expected feature-implementer listed as reasoning-only',
+  );
 });
 
 test('renderLocalMd: token count stays under hard cap after equivalents expansion', () => {
@@ -535,19 +658,30 @@ test('renderLocalMd: token count stays under hard cap after equivalents expansio
 
 test('renderMicroMd: does NOT include the equivalents table (MICRO stays narrow)', () => {
   const out = renderMicroMd(contract);
-  assert.ok(!out.includes('Local-tier equivalents'), 'MICRO.md must not surface the equivalents table');
+  assert.ok(
+    !out.includes('Local-tier equivalents'),
+    'MICRO.md must not surface the equivalents table',
+  );
 });
 
 test('on-disk LOCAL.md: includes the regenerated equivalents section', async () => {
   const text = await readFile(path.join(ROOT, 'LOCAL.md'), 'utf8');
-  assert.ok(text.includes('Local-tier equivalents'), 'on-disk LOCAL.md missing equivalents section');
-  assert.ok(text.includes('node scripts/checks/header-fix.mjs --changed'), 'expected header-sidecar mapping in regenerated LOCAL.md');
+  assert.ok(
+    text.includes('Local-tier equivalents'),
+    'on-disk LOCAL.md missing equivalents section',
+  );
+  assert.ok(
+    text.includes('node scripts/checks/header-fix.mjs --changed'),
+    'expected header-sidecar mapping in regenerated LOCAL.md',
+  );
 });
 
 test('contract: live schemaVersion is at least 3 (TPL-212 bump)', async () => {
   const live = await loadContract();
-  assert.ok(typeof live.schemaVersion === 'number' && live.schemaVersion >= 3,
-    `expected schemaVersion >= 3 after TPL-212, got ${live.schemaVersion}`);
+  assert.ok(
+    typeof live.schemaVersion === 'number' && live.schemaVersion >= 3,
+    `expected schemaVersion >= 3 after TPL-212, got ${live.schemaVersion}`,
+  );
 });
 
 test('contract: every localTierEquivalent on disk validates clean against the schema', async () => {

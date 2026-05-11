@@ -159,14 +159,18 @@ function ancestorPids(pid) {
   for (let i = 0; i < 8; i++) {
     let parent = null;
     if (process.platform === 'win32') {
-      const r = spawnSync('wmic', [
-        'process', 'where', `ProcessId=${current}`, 'get', 'ParentProcessId', '/value',
-      ], { encoding: 'utf8', stdio: 'pipe', shell: false });
+      const r = spawnSync(
+        'wmic',
+        ['process', 'where', `ProcessId=${current}`, 'get', 'ParentProcessId', '/value'],
+        { encoding: 'utf8', stdio: 'pipe', shell: false },
+      );
       const m = (r.stdout || '').match(/ParentProcessId=(\d+)/);
       if (m) parent = Number(m[1]);
     } else {
       const r = spawnSync('ps', ['-o', 'ppid=', '-p', String(current)], {
-        encoding: 'utf8', stdio: 'pipe', shell: false,
+        encoding: 'utf8',
+        stdio: 'pipe',
+        shell: false,
       });
       const m = (r.stdout || '').trim().match(/^(\d+)$/);
       if (m) parent = Number(m[1]);
@@ -193,8 +197,7 @@ function checkMarker(repoRoot, branch) {
   if (!existsSync(path)) {
     return {
       ok: false,
-      reason:
-        'no .claims/.coa-merging.lock marker — ceremony bumps must run via coa-merge.mjs',
+      reason: 'no .claims/.coa-merging.lock marker — ceremony bumps must run via coa-merge.mjs',
     };
   }
 
@@ -247,8 +250,7 @@ function checkMarker(repoRoot, branch) {
   if (!chain.includes(parsed.pid)) {
     return {
       ok: false,
-      reason:
-        `marker's pid ${parsed.pid} is not an ancestor of this hook process (chain: ${chain.join('→')})`,
+      reason: `marker's pid ${parsed.pid} is not an ancestor of this hook process (chain: ${chain.join('→')})`,
     };
   }
 
@@ -274,9 +276,17 @@ function runSelfTest(wantJson) {
   }
 
   const bads = [
-    'feature/foo', 'feat/bar', 'fix/baz',
-    'tpl234', 'TPL-234', 'tx-', 'tx-foo',
-    'tx-tpl-234', 'tpl234-backport', 'backport-tpl234', 'main2',
+    'feature/foo',
+    'feat/bar',
+    'fix/baz',
+    'tpl234',
+    'TPL-234',
+    'tx-',
+    'tx-foo',
+    'tx-tpl-234',
+    'tpl234-backport',
+    'backport-tpl234',
+    'main2',
   ];
   for (const name of bads) {
     if (isTransportBranchName(name)) failures.push(`expected reject: ${name}`);
@@ -297,9 +307,7 @@ function runSelfTest(wantJson) {
   if (parseMergingMarker(JSON.stringify({ pid: 1, branch: 'main', ts: 1 })) !== null) {
     failures.push('parseMergingMarker should reject non-transport branch');
   }
-  const round = parseMergingMarker(
-    JSON.stringify({ pid: 1, branch: 'tx-TPL-1', ts: 1 }),
-  );
+  const round = parseMergingMarker(JSON.stringify({ pid: 1, branch: 'tx-TPL-1', ts: 1 }));
   if (!round || round.pid !== 1) failures.push('round-trip parseMergingMarker failed');
 
   if (ceremonyFilesIn(['VERSION', 'foo.mjs']).length !== 1) {
@@ -343,7 +351,12 @@ function explainBannedBranch(branch, banReason) {
  * structured result for callers that import this directly (the R2
  * integration tests exercise it without spawning a child process).
  */
-export function runPreCommit({ repoRoot = ROOT, json = false, really = false, silent = false } = {}) {
+export function runPreCommit({
+  repoRoot = ROOT,
+  json = false,
+  really = false,
+  silent = false,
+} = {}) {
   const refuse = (reason, extras = {}) => {
     const out = { ok: false, reason, ...extras };
     if (!silent) {
@@ -363,7 +376,10 @@ export function runPreCommit({ repoRoot = ROOT, json = false, really = false, si
 
   const branch = (() => {
     const probe = spawnSync('git', ['rev-parse', '--abbrev-ref', 'HEAD'], {
-      cwd: repoRoot, encoding: 'utf8', stdio: 'pipe', shell: false,
+      cwd: repoRoot,
+      encoding: 'utf8',
+      stdio: 'pipe',
+      shell: false,
     });
     if (probe.status !== 0) return null;
     const out = (probe.stdout || '').trim();
@@ -390,11 +406,15 @@ export function runPreCommit({ repoRoot = ROOT, json = false, really = false, si
 
   // Transport-branch path.
   const stagedProbe = spawnSync('git', ['diff', '--cached', '--name-only'], {
-    cwd: repoRoot, encoding: 'utf8', stdio: 'pipe', shell: false,
+    cwd: repoRoot,
+    encoding: 'utf8',
+    stdio: 'pipe',
+    shell: false,
   });
-  const staged = stagedProbe.status === 0
-    ? (stagedProbe.stdout || '').split('\n').filter((s) => s.length > 0)
-    : [];
+  const staged =
+    stagedProbe.status === 0
+      ? (stagedProbe.stdout || '').split('\n').filter((s) => s.length > 0)
+      : [];
   const ceremonyHits = ceremonyFilesIn(staged);
 
   // Age check first — a 7d-old branch refuses even ordinary code
@@ -472,7 +492,10 @@ function parseArgs(argv) {
   }
   return {
     has: (k) => map.has(k),
-    get: (k) => { const v = map.get(k); return v === true ? undefined : v; },
+    get: (k) => {
+      const v = map.get(k);
+      return v === true ? undefined : v;
+    },
   };
 }
 
@@ -498,19 +521,14 @@ function main() {
   process.exit(exitCode);
 }
 
-const isDirectRun = process.argv[1] && (
-  process.argv[1].endsWith('transport-branch-check.mjs') ||
-  process.argv[1].endsWith('transport-branch-check')
-);
+const isDirectRun =
+  process.argv[1] &&
+  (process.argv[1].endsWith('transport-branch-check.mjs') ||
+    process.argv[1].endsWith('transport-branch-check'));
 
 if (isDirectRun) {
   main();
 }
 
 // Exports for integration tests + coa-merge consumers.
-export {
-  ROOT,
-  branchCreationTimestamp,
-  checkMarker,
-  ancestorPids,
-};
+export { ROOT, branchCreationTimestamp, checkMarker, ancestorPids };

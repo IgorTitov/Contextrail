@@ -48,10 +48,10 @@ describe('parseChangelogVersions', () => {
   test('ignores headings that do not match strict X.Y.Z form', () => {
     const text = [
       '## [Unreleased]',
-      '## [0.1] - 2026-01-01',         // missing patch
-      '## [v1.0.0] - 2026-01-02',       // leading v
-      '## [1.0.0-rc] - 2026-01-03',     // pre-release suffix
-      '## [1.0.0] - 2026-01-04',        // valid
+      '## [0.1] - 2026-01-01', // missing patch
+      '## [v1.0.0] - 2026-01-02', // leading v
+      '## [1.0.0-rc] - 2026-01-03', // pre-release suffix
+      '## [1.0.0] - 2026-01-04', // valid
     ].join('\n');
     assert.deepEqual(parseChangelogVersions(text), ['1.0.0']);
   });
@@ -97,10 +97,7 @@ describe('findSnapshotGaps', () => {
       'merge-contextrail-template(0.7.49).txt',
       'merge-contextrail-template(0.7.49).zip',
     ];
-    assert.deepEqual(
-      findSnapshotGaps({ versions, presentFiles, txtName, zipName }),
-      [],
-    );
+    assert.deepEqual(findSnapshotGaps({ versions, presentFiles, txtName, zipName }), []);
   });
 
   test('flags missing snapshot on a single version (the bypass incident shape)', () => {
@@ -124,14 +121,26 @@ describe('findSnapshotGaps', () => {
     // Use a custom cutover that excludes our test version
     const versions = ['0.0.5'];
     const presentFiles = ['merge-contextrail-template(0.0.5).txt']; // no zip
-    const gaps = findSnapshotGaps({ versions, presentFiles, txtName, zipName, minZipVersion: '0.1.0' });
+    const gaps = findSnapshotGaps({
+      versions,
+      presentFiles,
+      txtName,
+      zipName,
+      minZipVersion: '0.1.0',
+    });
     assert.deepEqual(gaps, []);
   });
 
   test('still flags missing .txt for pre-cutover versions', () => {
     const versions = ['0.0.5'];
     const presentFiles = []; // not even txt
-    const gaps = findSnapshotGaps({ versions, presentFiles, txtName, zipName, minZipVersion: '0.1.0' });
+    const gaps = findSnapshotGaps({
+      versions,
+      presentFiles,
+      txtName,
+      zipName,
+      minZipVersion: '0.1.0',
+    });
     assert.equal(gaps.length, 1);
     assert.equal(gaps[0].missingTxt, true);
     assert.equal(gaps[0].missingZip, false); // exempt
@@ -146,7 +155,11 @@ describe('findSnapshotGaps', () => {
     assert.equal(gaps[0].missingZip, true);
     // Operator-overridden cutover to 0.6.0: now 0.5.0 < 0.6.0, so zip exempt.
     const gaps2 = findSnapshotGaps({
-      versions, presentFiles, txtName, zipName, minZipVersion: '0.6.0',
+      versions,
+      presentFiles,
+      txtName,
+      zipName,
+      minZipVersion: '0.6.0',
     });
     assert.deepEqual(gaps2, []);
   });
@@ -206,7 +219,11 @@ describe('DEFAULT_MIN_ZIP_VERSION', () => {
 describe('gitVersionsAdded', () => {
   test('returns empty array when both refs share the same versions', () => {
     const head = '## [Unreleased]\n\n## [0.7.50] - x\n';
-    const refStub = () => ({ ok: true, stdout: '## [Unreleased]\n\n## [0.7.50] - x\n', stderr: '' });
+    const refStub = () => ({
+      ok: true,
+      stdout: '## [Unreleased]\n\n## [0.7.50] - x\n',
+      stderr: '',
+    });
     assert.deepEqual(gitVersionsAdded('main', { gitCmd: refStub, headChangelog: head }), []);
   });
 

@@ -11,7 +11,12 @@ import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import {
-  mkdtempSync, mkdirSync, writeFileSync, readFileSync, statSync, existsSync,
+  mkdtempSync,
+  mkdirSync,
+  writeFileSync,
+  readFileSync,
+  statSync,
+  existsSync,
   rmSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -172,25 +177,36 @@ function createTempRepo(name) {
   git(dir, ['config', 'user.name', 'Test']);
   // Minimal repo metadata header-fix walks/inspects.
   writeFileSync(join(dir, 'VERSION'), '0.1.0\n');
-  writeFileSync(join(dir, 'package.json'), JSON.stringify({
-    name: 'tmp', version: '0.1.0',
-  }, null, 2) + '\n');
+  writeFileSync(
+    join(dir, 'package.json'),
+    JSON.stringify(
+      {
+        name: 'tmp',
+        version: '0.1.0',
+      },
+      null,
+      2,
+    ) + '\n',
+  );
   // A few files with slim headers so re-stamp paths are exercised.
   mkdirSync(join(dir, 'scripts'), { recursive: true });
   for (const name of ['a.mjs', 'b.mjs', 'c.mjs']) {
-    writeFileSync(join(dir, 'scripts', name), [
-      '/* @HEADER',
-      ' * @version 0.1.0 | 2026-01-01',
-      ` * @purpose ${name} fixture for header-fix --since test.`,
-      ` * @sidecar ${name}.header.md`,
-      ' * @layer tooling | @hex _none_ | @ctx _none_',
-      ' * @public false',
-      ' * @edit careful',
-      ' */',
-      '',
-      'export const value = 1;',
-      '',
-    ].join('\n'));
+    writeFileSync(
+      join(dir, 'scripts', name),
+      [
+        '/* @HEADER',
+        ' * @version 0.1.0 | 2026-01-01',
+        ` * @purpose ${name} fixture for header-fix --since test.`,
+        ` * @sidecar ${name}.header.md`,
+        ' * @layer tooling | @hex _none_ | @ctx _none_',
+        ' * @public false',
+        ' * @edit careful',
+        ' */',
+        '',
+        'export const value = 1;',
+        '',
+      ].join('\n'),
+    );
   }
   git(dir, ['add', '-A']);
   git(dir, ['commit', '-m', 'init', '--quiet']);
@@ -202,22 +218,27 @@ describe('header-fix CLI --since=HEAD — TPL-231 integration', () => {
     const dir = createTempRepo('since');
     try {
       // Modify exactly one file vs HEAD.
-      writeFileSync(join(dir, 'scripts', 'a.mjs'), [
-        '/* @HEADER',
-        ' * @version 0.1.0 | 2026-01-01',
-        ' * @purpose a.mjs fixture — edited.',
-        ' * @sidecar a.mjs.header.md',
-        ' * @layer tooling | @hex _none_ | @ctx _none_',
-        ' * @public false',
-        ' * @edit careful',
-        ' */',
-        '',
-        'export const value = 2;',
-        '',
-      ].join('\n'));
+      writeFileSync(
+        join(dir, 'scripts', 'a.mjs'),
+        [
+          '/* @HEADER',
+          ' * @version 0.1.0 | 2026-01-01',
+          ' * @purpose a.mjs fixture — edited.',
+          ' * @sidecar a.mjs.header.md',
+          ' * @layer tooling | @hex _none_ | @ctx _none_',
+          ' * @public false',
+          ' * @edit careful',
+          ' */',
+          '',
+          'export const value = 2;',
+          '',
+        ].join('\n'),
+      );
 
       const out = spawnSync(process.execPath, [HEADER_FIX, '--since=HEAD', '--json'], {
-        cwd: dir, encoding: 'utf8', stdio: 'pipe',
+        cwd: dir,
+        encoding: 'utf8',
+        stdio: 'pipe',
       });
       assert.equal(out.status, 0, `header-fix failed: ${out.stderr}\n${out.stdout}`);
       const json = JSON.parse(out.stdout);
@@ -242,7 +263,9 @@ describe('header-fix CLI --since=HEAD — TPL-231 integration', () => {
     const dir = createTempRepo('clean');
     try {
       const out = spawnSync(process.execPath, [HEADER_FIX, '--since=HEAD', '--json'], {
-        cwd: dir, encoding: 'utf8', stdio: 'pipe',
+        cwd: dir,
+        encoding: 'utf8',
+        stdio: 'pipe',
       });
       assert.equal(out.status, 0, `header-fix failed: ${out.stderr}\n${out.stdout}`);
       const json = JSON.parse(out.stdout);
@@ -258,27 +281,34 @@ describe('header-fix CLI --since=HEAD — TPL-231 integration', () => {
     const dir = createTempRepo('idem');
     try {
       // Edit one file so first run has work to do.
-      writeFileSync(join(dir, 'scripts', 'a.mjs'), [
-        '/* @HEADER',
-        ' * @version 0.1.0 | 2026-01-01',
-        ' * @purpose a.mjs fixture — edited.',
-        ' * @sidecar a.mjs.header.md',
-        ' * @layer tooling | @hex _none_ | @ctx _none_',
-        ' * @public false',
-        ' * @edit careful',
-        ' */',
-        '',
-        'export const value = 2;',
-        '',
-      ].join('\n'));
+      writeFileSync(
+        join(dir, 'scripts', 'a.mjs'),
+        [
+          '/* @HEADER',
+          ' * @version 0.1.0 | 2026-01-01',
+          ' * @purpose a.mjs fixture — edited.',
+          ' * @sidecar a.mjs.header.md',
+          ' * @layer tooling | @hex _none_ | @ctx _none_',
+          ' * @public false',
+          ' * @edit careful',
+          ' */',
+          '',
+          'export const value = 2;',
+          '',
+        ].join('\n'),
+      );
 
       const first = spawnSync(process.execPath, [HEADER_FIX, '--since=HEAD', '--json'], {
-        cwd: dir, encoding: 'utf8', stdio: 'pipe',
+        cwd: dir,
+        encoding: 'utf8',
+        stdio: 'pipe',
       });
       assert.equal(first.status, 0, `first run failed: ${first.stderr}`);
 
       const second = spawnSync(process.execPath, [HEADER_FIX, '--since=HEAD', '--json'], {
-        cwd: dir, encoding: 'utf8', stdio: 'pipe',
+        cwd: dir,
+        encoding: 'utf8',
+        stdio: 'pipe',
       });
       assert.equal(second.status, 0, `second run failed: ${second.stderr}`);
       const json = JSON.parse(second.stdout);
@@ -330,31 +360,48 @@ describe('header-fix CLI --lazy-stamp — TPL-233', () => {
       // Bump the repo VERSION so default eager mode would re-stamp.
       writeFileSync(join(dir, 'VERSION'), '0.5.0\n');
       // Edit a file's body (not its header). @version should stay 0.1.0.
-      writeFileSync(join(dir, 'scripts', 'a.mjs'), [
-        '/* @HEADER',
-        ' * @version 0.1.0 | 2026-01-01',
-        ' * @purpose a.mjs fixture for lazy-stamp.',
-        ' * @sidecar a.mjs.header.md',
-        ' * @layer tooling | @hex _none_ | @ctx _none_',
-        ' * @public false',
-        ' * @edit careful',
-        ' */',
-        '',
-        'export const value = 999;',
-        '',
-      ].join('\n'));
+      writeFileSync(
+        join(dir, 'scripts', 'a.mjs'),
+        [
+          '/* @HEADER',
+          ' * @version 0.1.0 | 2026-01-01',
+          ' * @purpose a.mjs fixture for lazy-stamp.',
+          ' * @sidecar a.mjs.header.md',
+          ' * @layer tooling | @hex _none_ | @ctx _none_',
+          ' * @public false',
+          ' * @edit careful',
+          ' */',
+          '',
+          'export const value = 999;',
+          '',
+        ].join('\n'),
+      );
 
-      const out = spawnSync(process.execPath, [HEADER_FIX, '--since=HEAD', '--lazy-stamp', '--json'], {
-        cwd: dir, encoding: 'utf8', stdio: 'pipe',
-      });
+      const out = spawnSync(
+        process.execPath,
+        [HEADER_FIX, '--since=HEAD', '--lazy-stamp', '--json'],
+        {
+          cwd: dir,
+          encoding: 'utf8',
+          stdio: 'pipe',
+        },
+      );
       assert.equal(out.status, 0, `header-fix failed: ${out.stderr}`);
       const json = JSON.parse(out.stdout);
       assert.equal(json.ok, true);
       assert.equal(json.data.lazyStamp, true);
 
       const after = readFileSync(join(dir, 'scripts', 'a.mjs'), 'utf8');
-      assert.match(after, /@version 0\.1\.0/, '@version 0.1.0 must be preserved under --lazy-stamp');
-      assert.doesNotMatch(after, /@version 0\.5\.0/, 'must NOT have been re-stamped to current VERSION');
+      assert.match(
+        after,
+        /@version 0\.1\.0/,
+        '@version 0.1.0 must be preserved under --lazy-stamp',
+      );
+      assert.doesNotMatch(
+        after,
+        /@version 0\.5\.0/,
+        'must NOT have been re-stamped to current VERSION',
+      );
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
@@ -364,22 +411,27 @@ describe('header-fix CLI --lazy-stamp — TPL-233', () => {
     const dir = createTempRepo('lazy-eager-baseline');
     try {
       writeFileSync(join(dir, 'VERSION'), '0.5.0\n');
-      writeFileSync(join(dir, 'scripts', 'a.mjs'), [
-        '/* @HEADER',
-        ' * @version 0.1.0 | 2026-01-01',
-        ' * @purpose a.mjs eager baseline.',
-        ' * @sidecar a.mjs.header.md',
-        ' * @layer tooling | @hex _none_ | @ctx _none_',
-        ' * @public false',
-        ' * @edit careful',
-        ' */',
-        '',
-        'export const value = 7;',
-        '',
-      ].join('\n'));
+      writeFileSync(
+        join(dir, 'scripts', 'a.mjs'),
+        [
+          '/* @HEADER',
+          ' * @version 0.1.0 | 2026-01-01',
+          ' * @purpose a.mjs eager baseline.',
+          ' * @sidecar a.mjs.header.md',
+          ' * @layer tooling | @hex _none_ | @ctx _none_',
+          ' * @public false',
+          ' * @edit careful',
+          ' */',
+          '',
+          'export const value = 7;',
+          '',
+        ].join('\n'),
+      );
 
       const out = spawnSync(process.execPath, [HEADER_FIX, '--since=HEAD', '--json'], {
-        cwd: dir, encoding: 'utf8', stdio: 'pipe',
+        cwd: dir,
+        encoding: 'utf8',
+        stdio: 'pipe',
       });
       assert.equal(out.status, 0, `header-fix failed: ${out.stderr}`);
       const json = JSON.parse(out.stdout);
@@ -403,9 +455,15 @@ describe('header-fix CLI --lazy-stamp — TPL-233', () => {
       writeFileSync(join(dir, 'scripts', 'fresh.mjs'), 'export const fresh = 1;\n');
       git(dir, ['add', 'scripts/fresh.mjs']);
 
-      const out = spawnSync(process.execPath, [HEADER_FIX, '--since=HEAD', '--lazy-stamp', '--json'], {
-        cwd: dir, encoding: 'utf8', stdio: 'pipe',
-      });
+      const out = spawnSync(
+        process.execPath,
+        [HEADER_FIX, '--since=HEAD', '--lazy-stamp', '--json'],
+        {
+          cwd: dir,
+          encoding: 'utf8',
+          stdio: 'pipe',
+        },
+      );
       assert.equal(out.status, 0, `header-fix failed: ${out.stderr}`);
 
       const after = readFileSync(join(dir, 'scripts', 'fresh.mjs'), 'utf8');
@@ -415,7 +473,11 @@ describe('header-fix CLI --lazy-stamp — TPL-233', () => {
       assert.match(after, /@?HEADER/, 'new file should get a header injected');
       // Whichever format is used, the version line must reflect the current
       // repo VERSION (lazy-stamp has nothing prior to preserve).
-      assert.match(after, /(?:@)?version 0\.5\.0/, 'new-file version should be the current repo VERSION');
+      assert.match(
+        after,
+        /(?:@)?version 0\.5\.0/,
+        'new-file version should be the current repo VERSION',
+      );
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
@@ -435,16 +497,12 @@ describe('header-fix CLI --files-from — TPL-233', () => {
       // Bump VERSION so eager stamping would have something to do.
       writeFileSync(join(dir, 'VERSION'), '0.9.0\n');
       // Constrain walk to a.mjs only — b.mjs and c.mjs must remain untouched.
-      const out = spawnSync(
-        process.execPath,
-        [HEADER_FIX, '--files-from=-', '--json'],
-        {
-          cwd: dir,
-          encoding: 'utf8',
-          stdio: 'pipe',
-          input: 'scripts/a.mjs\n',
-        },
-      );
+      const out = spawnSync(process.execPath, [HEADER_FIX, '--files-from=-', '--json'], {
+        cwd: dir,
+        encoding: 'utf8',
+        stdio: 'pipe',
+        input: 'scripts/a.mjs\n',
+      });
       assert.equal(out.status, 0, `header-fix failed: ${out.stderr}`);
       const json = JSON.parse(out.stdout);
       assert.equal(json.data.mode, 'files-from:-');
@@ -463,11 +521,12 @@ describe('header-fix CLI --files-from — TPL-233', () => {
     const dir = createTempRepo('files-from-empty');
     try {
       writeFileSync(join(dir, 'VERSION'), '0.9.0\n');
-      const out = spawnSync(
-        process.execPath,
-        [HEADER_FIX, '--files-from=-', '--json'],
-        { cwd: dir, encoding: 'utf8', stdio: 'pipe', input: '' },
-      );
+      const out = spawnSync(process.execPath, [HEADER_FIX, '--files-from=-', '--json'], {
+        cwd: dir,
+        encoding: 'utf8',
+        stdio: 'pipe',
+        input: '',
+      });
       assert.equal(out.status, 0, `header-fix failed: ${out.stderr}`);
       const json = JSON.parse(out.stdout);
       assert.deepEqual(json.data.changed, [], 'empty stdin must produce zero writes');
@@ -490,15 +549,16 @@ describe('header-fix CLI --files-from — TPL-233', () => {
       // must be filtered out before any walk happens.
       const stdin = [
         'scripts/a.mjs',
-        'scripts/a.mjs.header.md',  // sidecar — must be skipped
-        'docs/_generated/something.json',  // _generated — must be skipped
+        'scripts/a.mjs.header.md', // sidecar — must be skipped
+        'docs/_generated/something.json', // _generated — must be skipped
         '',
       ].join('\n');
-      const out = spawnSync(
-        process.execPath,
-        [HEADER_FIX, '--files-from=-', '--json'],
-        { cwd: dir, encoding: 'utf8', stdio: 'pipe', input: stdin },
-      );
+      const out = spawnSync(process.execPath, [HEADER_FIX, '--files-from=-', '--json'], {
+        cwd: dir,
+        encoding: 'utf8',
+        stdio: 'pipe',
+        input: stdin,
+      });
       assert.equal(out.status, 0, `header-fix failed: ${out.stderr}`);
       const json = JSON.parse(out.stdout);
       assert.equal(json.ok, true);
@@ -541,34 +601,40 @@ describe('header-fix pre-commit self-rewrite guard — TPL-331', () => {
 
       // A regular file that SHOULD be stamped by the pass.
       mkdirSync(join(dir, 'scripts'), { recursive: true });
-      writeFileSync(join(dir, 'scripts', 'sample.mjs'), [
-        '/* @HEADER',
-        ' * @version 0.1.0 | 2026-01-01',
-        ' * @purpose TPL-331 guard fixture — regular file.',
-        ' * @sidecar sample.mjs.header.md',
-        ' * @layer util | @hex _none_ | @ctx _none_',
-        ' * @public false',
-        ' * @edit rewrite-ok',
-        ' */',
-        '',
-        'export const x = 1;',
-        '',
-      ].join('\n'));
+      writeFileSync(
+        join(dir, 'scripts', 'sample.mjs'),
+        [
+          '/* @HEADER',
+          ' * @version 0.1.0 | 2026-01-01',
+          ' * @purpose TPL-331 guard fixture — regular file.',
+          ' * @sidecar sample.mjs.header.md',
+          ' * @layer util | @hex _none_ | @ctx _none_',
+          ' * @public false',
+          ' * @edit rewrite-ok',
+          ' */',
+          '',
+          'export const x = 1;',
+          '',
+        ].join('\n'),
+      );
 
       // .githooks/pre-commit — must NOT be stamped when guard is active.
       mkdirSync(join(dir, '.githooks'), { recursive: true });
-      writeFileSync(join(dir, '.githooks', 'pre-commit'), [
-        '#!/usr/bin/env bash',
-        '# @HEADER',
-        '# @version 0.1.0 | 2026-01-01',
-        '# @purpose TPL-331 guard fixture — hook file.',
-        '# @sidecar pre-commit.header.md',
-        '# @layer git-hooks | @hex _none_ | @ctx _none_',
-        '# @public false',
-        '# @edit careful',
-        'echo hello',
-        '',
-      ].join('\n'));
+      writeFileSync(
+        join(dir, '.githooks', 'pre-commit'),
+        [
+          '#!/usr/bin/env bash',
+          '# @HEADER',
+          '# @version 0.1.0 | 2026-01-01',
+          '# @purpose TPL-331 guard fixture — hook file.',
+          '# @sidecar pre-commit.header.md',
+          '# @layer git-hooks | @hex _none_ | @ctx _none_',
+          '# @public false',
+          '# @edit careful',
+          'echo hello',
+          '',
+        ].join('\n'),
+      );
 
       git(['add', 'VERSION', 'scripts/sample.mjs', '.githooks/pre-commit']);
       git(['commit', '-m', 'init', '--quiet']);
@@ -600,7 +666,11 @@ describe('header-fix pre-commit self-rewrite guard — TPL-331', () => {
 
       // Verify the hook file content is unchanged on disk.
       const hookContent = readFileSync(join(dir, '.githooks', 'pre-commit'), 'utf8');
-      assert.match(hookContent, /@version 0\.1\.0/, '.githooks/pre-commit must not have been re-stamped');
+      assert.match(
+        hookContent,
+        /@version 0\.1\.0/,
+        '.githooks/pre-commit must not have been re-stamped',
+      );
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

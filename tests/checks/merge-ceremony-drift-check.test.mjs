@@ -20,12 +20,7 @@
 
 import { describe, test, before } from 'node:test';
 import assert from 'node:assert/strict';
-import {
-  mkdtempSync,
-  writeFileSync,
-  mkdirSync,
-  existsSync,
-} from 'node:fs';
+import { mkdtempSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
@@ -324,11 +319,7 @@ describe('Check 5 — ceremony doc completeness', () => {
     mkdirSync(join(dir, 'scripts', 'checks'), { recursive: true });
 
     // Script that is referenced in the doc
-    writeFileSync(
-      join(dir, 'scripts', 'checks', 'my-check.mjs'),
-      '// placeholder',
-      'utf8',
-    );
+    writeFileSync(join(dir, 'scripts', 'checks', 'my-check.mjs'), '// placeholder', 'utf8');
 
     // Doc references the script and Phase 1
     writeFileSync(
@@ -338,11 +329,7 @@ describe('Check 5 — ceremony doc completeness', () => {
     );
 
     // Pre-commit references Phase 1
-    writeFileSync(
-      join(dir, '.githooks', 'pre-commit'),
-      '#!/bin/bash\n# Phase 1 checks\n',
-      'utf8',
-    );
+    writeFileSync(join(dir, '.githooks', 'pre-commit'), '#!/bin/bash\n# Phase 1 checks\n', 'utf8');
 
     safeGit(dir, ['add', '.'], { stdio: 'pipe' });
     safeGit(dir, ['commit', '-m', 'init'], { stdio: 'pipe' });
@@ -370,11 +357,7 @@ describe('Check 5 — ceremony doc completeness', () => {
       'utf8',
     );
 
-    writeFileSync(
-      join(dir, '.githooks', 'pre-commit'),
-      '#!/bin/bash\n# placeholder\n',
-      'utf8',
-    );
+    writeFileSync(join(dir, '.githooks', 'pre-commit'), '#!/bin/bash\n# placeholder\n', 'utf8');
 
     safeGit(dir, ['add', '.'], { stdio: 'pipe' });
     safeGit(dir, ['commit', '-m', 'init'], { stdio: 'pipe' });
@@ -435,10 +418,11 @@ describe('Check 6 — claim audit-log correlation', () => {
     safeGit(dir, ['commit', '-m', 'init'], { stdio: 'pipe' });
 
     // Get the commit timestamp
-    const commitTs = parseInt(
-      safeGit(dir, ['log', '--pretty=format:%ct', '-1'], { encoding: 'utf8' }).trim(),
-      10,
-    ) * 1000;
+    const commitTs =
+      parseInt(
+        safeGit(dir, ['log', '--pretty=format:%ct', '-1'], { encoding: 'utf8' }).trim(),
+        10,
+      ) * 1000;
 
     // Write a snapshot
     writeFileSync(join(dir, '.backups', 'merge-x(0.1.0).zip'), 'stub', 'utf8');
@@ -468,7 +452,11 @@ describe('Check 6 — claim audit-log correlation', () => {
     // Write claim file with VERSION as target
     writeFileSync(
       join(dir, '.claims', `${claimId}.json`),
-      JSON.stringify({ id: claimId, agent: 'feature-implementer', targets: ['VERSION', 'CHANGELOG.md'] }),
+      JSON.stringify({
+        id: claimId,
+        agent: 'feature-implementer',
+        targets: ['VERSION', 'CHANGELOG.md'],
+      }),
       'utf8',
     );
 
@@ -503,11 +491,7 @@ describe('Check 6 — claim audit-log correlation', () => {
       claimId: 'clm-old',
       claimAgent: 'someone-else',
     };
-    writeFileSync(
-      join(dir, '.claims', 'audit.log'),
-      JSON.stringify(oldEntry) + '\n',
-      'utf8',
-    );
+    writeFileSync(join(dir, '.claims', 'audit.log'), JSON.stringify(oldEntry) + '\n', 'utf8');
 
     const { stdout } = runCheck(dir, ['--recent=5']);
     assert.match(stdout, /\[WARN\] Check 6:/);

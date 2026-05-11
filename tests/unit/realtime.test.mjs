@@ -50,8 +50,12 @@ function createMockTransport(overrides = {}) {
   }
 
   return {
-    isSupported() { return supported; },
-    getState() { return state; },
+    isSupported() {
+      return supported;
+    },
+    getState() {
+      return state;
+    },
     async open() {
       setState('connecting');
       if (failOnOpen) {
@@ -60,12 +64,18 @@ function createMockTransport(overrides = {}) {
       }
       setState('connected');
     },
-    async close() { setState('disconnected'); },
+    async close() {
+      setState('disconnected');
+    },
     send() {
       if (state !== 'connected') throw new Error('Not connected');
     },
-    onMessage(cb) { messageListeners.push(cb); },
-    onStateChange(cb) { stateListeners.push(cb); },
+    onMessage(cb) {
+      messageListeners.push(cb);
+    },
+    onStateChange(cb) {
+      stateListeners.push(cb);
+    },
   };
 }
 
@@ -239,7 +249,9 @@ test('heartbeat fires sendFn on interval', async () => {
   const hb = createHeartbeat({ interval: 50, timeout: 200 });
   let sendCount = 0;
   hb.start(
-    () => { sendCount++; },
+    () => {
+      sendCount++;
+    },
     () => {},
   );
   await new Promise((r) => setTimeout(r, 180));
@@ -252,7 +264,9 @@ test('heartbeat calls onTimeout when no pong received', async () => {
   let timedOut = false;
   hb.start(
     () => {},
-    () => { timedOut = true; },
+    () => {
+      timedOut = true;
+    },
   );
   await new Promise((r) => setTimeout(r, 200));
   hb.stop();
@@ -263,8 +277,12 @@ test('heartbeat receivedPong prevents timeout', async () => {
   const hb = createHeartbeat({ interval: 30, timeout: 50 });
   let timedOut = false;
   hb.start(
-    () => { hb.receivedPong(); },
-    () => { timedOut = true; },
+    () => {
+      hb.receivedPong();
+    },
+    () => {
+      timedOut = true;
+    },
   );
   await new Promise((r) => setTimeout(r, 120));
   hb.stop();
@@ -276,8 +294,12 @@ test('heartbeat stop cancels all timers', async () => {
   let sendCount = 0;
   let timedOut = false;
   hb.start(
-    () => { sendCount++; },
-    () => { timedOut = true; },
+    () => {
+      sendCount++;
+    },
+    () => {
+      timedOut = true;
+    },
   );
   hb.stop();
   const countAtStop = sendCount;

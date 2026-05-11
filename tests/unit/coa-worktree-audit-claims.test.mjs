@@ -20,9 +20,7 @@
 
 import { describe, test, before, after, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
-import {
-  mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync, existsSync,
-} from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -82,7 +80,13 @@ describe('runAuditClaims: history-confirmed', () => {
     addCommit(root, 'feat(auth): implement login (TST-100)');
     writeActiveClaim(root, 'TST-100');
   });
-  after(() => { try { rmSync(root, { recursive: true, force: true }); } catch { /* best effort */ } });
+  after(() => {
+    try {
+      rmSync(root, { recursive: true, force: true });
+    } catch {
+      /* best effort */
+    }
+  });
 
   test('TC1: claim whose slice is in git log → history-confirmed', () => {
     const { exitCode, rows } = runAuditClaims(root, {});
@@ -105,7 +109,13 @@ describe('runAuditClaims: reserved-no-history in-flight', () => {
     // TST-011 not in history, brand new claim
     writeActiveClaim(root, 'TST-011', { createdAt: new Date().toISOString() });
   });
-  after(() => { try { rmSync(root, { recursive: true, force: true }); } catch { /* best effort */ } });
+  after(() => {
+    try {
+      rmSync(root, { recursive: true, force: true });
+    } catch {
+      /* best effort */
+    }
+  });
 
   test('TC2: fresh claim not in history → reserved-no-history (likely in-flight)', () => {
     const { exitCode, rows } = runAuditClaims(root, {});
@@ -132,7 +142,13 @@ describe('runAuditClaims: reserved-no-history stale', () => {
     const eightHoursAgo = new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString();
     writeActiveClaim(root, 'OLD-011', { createdAt: eightHoursAgo });
   });
-  after(() => { try { rmSync(root, { recursive: true, force: true }); } catch { /* best effort */ } });
+  after(() => {
+    try {
+      rmSync(root, { recursive: true, force: true });
+    } catch {
+      /* best effort */
+    }
+  });
 
   test('TC3: stale claim not in history → reserved-no-history (likely stale/orphaned)', () => {
     const { exitCode, rows } = runAuditClaims(root, {});
@@ -158,7 +174,13 @@ describe('runAuditClaims: anomalous-numbering', () => {
     // ZVX-999 is 835 above gitLogMax(164) — well over threshold
     writeActiveClaim(root, 'ZVX-999');
   });
-  after(() => { try { rmSync(root, { recursive: true, force: true }); } catch { /* best effort */ } });
+  after(() => {
+    try {
+      rmSync(root, { recursive: true, force: true });
+    } catch {
+      /* best effort */
+    }
+  });
 
   test('TC4: claim whose numeric is way above git-log max → anomalous-numbering', () => {
     const { exitCode, rows } = runAuditClaims(root, {});
@@ -179,7 +201,13 @@ describe('runAuditClaims: --execute gate', () => {
     root = makeRepo('t5');
     writeActiveClaim(root, 'TST-999'); // anomalous
   });
-  after(() => { try { rmSync(root, { recursive: true, force: true }); } catch { /* best effort */ } });
+  after(() => {
+    try {
+      rmSync(root, { recursive: true, force: true });
+    } catch {
+      /* best effort */
+    }
+  });
 
   test('TC5: --execute without COA_OPERATOR=1 returns exitCode 1', () => {
     const orig = process.env.COA_OPERATOR;
@@ -211,7 +239,13 @@ describe('runAuditClaims: --execute expires anomalous claims', () => {
     const l = writeActiveClaim(root, 'ZVX-050');
     legitimateFile = join(root, '.claims', l.file);
   });
-  after(() => { try { rmSync(root, { recursive: true, force: true }); } catch { /* best effort */ } });
+  after(() => {
+    try {
+      rmSync(root, { recursive: true, force: true });
+    } catch {
+      /* best effort */
+    }
+  });
 
   test('TC6: --execute with COA_OPERATOR=1 expires anomalous claim, leaves legitimate intact', () => {
     const orig = process.env.COA_OPERATOR;
@@ -241,8 +275,16 @@ describe('runAuditClaims: --execute expires anomalous claims', () => {
 
 describe('runAuditClaims: empty claims dir', () => {
   let root;
-  before(() => { root = makeRepo('t7'); });
-  after(() => { try { rmSync(root, { recursive: true, force: true }); } catch { /* best effort */ } });
+  before(() => {
+    root = makeRepo('t7');
+  });
+  after(() => {
+    try {
+      rmSync(root, { recursive: true, force: true });
+    } catch {
+      /* best effort */
+    }
+  });
 
   test('TC7: no active claims → exitCode 0, rows empty', () => {
     const { exitCode, rows } = runAuditClaims(root, {});

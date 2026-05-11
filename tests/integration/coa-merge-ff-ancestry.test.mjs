@@ -37,9 +37,7 @@
 
 import { describe, test, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
-import {
-  mkdirSync, mkdtempSync, writeFileSync, rmSync, existsSync,
-} from 'node:fs';
+import { mkdirSync, mkdtempSync, writeFileSync, rmSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { safeGitSpawn } from '../_setup/safe-git.mjs';
@@ -117,7 +115,11 @@ describe('coa-merge step 9c: ancestry guard (TPL-327)', () => {
 
   afterEach(() => {
     if (baseDir && existsSync(baseDir)) {
-      try { rmSync(baseDir, { recursive: true, force: true }); } catch { /* best effort */ }
+      try {
+        rmSync(baseDir, { recursive: true, force: true });
+      } catch {
+        /* best effort */
+      }
       baseDir = undefined;
     }
   });
@@ -140,7 +142,7 @@ describe('coa-merge step 9c: ancestry guard (TPL-327)', () => {
       checkResult.status,
       0,
       `Expected ancestry check to fail (B is not descended from A) but it exited 0.\n` +
-      `This means B was accidentally rebased onto A — the race scenario is invalid.`,
+        `This means B was accidentally rebased onto A — the race scenario is invalid.`,
     );
   });
 
@@ -175,7 +177,7 @@ describe('coa-merge step 9c: ancestry guard (TPL-327)', () => {
     // (not asserted — git behaviour varies by version/config; see comment above)
     safeGitSpawn(txBRoot, [
       'push',
-      `--force-with-lease=main:${parentSha}`,  // short ref — this is the bug
+      `--force-with-lease=main:${parentSha}`, // short ref — this is the bug
       mainRoot,
       'HEAD:refs/heads/main',
     ]);
@@ -183,7 +185,7 @@ describe('coa-merge step 9c: ancestry guard (TPL-327)', () => {
     // Attempt push with CORRECT full ref lease — should fail because mainSha != parentSha.
     const goodLeasePush = safeGitSpawn(txBRoot, [
       'push',
-      `--force-with-lease=refs/heads/main:${parentSha}`,  // full ref — the fix
+      `--force-with-lease=refs/heads/main:${parentSha}`, // full ref — the fix
       mainRoot,
       'HEAD:refs/heads/main',
     ]);
@@ -194,8 +196,8 @@ describe('coa-merge step 9c: ancestry guard (TPL-327)', () => {
       goodLeasePush.status,
       0,
       `Expected --force-with-lease=refs/heads/main:${parentSha.slice(0, 8)} to fail ` +
-      `(main is at ${aSha.slice(0, 8)}, not parentSha), but push succeeded.\n` +
-      `STDERR: ${goodLeasePush.stderr}`,
+        `(main is at ${aSha.slice(0, 8)}, not parentSha), but push succeeded.\n` +
+        `STDERR: ${goodLeasePush.stderr}`,
     );
   });
 });

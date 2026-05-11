@@ -102,7 +102,10 @@ export function consumeOverride(stagedFiles, repoRoot) {
 
   const ts = Date.parse(timestamp);
   if (isNaN(ts)) {
-    return { ok: false, reason: `r5-override.json: "timestamp" is not a valid ISO-8601 date: ${timestamp}` };
+    return {
+      ok: false,
+      reason: `r5-override.json: "timestamp" is not a valid ISO-8601 date: ${timestamp}`,
+    };
   }
 
   // Gap 1 — Far-future timestamp rejection (TPL-331 / ADR-0047 Revision 1).
@@ -113,7 +116,11 @@ export function consumeOverride(stagedFiles, repoRoot) {
   }
 
   if (Date.now() - ts > TTL_MS) {
-    return { ok: false, reason: 'r5-override.json: timestamp is older than 60 seconds (TTL expired). Re-create the file.' };
+    return {
+      ok: false,
+      reason:
+        'r5-override.json: timestamp is older than 60 seconds (TTL expired). Re-create the file.',
+    };
   }
 
   if (!slice_id || typeof slice_id !== 'string') {
@@ -121,11 +128,17 @@ export function consumeOverride(stagedFiles, repoRoot) {
   }
 
   if (!reason || typeof reason !== 'string' || reason.length < 20) {
-    return { ok: false, reason: `r5-override.json: "reason" must be >= 20 characters (got ${reason?.length ?? 0}).` };
+    return {
+      ok: false,
+      reason: `r5-override.json: "reason" must be >= 20 characters (got ${reason?.length ?? 0}).`,
+    };
   }
 
   if (!VALID_CATEGORIES.includes(category)) {
-    return { ok: false, reason: `r5-override.json: "category" must be one of: ${VALID_CATEGORIES.join(', ')}. Got: ${JSON.stringify(category)}` };
+    return {
+      ok: false,
+      reason: `r5-override.json: "category" must be one of: ${VALID_CATEGORIES.join(', ')}. Got: ${JSON.stringify(category)}`,
+    };
   }
 
   if (!Array.isArray(expected_files)) {
@@ -137,7 +150,7 @@ export function consumeOverride(stagedFiles, repoRoot) {
   // must match at least one CEREMONY_PATH_PATTERNS entry.
   if (category === 'self-modifying-ceremony') {
     const offending = expected_files.filter(
-      f => typeof f === 'string' && !CEREMONY_PATH_PATTERNS.some(p => p.test(f))
+      (f) => typeof f === 'string' && !CEREMONY_PATH_PATTERNS.some((p) => p.test(f)),
     );
     if (offending.length > 0) {
       return {
@@ -148,9 +161,12 @@ export function consumeOverride(stagedFiles, repoRoot) {
   }
 
   const expectedSet = new Set(expected_files);
-  const uncovered = stagedFiles.filter(f => !expectedSet.has(f));
+  const uncovered = stagedFiles.filter((f) => !expectedSet.has(f));
   if (uncovered.length > 0) {
-    return { ok: false, reason: `r5-override.json: staged files not listed in "expected_files": ${uncovered.join(', ')}` };
+    return {
+      ok: false,
+      reason: `r5-override.json: staged files not listed in "expected_files": ${uncovered.join(', ')}`,
+    };
   }
 
   // All checks passed — build the log entry. consumed_at is set here, after

@@ -19,8 +19,13 @@ import { describe, test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync, execSync } from 'node:child_process';
 import {
-  mkdtempSync, mkdirSync, writeFileSync, readFileSync,
-  existsSync, rmSync, symlinkSync,
+  mkdtempSync,
+  mkdirSync,
+  writeFileSync,
+  readFileSync,
+  existsSync,
+  rmSync,
+  symlinkSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
@@ -34,34 +39,40 @@ const REPO_ROOT = resolve(import.meta.dirname ?? '.', '..', '..');
 
 function createTempGitRepo(name) {
   const dir = mkdtempSync(join(tmpdir(), `coa-ps-${name}-`));
-  safeGit(dir, 'init', { stdio: 'pipe'});
+  safeGit(dir, 'init', { stdio: 'pipe' });
   safeGit(dir, 'config user.email "test@test.com"', { stdio: 'pipe' });
   safeGit(dir, 'config user.name "Test"', { stdio: 'pipe' });
 
   // Minimal repo structure
   writeFileSync(join(dir, 'VERSION'), '0.1.0\n');
-  writeFileSync(join(dir, 'package.json'), JSON.stringify({ name: 'test', version: '0.1.0' }, null, 2) + '\n');
-  writeFileSync(join(dir, 'CHANGELOG.md'), [
-    '# CHANGELOG',
-    '',
-    '## [Unreleased]',
-    '',
-    '_Nothing yet._',
-    '',
-  ].join('\n'));
+  writeFileSync(
+    join(dir, 'package.json'),
+    JSON.stringify({ name: 'test', version: '0.1.0' }, null, 2) + '\n',
+  );
+  writeFileSync(
+    join(dir, 'CHANGELOG.md'),
+    ['# CHANGELOG', '', '## [Unreleased]', '', '_Nothing yet._', ''].join('\n'),
+  );
 
   mkdirSync(join(dir, '.claims'), { recursive: true });
-  writeFileSync(join(dir, '.claims', 'config.json'), JSON.stringify({
-    protectedPathMode: 'block',
-    protectedPaths: ['VERSION', 'CHANGELOG.md', 'package.json'],
-  }, null, 2) + '\n');
+  writeFileSync(
+    join(dir, '.claims', 'config.json'),
+    JSON.stringify(
+      {
+        protectedPathMode: 'block',
+        protectedPaths: ['VERSION', 'CHANGELOG.md', 'package.json'],
+      },
+      null,
+      2,
+    ) + '\n',
+  );
 
   mkdirSync(join(dir, 'modules', 'auth'), { recursive: true });
   writeFileSync(join(dir, 'modules', 'auth', 'index.mjs'), '// auth module\n');
   mkdirSync(join(dir, 'modules', 'gantt'), { recursive: true });
   writeFileSync(join(dir, 'modules', 'gantt', 'index.mjs'), '// gantt module\n');
 
-  safeGit(dir, 'add -A', { stdio: 'pipe'});
+  safeGit(dir, 'add -A', { stdio: 'pipe' });
   safeGit(dir, 'commit -m "init"', { stdio: 'pipe' });
 
   return dir;
@@ -69,10 +80,7 @@ function createTempGitRepo(name) {
 
 function writeClaim(dir, claim) {
   mkdirSync(join(dir, '.claims'), { recursive: true });
-  writeFileSync(
-    join(dir, '.claims', `${claim.id}.json`),
-    JSON.stringify(claim, null, 2) + '\n',
-  );
+  writeFileSync(join(dir, '.claims', `${claim.id}.json`), JSON.stringify(claim, null, 2) + '\n');
 }
 
 function farFuture() {
@@ -111,7 +119,14 @@ describe('parallel-sessions: claim-check --acquire blocks second agent', () => {
         created: new Date().toISOString(),
         expires: farFuture(),
         status: 'active',
-        targets: [{ path: 'modules/auth/index.mjs', action: 'modify', surface: 'domain', description: 'refactor' }],
+        targets: [
+          {
+            path: 'modules/auth/index.mjs',
+            action: 'modify',
+            surface: 'domain',
+            description: 'refactor',
+          },
+        ],
         strategy: 'modify-in-place',
         dependsOn: [],
         notes: '',
@@ -147,7 +162,14 @@ describe('parallel-sessions: claim-check --acquire blocks second agent', () => {
         created: new Date().toISOString(),
         expires: farFuture(),
         status: 'active',
-        targets: [{ path: 'modules/auth/index.mjs', action: 'modify', surface: 'domain', description: 'refactor' }],
+        targets: [
+          {
+            path: 'modules/auth/index.mjs',
+            action: 'modify',
+            surface: 'domain',
+            description: 'refactor',
+          },
+        ],
         strategy: 'modify-in-place',
         dependsOn: [],
         notes: '',
@@ -185,7 +207,14 @@ describe('parallel-sessions: stale claims are auto-expired', () => {
         created: pastDate(),
         expires: pastDate(), // Already expired
         status: 'active',
-        targets: [{ path: 'modules/auth/index.mjs', action: 'modify', surface: 'domain', description: 'work' }],
+        targets: [
+          {
+            path: 'modules/auth/index.mjs',
+            action: 'modify',
+            surface: 'domain',
+            description: 'work',
+          },
+        ],
         strategy: 'modify-in-place',
         dependsOn: [],
         notes: '',
@@ -207,7 +236,11 @@ describe('parallel-sessions: stale claims are auto-expired', () => {
         '--action=modify',
         '--json',
       ]);
-      assert.equal(acquire.status, 0, 'Agent B should be able to acquire after stale claim expired');
+      assert.equal(
+        acquire.status,
+        0,
+        'Agent B should be able to acquire after stale claim expired',
+      );
     } finally {
       rmSync(repo, { recursive: true, force: true });
     }
@@ -219,7 +252,10 @@ describe('parallel-sessions: VERSION race protection', () => {
     const repo = createTempGitRepo('version-race');
     try {
       // VERSION is 0.1.0 at HEAD and also in working tree (no bump)
-      const result = runScript(repo, join(REPO_ROOT, 'scripts', 'checks', 'release-discipline-check.mjs'));
+      const result = runScript(
+        repo,
+        join(REPO_ROOT, 'scripts', 'checks', 'release-discipline-check.mjs'),
+      );
       // Should fail because VERSION not bumped
       assert.equal(result.status, 1, 'Should reject un-bumped VERSION');
       assert.ok(result.stderr.includes('not bumped'), `Expected "not bumped" in: ${result.stderr}`);
@@ -233,22 +269,31 @@ describe('parallel-sessions: VERSION race protection', () => {
     try {
       // Jump VERSION from 0.1.0 to 0.1.5 (should be 0.1.1)
       writeFileSync(join(repo, 'VERSION'), '0.1.5\n');
-      writeFileSync(join(repo, 'CHANGELOG.md'), [
-        '# CHANGELOG',
-        '',
-        '## [Unreleased]',
-        '',
-        '_Nothing yet._',
-        '',
-        '## [0.1.5] — 2026-04-27',
-        '',
-        '- Something',
-        '',
-      ].join('\n'));
+      writeFileSync(
+        join(repo, 'CHANGELOG.md'),
+        [
+          '# CHANGELOG',
+          '',
+          '## [Unreleased]',
+          '',
+          '_Nothing yet._',
+          '',
+          '## [0.1.5] — 2026-04-27',
+          '',
+          '- Something',
+          '',
+        ].join('\n'),
+      );
 
-      const result = runScript(repo, join(REPO_ROOT, 'scripts', 'checks', 'release-discipline-check.mjs'));
+      const result = runScript(
+        repo,
+        join(REPO_ROOT, 'scripts', 'checks', 'release-discipline-check.mjs'),
+      );
       assert.equal(result.status, 1, 'Should reject VERSION jump > 1');
-      assert.ok(result.stderr.includes('jump') || result.stderr.includes('Expected'), `Expected jump error in: ${result.stderr}`);
+      assert.ok(
+        result.stderr.includes('jump') || result.stderr.includes('Expected'),
+        `Expected jump error in: ${result.stderr}`,
+      );
     } finally {
       rmSync(repo, { recursive: true, force: true });
     }
@@ -350,7 +395,7 @@ describe('parallel-sessions: header-fix --since=HEAD narrow fallback (TPL-231)',
 
   function setupHeaderFixRepo(name) {
     const dir = mkdtempSync(join(tmpdir(), `coa-hf-narrow-${name}-`));
-    safeGit(dir, 'init --quiet', { stdio: 'pipe'});
+    safeGit(dir, 'init --quiet', { stdio: 'pipe' });
     safeGit(dir, 'config user.email "test@test.com"', { stdio: 'pipe' });
     safeGit(dir, 'config user.name "Test"', { stdio: 'pipe' });
     writeFileSync(join(dir, 'VERSION'), '0.1.0\n');
@@ -362,21 +407,24 @@ describe('parallel-sessions: header-fix --since=HEAD narrow fallback (TPL-231)',
     // Seed 12 files with slim headers stamped at the same baseline version.
     // The number stands in for the broader repo's ~1968-file population.
     for (let i = 0; i < 12; i++) {
-      writeFileSync(join(dir, 'scripts', `f${i}.mjs`), [
-        '/* @HEADER',
-        ' * @version 0.1.0 | 2026-01-01',
-        ` * @purpose f${i}.mjs fixture for TPL-231 narrow fallback test.`,
-        ` * @sidecar f${i}.mjs.header.md`,
-        ' * @layer tooling | @hex _none_ | @ctx _none_',
-        ' * @public false',
-        ' * @edit careful',
-        ' */',
-        '',
-        `export const value = ${i};`,
-        '',
-      ].join('\n'));
+      writeFileSync(
+        join(dir, 'scripts', `f${i}.mjs`),
+        [
+          '/* @HEADER',
+          ' * @version 0.1.0 | 2026-01-01',
+          ` * @purpose f${i}.mjs fixture for TPL-231 narrow fallback test.`,
+          ` * @sidecar f${i}.mjs.header.md`,
+          ' * @layer tooling | @hex _none_ | @ctx _none_',
+          ' * @public false',
+          ' * @edit careful',
+          ' */',
+          '',
+          `export const value = ${i};`,
+          '',
+        ].join('\n'),
+      );
     }
-    safeGit(dir, 'add -A', { stdio: 'pipe'});
+    safeGit(dir, 'add -A', { stdio: 'pipe' });
     safeGit(dir, 'commit -m "init" --quiet', { stdio: 'pipe' });
     return dir;
   }
@@ -386,20 +434,23 @@ describe('parallel-sessions: header-fix --since=HEAD narrow fallback (TPL-231)',
     try {
       // Simulate a cross-cutting commit: stage exactly one file (no module
       // SCOPE auto-detect, mirroring the pre-fix failure shape).
-      writeFileSync(join(repo, 'scripts', 'f0.mjs'), [
-        '/* @HEADER',
-        ' * @version 0.1.0 | 2026-01-01',
-        ' * @purpose f0.mjs fixture — edited.',
-        ' * @sidecar f0.mjs.header.md',
-        ' * @layer tooling | @hex _none_ | @ctx _none_',
-        ' * @public false',
-        ' * @edit careful',
-        ' */',
-        '',
-        'export const value = 99;',
-        '',
-      ].join('\n'));
-      safeGit(repo, 'add scripts/f0.mjs', { stdio: 'pipe'});
+      writeFileSync(
+        join(repo, 'scripts', 'f0.mjs'),
+        [
+          '/* @HEADER',
+          ' * @version 0.1.0 | 2026-01-01',
+          ' * @purpose f0.mjs fixture — edited.',
+          ' * @sidecar f0.mjs.header.md',
+          ' * @layer tooling | @hex _none_ | @ctx _none_',
+          ' * @public false',
+          ' * @edit careful',
+          ' */',
+          '',
+          'export const value = 99;',
+          '',
+        ].join('\n'),
+      );
+      safeGit(repo, 'add scripts/f0.mjs', { stdio: 'pipe' });
 
       const result = spawnSync(
         process.execPath,
@@ -416,7 +467,10 @@ describe('parallel-sessions: header-fix --since=HEAD narrow fallback (TPL-231)',
       // header-stamp drift between the harness and the temp repo.
       for (let i = 1; i < 12; i++) {
         const onDisk = readFileSync(join(repo, 'scripts', `f${i}.mjs`), 'utf8');
-        const atHead = safeGit(repo, `show HEAD:scripts/f${i}.mjs`, { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'],});
+        const atHead = safeGit(repo, `show HEAD:scripts/f${i}.mjs`, {
+          encoding: 'utf8',
+          stdio: ['pipe', 'pipe', 'pipe'],
+        });
         assert.equal(onDisk, atHead, `scripts/f${i}.mjs must not be touched`);
       }
 
@@ -424,7 +478,10 @@ describe('parallel-sessions: header-fix --since=HEAD narrow fallback (TPL-231)',
       // the ~1968 the pre-fix invocation churned). The bound is generous
       // because header-fix may legitimately re-stamp the staged file plus
       // sidecars; the point is that it is NOT proportional to the repo size.
-      const status = safeGit(repo, 'status --porcelain', { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'],});
+      const status = safeGit(repo, 'status --porcelain', {
+        encoding: 'utf8',
+        stdio: ['pipe', 'pipe', 'pipe'],
+      });
       const modifiedCount = status.split('\n').filter((l) => l.trim().length > 0).length;
       assert.ok(
         modifiedCount <= 5,
@@ -449,7 +506,7 @@ describe('parallel-sessions: TPL-233 lazy-stamp does not churn unrelated files',
 
   function setupLazyStampRepo(name) {
     const dir = mkdtempSync(join(tmpdir(), `coa-tpl233-${name}-`));
-    safeGit(dir, 'init --quiet', { stdio: 'pipe'});
+    safeGit(dir, 'init --quiet', { stdio: 'pipe' });
     safeGit(dir, 'config user.email "test@test.com"', { stdio: 'pipe' });
     safeGit(dir, 'config user.name "Test"', { stdio: 'pipe' });
     writeFileSync(join(dir, 'VERSION'), '0.1.0\n');
@@ -459,51 +516,59 @@ describe('parallel-sessions: TPL-233 lazy-stamp does not churn unrelated files',
     );
     mkdirSync(join(dir, 'scripts'), { recursive: true });
     for (let i = 0; i < 12; i++) {
-      writeFileSync(join(dir, 'scripts', `f${i}.mjs`), [
-        '/* @HEADER',
-        ' * @version 0.1.0 | 2026-01-01',
-        ` * @purpose f${i}.mjs fixture for TPL-233 lazy-stamp test.`,
-        ` * @sidecar f${i}.mjs.header.md`,
-        ' * @layer tooling | @hex _none_ | @ctx _none_',
-        ' * @public false',
-        ' * @edit careful',
-        ' */',
-        '',
-        `export const value = ${i};`,
-        '',
-      ].join('\n'));
+      writeFileSync(
+        join(dir, 'scripts', `f${i}.mjs`),
+        [
+          '/* @HEADER',
+          ' * @version 0.1.0 | 2026-01-01',
+          ` * @purpose f${i}.mjs fixture for TPL-233 lazy-stamp test.`,
+          ` * @sidecar f${i}.mjs.header.md`,
+          ' * @layer tooling | @hex _none_ | @ctx _none_',
+          ' * @public false',
+          ' * @edit careful',
+          ' */',
+          '',
+          `export const value = ${i};`,
+          '',
+        ].join('\n'),
+      );
     }
-    safeGit(dir, 'add -A', { stdio: 'pipe'});
+    safeGit(dir, 'add -A', { stdio: 'pipe' });
     safeGit(dir, 'commit -m "init" --quiet', { stdio: 'pipe' });
     return dir;
   }
 
-  test('lazy-stamp leaves unrelated files\' @version untouched', () => {
+  test("lazy-stamp leaves unrelated files' @version untouched", () => {
     const repo = setupLazyStampRepo('lazy-noop');
     try {
       // Bump VERSION in the working tree (simulating a slice's release ceremony).
       writeFileSync(join(repo, 'VERSION'), '0.2.0\n');
       // Edit exactly one fixture's BODY (no header change).
-      writeFileSync(join(repo, 'scripts', 'f0.mjs'), [
-        '/* @HEADER',
-        ' * @version 0.1.0 | 2026-01-01',
-        ' * @purpose f0.mjs fixture for TPL-233 lazy-stamp test.',
-        ' * @sidecar f0.mjs.header.md',
-        ' * @layer tooling | @hex _none_ | @ctx _none_',
-        ' * @public false',
-        ' * @edit careful',
-        ' */',
-        '',
-        'export const value = 999;',
-        '',
-      ].join('\n'));
-      safeGit(repo, 'add scripts/f0.mjs VERSION', { stdio: 'pipe'});
+      writeFileSync(
+        join(repo, 'scripts', 'f0.mjs'),
+        [
+          '/* @HEADER',
+          ' * @version 0.1.0 | 2026-01-01',
+          ' * @purpose f0.mjs fixture for TPL-233 lazy-stamp test.',
+          ' * @sidecar f0.mjs.header.md',
+          ' * @layer tooling | @hex _none_ | @ctx _none_',
+          ' * @public false',
+          ' * @edit careful',
+          ' */',
+          '',
+          'export const value = 999;',
+          '',
+        ].join('\n'),
+      );
+      safeGit(repo, 'add scripts/f0.mjs VERSION', { stdio: 'pipe' });
 
       const result = spawnSync(
         process.execPath,
         [
           join(REPO_ROOT, 'scripts', 'checks', 'header-fix.mjs'),
-          '--since=HEAD', '--lazy-stamp', '--json',
+          '--since=HEAD',
+          '--lazy-stamp',
+          '--json',
         ],
         { cwd: repo, encoding: 'utf8', stdio: 'pipe' },
       );
@@ -515,13 +580,24 @@ describe('parallel-sessions: TPL-233 lazy-stamp does not churn unrelated files',
       // The post-commit hook (not Phase 5) is what stamps current VERSION onto
       // files that actually changed.
       const f0 = readFileSync(join(repo, 'scripts', 'f0.mjs'), 'utf8');
-      assert.match(f0, /@version 0\.1\.0/, 'lazy-stamp must preserve f0.mjs @version even though its body changed');
-      assert.doesNotMatch(f0, /@version 0\.2\.0/, 'lazy-stamp must NOT bump f0 to current VERSION (post-commit owns that)');
+      assert.match(
+        f0,
+        /@version 0\.1\.0/,
+        'lazy-stamp must preserve f0.mjs @version even though its body changed',
+      );
+      assert.doesNotMatch(
+        f0,
+        /@version 0\.2\.0/,
+        'lazy-stamp must NOT bump f0 to current VERSION (post-commit owns that)',
+      );
 
       // f1..f11 are completely untouched.
       for (let i = 1; i < 12; i++) {
         const onDisk = readFileSync(join(repo, 'scripts', `f${i}.mjs`), 'utf8');
-        const atHead = safeGit(repo, `show HEAD:scripts/f${i}.mjs`, { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'],});
+        const atHead = safeGit(repo, `show HEAD:scripts/f${i}.mjs`, {
+          encoding: 'utf8',
+          stdio: ['pipe', 'pipe', 'pipe'],
+        });
         assert.equal(onDisk, atHead, `scripts/f${i}.mjs must remain byte-identical to HEAD`);
       }
     } finally {
@@ -537,47 +613,56 @@ describe('parallel-sessions: TPL-233 lazy-stamp does not churn unrelated files',
     try {
       // Land a real commit that bumps VERSION + edits f0.mjs body.
       writeFileSync(join(repo, 'VERSION'), '0.5.0\n');
-      writeFileSync(join(repo, 'scripts', 'f0.mjs'), [
-        '/* @HEADER',
-        ' * @version 0.1.0 | 2026-01-01',
-        ' * @purpose f0.mjs fixture for TPL-233 lazy-stamp test.',
-        ' * @sidecar f0.mjs.header.md',
-        ' * @layer tooling | @hex _none_ | @ctx _none_',
-        ' * @public false',
-        ' * @edit careful',
-        ' */',
-        '',
-        'export const value = 4242;',
-        '',
-      ].join('\n'));
-      safeGit(repo, 'add VERSION scripts/f0.mjs', { stdio: 'pipe'});
+      writeFileSync(
+        join(repo, 'scripts', 'f0.mjs'),
+        [
+          '/* @HEADER',
+          ' * @version 0.1.0 | 2026-01-01',
+          ' * @purpose f0.mjs fixture for TPL-233 lazy-stamp test.',
+          ' * @sidecar f0.mjs.header.md',
+          ' * @layer tooling | @hex _none_ | @ctx _none_',
+          ' * @public false',
+          ' * @edit careful',
+          ' */',
+          '',
+          'export const value = 4242;',
+          '',
+        ].join('\n'),
+      );
+      safeGit(repo, 'add VERSION scripts/f0.mjs', { stdio: 'pipe' });
       safeGit(repo, 'commit -m "edit f0" --quiet', { stdio: 'pipe' });
 
       // Now run the post-commit equivalent: diff-tree → header-fix --files-from=-.
-      const diffTree = safeGit(
-        repo,
-        'diff-tree --no-commit-id --name-only -r HEAD',
-        { encoding: 'utf8' },
-      );
+      const diffTree = safeGit(repo, 'diff-tree --no-commit-id --name-only -r HEAD', {
+        encoding: 'utf8',
+      });
       const result = spawnSync(
         process.execPath,
-        [
-          join(REPO_ROOT, 'scripts', 'checks', 'header-fix.mjs'),
-          '--files-from=-', '--json',
-        ],
+        [join(REPO_ROOT, 'scripts', 'checks', 'header-fix.mjs'), '--files-from=-', '--json'],
         { cwd: repo, encoding: 'utf8', stdio: 'pipe', input: diffTree },
       );
       assert.equal(result.status, 0, `header-fix failed: ${result.stderr}`);
 
       // f0 is in the diff-tree set → eager stamp bumps @version to 0.5.0.
       const f0 = readFileSync(join(repo, 'scripts', 'f0.mjs'), 'utf8');
-      assert.match(f0, /@version 0\.5\.0/, 'post-commit hook should stamp 0.5.0 onto f0 (was in diff-tree)');
+      assert.match(
+        f0,
+        /@version 0\.5\.0/,
+        'post-commit hook should stamp 0.5.0 onto f0 (was in diff-tree)',
+      );
 
       // f1..f11 are NOT in the diff-tree set → byte-identical to HEAD.
       for (let i = 1; i < 12; i++) {
         const onDisk = readFileSync(join(repo, 'scripts', `f${i}.mjs`), 'utf8');
-        const atHead = safeGit(repo, `show HEAD:scripts/f${i}.mjs`, { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'],});
-        assert.equal(onDisk, atHead, `scripts/f${i}.mjs must remain at its prior @version (not in HEAD diff-tree)`);
+        const atHead = safeGit(repo, `show HEAD:scripts/f${i}.mjs`, {
+          encoding: 'utf8',
+          stdio: ['pipe', 'pipe', 'pipe'],
+        });
+        assert.equal(
+          onDisk,
+          atHead,
+          `scripts/f${i}.mjs must remain at its prior @version (not in HEAD diff-tree)`,
+        );
       }
     } finally {
       rmSync(repo, { recursive: true, force: true });
@@ -587,7 +672,7 @@ describe('parallel-sessions: TPL-233 lazy-stamp does not churn unrelated files',
   test('header-backfill on multi-commit history resolves last-content-change VERSION per file', () => {
     const repo = mkdtempSync(join(tmpdir(), 'coa-tpl233-backfill-int-'));
     try {
-      safeGit(repo, 'init --quiet', { stdio: 'pipe'});
+      safeGit(repo, 'init --quiet', { stdio: 'pipe' });
       safeGit(repo, 'config user.email "test@test.com"', { stdio: 'pipe' });
       safeGit(repo, 'config user.name "Test"', { stdio: 'pipe' });
       writeFileSync(join(repo, 'VERSION'), '0.1.0\n');
@@ -596,33 +681,34 @@ describe('parallel-sessions: TPL-233 lazy-stamp does not churn unrelated files',
         JSON.stringify({ name: 'tmp', version: '0.1.0' }, null, 2) + '\n',
       );
       mkdirSync(join(repo, 'scripts'), { recursive: true });
-      const slim = (n, v, body) => [
-        '/* @HEADER',
-        ` * @version ${v} | 2026-01-01`,
-        ` * @purpose ${n}.mjs.`,
-        ` * @sidecar ${n}.mjs.header.md`,
-        ' * @layer tooling | @hex _none_ | @ctx _none_',
-        ' * @public false',
-        ' * @edit careful',
-        ' */',
-        '',
-        body,
-        '',
-      ].join('\n');
+      const slim = (n, v, body) =>
+        [
+          '/* @HEADER',
+          ` * @version ${v} | 2026-01-01`,
+          ` * @purpose ${n}.mjs.`,
+          ` * @sidecar ${n}.mjs.header.md`,
+          ' * @layer tooling | @hex _none_ | @ctx _none_',
+          ' * @public false',
+          ' * @edit careful',
+          ' */',
+          '',
+          body,
+          '',
+        ].join('\n');
 
       // c1: 0.1.0 — create both. c2: 0.2.0 — edit a only. c3: 0.5.0 — leave both alone, bump VERSION via package.json.
       writeFileSync(join(repo, 'scripts', 'a.mjs'), slim('a', '0.1.0', 'export const v = 1;'));
       writeFileSync(join(repo, 'scripts', 'b.mjs'), slim('b', '0.1.0', 'export const v = 1;'));
-      safeGit(repo, 'add -A', { stdio: 'pipe'});
+      safeGit(repo, 'add -A', { stdio: 'pipe' });
       safeGit(repo, 'commit -m "c1" --quiet', { stdio: 'pipe' });
 
       writeFileSync(join(repo, 'VERSION'), '0.2.0\n');
       writeFileSync(join(repo, 'scripts', 'a.mjs'), slim('a', '0.1.0', 'export const v = 2;'));
-      safeGit(repo, 'add -A', { stdio: 'pipe'});
+      safeGit(repo, 'add -A', { stdio: 'pipe' });
       safeGit(repo, 'commit -m "c2" --quiet', { stdio: 'pipe' });
 
       writeFileSync(join(repo, 'VERSION'), '0.5.0\n');
-      safeGit(repo, 'add -A', { stdio: 'pipe'});
+      safeGit(repo, 'add -A', { stdio: 'pipe' });
       safeGit(repo, 'commit -m "c3 (no script changes)" --quiet', { stdio: 'pipe' });
 
       const result = spawnSync(
@@ -635,7 +721,11 @@ describe('parallel-sessions: TPL-233 lazy-stamp does not churn unrelated files',
       const a = readFileSync(join(repo, 'scripts', 'a.mjs'), 'utf8');
       assert.match(a, /@version 0\.2\.0/, 'a last changed at 0.2.0 (commit c2)');
       const b = readFileSync(join(repo, 'scripts', 'b.mjs'), 'utf8');
-      assert.match(b, /@version 0\.1\.0/, 'b last changed at 0.1.0 (commit c1) — c3 must NOT pull it forward');
+      assert.match(
+        b,
+        /@version 0\.1\.0/,
+        'b last changed at 0.1.0 (commit c1) — c3 must NOT pull it forward',
+      );
     } finally {
       rmSync(repo, { recursive: true, force: true });
     }
@@ -648,7 +738,7 @@ describe('parallel-sessions: protected paths enforcement', () => {
     try {
       // Modify VERSION without a claim
       writeFileSync(join(repo, 'VERSION'), '0.1.1\n');
-      safeGit(repo, 'add VERSION', { stdio: 'pipe'});
+      safeGit(repo, 'add VERSION', { stdio: 'pipe' });
 
       // Run enforce --staged with config that blocks protected paths
       const result = runScript(repo, claimCheckPath(), ['--enforce', '--staged', '--json']);
@@ -677,21 +767,24 @@ describe('parallel-sessions: TPL-222 J2 — pre-flight detect-and-resume', () =>
       // CHANGELOG already has [0.1.1] section, [Unreleased] is empty,
       // but no commit exists at 0.1.1.
       writeFileSync(join(repo, 'VERSION'), '0.1.1\n');
-      writeFileSync(join(repo, 'CHANGELOG.md'), [
-        '# CHANGELOG',
-        '',
-        '## [Unreleased]',
-        '',
-        '_Nothing yet._',
-        '',
-        '## [0.1.1] — 2026-04-27 12:00:00 UTC+0',
-        '',
-        '- previous run never committed',
-        '',
-      ].join('\n'));
+      writeFileSync(
+        join(repo, 'CHANGELOG.md'),
+        [
+          '# CHANGELOG',
+          '',
+          '## [Unreleased]',
+          '',
+          '_Nothing yet._',
+          '',
+          '## [0.1.1] — 2026-04-27 12:00:00 UTC+0',
+          '',
+          '- previous run never committed',
+          '',
+        ].join('\n'),
+      );
       // Stage some user file so step 1 doesn't bail before step 0 fires.
       writeFileSync(join(repo, 'modules', 'auth', 'index.mjs'), '// edited\n');
-      safeGit(repo, 'add modules/auth/index.mjs', { stdio: 'pipe'});
+      safeGit(repo, 'add modules/auth/index.mjs', { stdio: 'pipe' });
 
       const result = runScript(repo, coaMergePath(), [
         '--message=fix(auth): noop',
@@ -728,9 +821,7 @@ describe('parallel-sessions: TPL-222 J2 — pre-flight detect-and-resume', () =>
         '--json',
       ]);
       assert.equal(result.status, 1, 'will fail at step 1 (no staged files)');
-      const firstJsonLine = result.stdout
-        .split('\n')
-        .find((l) => l.startsWith('{'));
+      const firstJsonLine = result.stdout.split('\n').find((l) => l.startsWith('{'));
       const parsed = JSON.parse(firstJsonLine);
       assert.notEqual(parsed.failedStep, 0, 'pre-flight should NOT trigger when state is normal');
     } finally {
@@ -740,7 +831,7 @@ describe('parallel-sessions: TPL-222 J2 — pre-flight detect-and-resume', () =>
 });
 
 describe('parallel-sessions: TPL-222 J5 — claim-check --extend before enforce', () => {
-  test('--extend appends new targets to caller\'s active claim (same-agent)', () => {
+  test("--extend appends new targets to caller's active claim (same-agent)", () => {
     const repo = createTempGitRepo('extend-same-agent');
     try {
       const claim = {
@@ -777,9 +868,7 @@ describe('parallel-sessions: TPL-222 J5 — claim-check --extend before enforce'
       assert.equal(out.ok, true);
       assert.equal(out.data.addedCount, 3);
       // Verify the claim file was rewritten with the new targets.
-      const updated = JSON.parse(
-        readFileSync(join(repo, '.claims', 'clm-extend1.json'), 'utf8'),
-      );
+      const updated = JSON.parse(readFileSync(join(repo, '.claims', 'clm-extend1.json'), 'utf8'));
       const paths = updated.targets.map((t) => t.path);
       assert.ok(paths.includes('modules/auth/index.mjs'));
       assert.ok(paths.includes('VERSION'));
@@ -800,9 +889,7 @@ describe('parallel-sessions: TPL-222 J5 — claim-check --extend before enforce'
         created: new Date().toISOString(),
         expires: farFuture(),
         status: 'active',
-        targets: [
-          { path: 'modules/auth/index.mjs', action: 'modify', surface: 'domain' },
-        ],
+        targets: [{ path: 'modules/auth/index.mjs', action: 'modify', surface: 'domain' }],
         strategy: 'modify-in-place',
         dependsOn: [],
         notes: '',
@@ -820,9 +907,7 @@ describe('parallel-sessions: TPL-222 J5 — claim-check --extend before enforce'
       assert.equal(out.ok, false);
       assert.ok(out.errors.some((e) => /cross-agent extend not allowed/.test(e)));
       // Claim file must NOT have been mutated
-      const onDisk = JSON.parse(
-        readFileSync(join(repo, '.claims', 'clm-extend2.json'), 'utf8'),
-      );
+      const onDisk = JSON.parse(readFileSync(join(repo, '.claims', 'clm-extend2.json'), 'utf8'));
       assert.equal(onDisk.targets.length, 1);
     } finally {
       rmSync(repo, { recursive: true, force: true });
@@ -839,9 +924,7 @@ describe('parallel-sessions: TPL-222 J5 — claim-check --extend before enforce'
         created: new Date().toISOString(),
         expires: farFuture(),
         status: 'active',
-        targets: [
-          { path: 'modules/auth/index.mjs', action: 'modify', surface: 'domain' },
-        ],
+        targets: [{ path: 'modules/auth/index.mjs', action: 'modify', surface: 'domain' }],
         strategy: 'modify-in-place',
         dependsOn: [],
         notes: '',
@@ -872,7 +955,7 @@ describe('parallel-sessions: TPL-222 J5 — claim-check --extend before enforce'
     }
   });
 
-  test('coa-merge auto-extends caller\'s claim before pre-commit Phase 3 enforces', () => {
+  test("coa-merge auto-extends caller's claim before pre-commit Phase 3 enforces", () => {
     const repo = createTempGitRepo('auto-extend-flow');
     try {
       // Write a claim that covers ONLY the user file (not VERSION/CHANGELOG/etc.)
@@ -899,15 +982,18 @@ describe('parallel-sessions: TPL-222 J5 — claim-check --extend before enforce'
 
       // Stage a user-file edit; add a CHANGELOG entry so step 5 passes.
       writeFileSync(join(repo, 'modules', 'auth', 'index.mjs'), '// edited\n');
-      writeFileSync(join(repo, 'CHANGELOG.md'), [
-        '# CHANGELOG',
-        '',
-        '## [Unreleased]',
-        '',
-        '- something real for the auto-extend flow test',
-        '',
-      ].join('\n'));
-      safeGit(repo, 'add modules/auth/index.mjs', { stdio: 'pipe'});
+      writeFileSync(
+        join(repo, 'CHANGELOG.md'),
+        [
+          '# CHANGELOG',
+          '',
+          '## [Unreleased]',
+          '',
+          '- something real for the auto-extend flow test',
+          '',
+        ].join('\n'),
+      );
+      safeGit(repo, 'add modules/auth/index.mjs', { stdio: 'pipe' });
 
       // Run coa-merge in dry-run so it doesn't try to commit (the temp
       // repo lacks the full pre-commit infrastructure). dry-run still
@@ -923,9 +1009,7 @@ describe('parallel-sessions: TPL-222 J5 — claim-check --extend before enforce'
       // We don't care about success here — only that the claim file was
       // rewritten with the new ceremony+regen paths before any later
       // failure.
-      const updated = JSON.parse(
-        readFileSync(join(repo, '.claims', 'clm-flow.json'), 'utf8'),
-      );
+      const updated = JSON.parse(readFileSync(join(repo, '.claims', 'clm-flow.json'), 'utf8'));
       const paths = new Set(updated.targets.map((t) => t.path));
       assert.ok(paths.has('modules/auth/index.mjs'), 'original target preserved');
       assert.ok(paths.has('VERSION'), 'VERSION auto-added by step 2.5');
@@ -944,7 +1028,7 @@ describe('parallel-sessions: TPL-222 J5 — claim-check --extend before enforce'
     const repo = createTempGitRepo('no-claim');
     try {
       writeFileSync(join(repo, 'modules', 'auth', 'index.mjs'), '// edited\n');
-      safeGit(repo, 'add modules/auth/index.mjs', { stdio: 'pipe'});
+      safeGit(repo, 'add modules/auth/index.mjs', { stdio: 'pipe' });
 
       const result = runScript(repo, coaMergePath(), [
         '--message=feat(auth): no claim',
@@ -952,9 +1036,7 @@ describe('parallel-sessions: TPL-222 J5 — claim-check --extend before enforce'
         '--json',
       ]);
       assert.equal(result.status, 1);
-      const firstJsonLine = result.stdout
-        .split('\n')
-        .find((l) => l.startsWith('{'));
+      const firstJsonLine = result.stdout.split('\n').find((l) => l.startsWith('{'));
       const parsed = JSON.parse(firstJsonLine);
       assert.equal(parsed.failedStep, 2.5);
       assert.match(parsed.error, /No active claim/);

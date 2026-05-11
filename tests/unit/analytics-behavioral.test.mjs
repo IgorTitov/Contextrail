@@ -49,15 +49,23 @@ test('BehavioralAdapter startTracking/stopTracking lifecycle', () => {
 
   globalThis.document = {
     body: {
-      addEventListener(event, handler) { listeners[event] = handler; },
-      removeEventListener(event) { delete listeners[event]; },
+      addEventListener(event, handler) {
+        listeners[event] = handler;
+      },
+      removeEventListener(event) {
+        delete listeners[event];
+      },
     },
     documentElement: { scrollHeight: 1000 },
     hidden: false,
   };
   globalThis.window = {
-    addEventListener(event, handler) { listeners[`window_${event}`] = handler; },
-    removeEventListener(event) { delete listeners[`window_${event}`]; },
+    addEventListener(event, handler) {
+      listeners[`window_${event}`] = handler;
+    },
+    removeEventListener(event) {
+      delete listeners[`window_${event}`];
+    },
     scrollY: 0,
     innerHeight: 500,
   };
@@ -98,8 +106,12 @@ test('BehavioralAdapter click events forwarded as track() calls', () => {
 
   globalThis.document = {
     body: {
-      addEventListener(event, handler) { listeners[event] = handler; },
-      removeEventListener(event) { delete listeners[event]; },
+      addEventListener(event, handler) {
+        listeners[event] = handler;
+      },
+      removeEventListener(event) {
+        delete listeners[event];
+      },
     },
     documentElement: { scrollHeight: 1000 },
     hidden: false,
@@ -157,8 +169,12 @@ test('BehavioralAdapter suppresses events when behavioral consent is false', () 
 
   globalThis.document = {
     body: {
-      addEventListener(event, handler) { listeners[event] = handler; },
-      removeEventListener(event) { delete listeners[event]; },
+      addEventListener(event, handler) {
+        listeners[event] = handler;
+      },
+      removeEventListener(event) {
+        delete listeners[event];
+      },
     },
     documentElement: { scrollHeight: 1000 },
     hidden: false,
@@ -220,8 +236,12 @@ test('BehavioralAdapter scroll tracking at thresholds', () => {
     hidden: false,
   };
   globalThis.window = {
-    addEventListener(event, handler) { listeners[`window_${event}`] = handler; },
-    removeEventListener(event) { delete listeners[`window_${event}`]; },
+    addEventListener(event, handler) {
+      listeners[`window_${event}`] = handler;
+    },
+    removeEventListener(event) {
+      delete listeners[`window_${event}`];
+    },
     scrollY: 0,
     innerHeight: 500,
   };

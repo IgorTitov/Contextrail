@@ -65,7 +65,9 @@ async function main() {
       const { generatedAt: _a, ...prevSub } = prev;
       const { generatedAt: _b, ...curSub } = payload;
       jsonChanged = JSON.stringify(prevSub) !== JSON.stringify(curSub);
-    } catch { /* parse error → treat as changed */ }
+    } catch {
+      /* parse error → treat as changed */
+    }
   }
   if (!jsonChanged && currentJson) payload.generatedAt = JSON.parse(currentJson).generatedAt;
   const md = renderMarkdown(items, payload.generatedAt);

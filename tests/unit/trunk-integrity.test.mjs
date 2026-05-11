@@ -134,7 +134,10 @@ describe('isForcePush', () => {
 describe('classifyPush', () => {
   it('allows push when no force-push detected', () => {
     const trunkRefspecs = [
-      { refspec: { localSha: SHA_A, remoteSha: SHA_B, remoteRef: 'refs/heads/main' }, remoteIsAncestor: true },
+      {
+        refspec: { localSha: SHA_A, remoteSha: SHA_B, remoteRef: 'refs/heads/main' },
+        remoteIsAncestor: true,
+      },
     ];
     const result = classifyPush({ trunkRefspecs, env: {} });
     assert.equal(result.allowed, true);
@@ -143,7 +146,10 @@ describe('classifyPush', () => {
 
   it('denies push when force-push detected and no operator override', () => {
     const trunkRefspecs = [
-      { refspec: { localSha: SHA_A, remoteSha: SHA_B, remoteRef: 'refs/heads/main' }, remoteIsAncestor: false },
+      {
+        refspec: { localSha: SHA_A, remoteSha: SHA_B, remoteRef: 'refs/heads/main' },
+        remoteIsAncestor: false,
+      },
     ];
     const result = classifyPush({ trunkRefspecs, env: {} });
     assert.equal(result.allowed, false);
@@ -153,7 +159,10 @@ describe('classifyPush', () => {
 
   it('allows force-push with full operator override (COA_OPERATOR=1 COA_FORCE_TRUNK=1)', () => {
     const trunkRefspecs = [
-      { refspec: { localSha: SHA_A, remoteSha: SHA_B, remoteRef: 'refs/heads/main' }, remoteIsAncestor: false },
+      {
+        refspec: { localSha: SHA_A, remoteSha: SHA_B, remoteRef: 'refs/heads/main' },
+        remoteIsAncestor: false,
+      },
     ];
     const result = classifyPush({
       trunkRefspecs,
@@ -167,7 +176,10 @@ describe('classifyPush', () => {
 
   it('denies force-push with COA_OPERATOR=1 but missing COA_FORCE_TRUNK', () => {
     const trunkRefspecs = [
-      { refspec: { localSha: SHA_A, remoteSha: SHA_B, remoteRef: 'refs/heads/main' }, remoteIsAncestor: false },
+      {
+        refspec: { localSha: SHA_A, remoteSha: SHA_B, remoteRef: 'refs/heads/main' },
+        remoteIsAncestor: false,
+      },
     ];
     const result = classifyPush({
       trunkRefspecs,
@@ -178,7 +190,10 @@ describe('classifyPush', () => {
 
   it('denies force-push with COA_FORCE_TRUNK=1 but missing COA_OPERATOR', () => {
     const trunkRefspecs = [
-      { refspec: { localSha: SHA_A, remoteSha: SHA_B, remoteRef: 'refs/heads/main' }, remoteIsAncestor: false },
+      {
+        refspec: { localSha: SHA_A, remoteSha: SHA_B, remoteRef: 'refs/heads/main' },
+        remoteIsAncestor: false,
+      },
     ];
     const result = classifyPush({
       trunkRefspecs,
@@ -195,8 +210,14 @@ describe('classifyPush', () => {
 
   it('includes all forced refs in deniedReason when multiple forced', () => {
     const trunkRefspecs = [
-      { refspec: { localSha: SHA_A, remoteSha: SHA_B, remoteRef: 'refs/heads/main' }, remoteIsAncestor: false },
-      { refspec: { localSha: SHA_A, remoteSha: SHA_C, remoteRef: 'refs/heads/master' }, remoteIsAncestor: false },
+      {
+        refspec: { localSha: SHA_A, remoteSha: SHA_B, remoteRef: 'refs/heads/main' },
+        remoteIsAncestor: false,
+      },
+      {
+        refspec: { localSha: SHA_A, remoteSha: SHA_C, remoteRef: 'refs/heads/master' },
+        remoteIsAncestor: false,
+      },
     ];
     const result = classifyPush({ trunkRefspecs, env: {} });
     assert.equal(result.allowed, false);

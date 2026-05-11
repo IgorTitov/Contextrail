@@ -15,7 +15,8 @@
 const locales = {
   en: {
     'user-management.port.invalid_adapter': 'User management adapter must be a non-null object.',
-    'user-management.port.missing_method': 'User management adapter missing required method: {method}.',
+    'user-management.port.missing_method':
+      'User management adapter missing required method: {method}.',
   },
 };
 

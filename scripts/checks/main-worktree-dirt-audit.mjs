@@ -111,23 +111,27 @@ export function filterUntrackedFiles(statusLines) {
 
 const SELF_TEST_CASES = [
   // isTransportWorktreePath
-  { fn: 'isTransportWorktreePath', input: '/repos/contextrail-template',              expected: false },
-  { fn: 'isTransportWorktreePath', input: '/repos/contextrail-template-tx-TPL-283',  expected: true  },
-  { fn: 'isTransportWorktreePath', input: 'C:\\Projects\\ctx-tx-AIC-DEV-099',         expected: true  },
-  { fn: 'isTransportWorktreePath', input: '/repos/my-tx-project',                    expected: false },
+  { fn: 'isTransportWorktreePath', input: '/repos/contextrail-template', expected: false },
+  {
+    fn: 'isTransportWorktreePath',
+    input: '/repos/contextrail-template-tx-TPL-283',
+    expected: true,
+  },
+  { fn: 'isTransportWorktreePath', input: 'C:\\Projects\\ctx-tx-AIC-DEV-099', expected: true },
+  { fn: 'isTransportWorktreePath', input: '/repos/my-tx-project', expected: false },
 
   // isKnownOk
-  { fn: 'isKnownOk', input: '.claims/clm-abc123.json',   expected: true  },
-  { fn: 'isKnownOk', input: '.claims/config.json',       expected: false },
-  { fn: 'isKnownOk', input: 'scripts/checks/foo.mjs',   expected: false },
-  { fn: 'isKnownOk', input: 'tests/_generated/foo.mjs', expected: true  },
-  { fn: 'isKnownOk', input: '.backups/snap.zip',         expected: true  },
+  { fn: 'isKnownOk', input: '.claims/clm-abc123.json', expected: true },
+  { fn: 'isKnownOk', input: '.claims/config.json', expected: false },
+  { fn: 'isKnownOk', input: 'scripts/checks/foo.mjs', expected: false },
+  { fn: 'isKnownOk', input: 'tests/_generated/foo.mjs', expected: true },
+  { fn: 'isKnownOk', input: '.backups/snap.zip', expected: true },
 
   // isInWatchedDir
-  { fn: 'isInWatchedDir', input: 'tests/scratch.test.mjs',  expected: true  },
-  { fn: 'isInWatchedDir', input: 'apps/starter/index.html', expected: true  },
-  { fn: 'isInWatchedDir', input: '.claims/foo.json',         expected: false },
-  { fn: 'isInWatchedDir', input: 'CHANGELOG.md',             expected: false },
+  { fn: 'isInWatchedDir', input: 'tests/scratch.test.mjs', expected: true },
+  { fn: 'isInWatchedDir', input: 'apps/starter/index.html', expected: true },
+  { fn: 'isInWatchedDir', input: '.claims/foo.json', expected: false },
+  { fn: 'isInWatchedDir', input: 'CHANGELOG.md', expected: false },
 
   // filterUntrackedFiles
   {
@@ -180,11 +184,11 @@ function getWorktreeRoot() {
 }
 
 function getStatusLines(cwd) {
-  const result = spawnSync(
-    'git',
-    ['status', '--porcelain', '--untracked-files=normal'],
-    { encoding: 'utf8', cwd, stdio: 'pipe' },
-  );
+  const result = spawnSync('git', ['status', '--porcelain', '--untracked-files=normal'], {
+    encoding: 'utf8',
+    cwd,
+    stdio: 'pipe',
+  });
   if (result.status !== 0 || result.error) return [];
   return (result.stdout || '').split('\n').filter(Boolean);
 }
@@ -224,9 +228,9 @@ function main() {
     }
     process.stderr.write(
       `[W1] These may be residue from a tx-* session that edited in main worktree.\n` +
-      `     Options:\n` +
-      `       - Commit this work from a tx-* worktree (preferred)\n` +
-      `       - Remove stale residue: git clean -fd <path>\n`,
+        `     Options:\n` +
+        `       - Commit this work from a tx-* worktree (preferred)\n` +
+        `       - Remove stale residue: git clean -fd <path>\n`,
     );
   }
 

@@ -23,12 +23,7 @@
 
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import {
-  mkdtempSync,
-  writeFileSync,
-  existsSync,
-  rmSync,
-} from 'node:fs';
+import { mkdtempSync, writeFileSync, existsSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, basename } from 'node:path';
 import { safeGitSpawn } from '../_setup/safe-git.mjs';
@@ -57,11 +52,21 @@ function createBaseRepo(label) {
 function cleanupWorktree(mainRoot, wtPath) {
   const nmInWt = join(wtPath, 'node_modules');
   if (existsSync(nmInWt)) {
-    try { rmSync(nmInWt, { recursive: false }); } catch {
-      try { rmSync(nmInWt, { recursive: true, force: true }); } catch { /* best effort */ }
+    try {
+      rmSync(nmInWt, { recursive: false });
+    } catch {
+      try {
+        rmSync(nmInWt, { recursive: true, force: true });
+      } catch {
+        /* best effort */
+      }
     }
   }
-  try { safeGitSpawn(mainRoot, ['worktree', 'remove', '--force', wtPath]); } catch { /* best effort */ }
+  try {
+    safeGitSpawn(mainRoot, ['worktree', 'remove', '--force', wtPath]);
+  } catch {
+    /* best effort */
+  }
   if (existsSync(wtPath)) rmSync(wtPath, { recursive: true, force: true });
   rmSync(mainRoot, { recursive: true, force: true });
 }
@@ -79,7 +84,11 @@ describe('resolveWorktreePath: lookup via git worktree list (Bug A)', () => {
     const wtPath = transportWorktreePath(mainRoot, 'TEST-001');
 
     try {
-      const { exitCode } = runCreate(mainRoot, { sliceId: 'TEST-001', silent: true, skipSliceCheck: true });
+      const { exitCode } = runCreate(mainRoot, {
+        sliceId: 'TEST-001',
+        silent: true,
+        skipSliceCheck: true,
+      });
       assert.strictEqual(exitCode, 0, 'pre-condition: runCreate must succeed');
 
       // Worktree lives inside .worktrees/ subdir (TPL-334 / ADR-0050)
@@ -137,7 +146,11 @@ describe('runCreate --slice: branch existence guard (Bug B)', () => {
     safeGitSpawn(mainRoot, ['branch', 'tx-TPL-266']);
 
     try {
-      const { exitCode, result } = runCreate(mainRoot, { sliceId: 'TPL-266', silent: true, skipSliceCheck: true });
+      const { exitCode, result } = runCreate(mainRoot, {
+        sliceId: 'TPL-266',
+        silent: true,
+        skipSliceCheck: true,
+      });
       assert.strictEqual(exitCode, 1, 'runCreate must fail when branch exists');
       assert.ok(
         result.error.includes('tx-TPL-266'),
@@ -153,7 +166,11 @@ describe('runCreate --slice: branch existence guard (Bug B)', () => {
       );
     } finally {
       // Clean up the branch we created, then the repo
-      try { safeGitSpawn(mainRoot, ['branch', '-D', 'tx-TPL-266']); } catch { /* best effort */ }
+      try {
+        safeGitSpawn(mainRoot, ['branch', '-D', 'tx-TPL-266']);
+      } catch {
+        /* best effort */
+      }
       rmSync(mainRoot, { recursive: true, force: true });
     }
   });
@@ -163,7 +180,11 @@ describe('runCreate --slice: branch existence guard (Bug B)', () => {
     const wtPath = transportWorktreePath(mainRoot, 'TPL-266');
 
     try {
-      const { exitCode, result } = runCreate(mainRoot, { sliceId: 'TPL-266', silent: true, skipSliceCheck: true });
+      const { exitCode, result } = runCreate(mainRoot, {
+        sliceId: 'TPL-266',
+        silent: true,
+        skipSliceCheck: true,
+      });
       assert.strictEqual(exitCode, 0, `runCreate should succeed: ${result?.error}`);
       assert.ok(existsSync(wtPath), 'Transport worktree directory must be created');
 

@@ -22,8 +22,13 @@ import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import {
-  mkdtempSync, mkdirSync, writeFileSync, readdirSync,
-  existsSync, rmSync, cpSync,
+  mkdtempSync,
+  mkdirSync,
+  writeFileSync,
+  readdirSync,
+  existsSync,
+  rmSync,
+  cpSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
@@ -82,7 +87,7 @@ function runGuard(dir, extraEnv = {}) {
 function logFiles(dir) {
   const logDir = join(dir, '.coa', 'r5-override-log');
   if (!existsSync(logDir)) return [];
-  return readdirSync(logDir).filter(f => f !== '.gitkeep');
+  return readdirSync(logDir).filter((f) => f !== '.gitkeep');
 }
 
 // ---------------------------------------------------------------------------
@@ -105,14 +110,22 @@ describe('R5 rationale-file override flow', () => {
       });
 
       const result = runGuard(dir);
-      assert.equal(result.status, 0,
-        `Guard should exit 0 with valid override.\nstderr: ${result.stderr}`);
-      assert.ok(result.stderr.includes('[R5] Override accepted'),
-        `Expected acceptance message.\nstderr: ${result.stderr}`);
+      assert.equal(
+        result.status,
+        0,
+        `Guard should exit 0 with valid override.\nstderr: ${result.stderr}`,
+      );
+      assert.ok(
+        result.stderr.includes('[R5] Override accepted'),
+        `Expected acceptance message.\nstderr: ${result.stderr}`,
+      );
 
       // Override file consumed
-      assert.equal(existsSync(join(dir, '.coa', 'r5-override.json')), false,
-        'Override file should be deleted after consumption');
+      assert.equal(
+        existsSync(join(dir, '.coa', 'r5-override.json')),
+        false,
+        'Override file should be deleted after consumption',
+      );
 
       // Log entry created
       const files = logFiles(dir);
@@ -129,16 +142,27 @@ describe('R5 rationale-file override flow', () => {
       stageFile(dir, 'feature.mjs');
 
       const result = runGuard(dir);
-      assert.equal(result.status, 1,
-        `Guard should exit 1 without override file.\nstderr: ${result.stderr}`);
-      assert.ok(result.stderr.includes('[R5] Direct commit to main worktree is forbidden'),
-        `Expected refusal message.\nstderr: ${result.stderr}`);
-      assert.ok(result.stderr.includes('coa-worktree.mjs'),
-        `Refusal should suggest coa-worktree.mjs.\nstderr: ${result.stderr}`);
-      assert.ok(result.stderr.includes('coa-merge.mjs'),
-        `Refusal should suggest coa-merge.mjs.\nstderr: ${result.stderr}`);
-      assert.ok(result.stderr.includes('r5-override-emergency.md'),
-        `Refusal should reference emergency guide.\nstderr: ${result.stderr}`);
+      assert.equal(
+        result.status,
+        1,
+        `Guard should exit 1 without override file.\nstderr: ${result.stderr}`,
+      );
+      assert.ok(
+        result.stderr.includes('[R5] Direct commit to main worktree is forbidden'),
+        `Expected refusal message.\nstderr: ${result.stderr}`,
+      );
+      assert.ok(
+        result.stderr.includes('coa-worktree.mjs'),
+        `Refusal should suggest coa-worktree.mjs.\nstderr: ${result.stderr}`,
+      );
+      assert.ok(
+        result.stderr.includes('coa-merge.mjs'),
+        `Refusal should suggest coa-merge.mjs.\nstderr: ${result.stderr}`,
+      );
+      assert.ok(
+        result.stderr.includes('r5-override-emergency.md'),
+        `Refusal should reference emergency guide.\nstderr: ${result.stderr}`,
+      );
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
@@ -151,8 +175,11 @@ describe('R5 rationale-file override flow', () => {
       stageFile(dir, 'feature.mjs');
 
       const result = runGuard(dir, { COA_OPERATOR: '1' });
-      assert.equal(result.status, 1,
-        `COA_OPERATOR=1 alone must NOT bypass R5.\nstderr: ${result.stderr}`);
+      assert.equal(
+        result.status,
+        1,
+        `COA_OPERATOR=1 alone must NOT bypass R5.\nstderr: ${result.stderr}`,
+      );
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
@@ -173,10 +200,15 @@ describe('R5 rationale-file override flow', () => {
       });
 
       const result = runGuard(dir);
-      assert.equal(result.status, 1,
-        `Guard should exit 1 with expired override.\nstderr: ${result.stderr}`);
-      assert.ok(result.stderr.includes('TTL expired'),
-        `Should mention TTL expiry.\nstderr: ${result.stderr}`);
+      assert.equal(
+        result.status,
+        1,
+        `Guard should exit 1 with expired override.\nstderr: ${result.stderr}`,
+      );
+      assert.ok(
+        result.stderr.includes('TTL expired'),
+        `Should mention TTL expiry.\nstderr: ${result.stderr}`,
+      );
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
@@ -198,10 +230,15 @@ describe('R5 rationale-file override flow', () => {
       });
 
       const result = runGuard(dir);
-      assert.equal(result.status, 1,
-        `Guard should exit 1 when coverage is insufficient.\nstderr: ${result.stderr}`);
-      assert.ok(result.stderr.includes('file-b.mjs'),
-        `Refusal should name uncovered file.\nstderr: ${result.stderr}`);
+      assert.equal(
+        result.status,
+        1,
+        `Guard should exit 1 when coverage is insufficient.\nstderr: ${result.stderr}`,
+      );
+      assert.ok(
+        result.stderr.includes('file-b.mjs'),
+        `Refusal should name uncovered file.\nstderr: ${result.stderr}`,
+      );
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
@@ -224,16 +261,19 @@ describe('R5 rationale-file override flow', () => {
       });
 
       const result = runGuard(dir);
-      assert.equal(result.status, 0,
-        `Guard should exit 0 with valid override.\nstderr: ${result.stderr}`);
+      assert.equal(
+        result.status,
+        0,
+        `Guard should exit 0 with valid override.\nstderr: ${result.stderr}`,
+      );
 
       // Verify log file is in the git index (staged).
       const staged = safeGitSpawn(dir, ['diff', '--cached', '--name-only'], { stdio: 'pipe' });
       const stagedFiles = staged.stdout.trim().split('\n').filter(Boolean);
-      const logFileStaged = stagedFiles.some(f => f.startsWith('.coa/r5-override-log/'));
+      const logFileStaged = stagedFiles.some((f) => f.startsWith('.coa/r5-override-log/'));
       assert.ok(
         logFileStaged,
-        `Log file must be staged after override consumption.\nStaged files: ${stagedFiles.join(', ')}`
+        `Log file must be staged after override consumption.\nStaged files: ${stagedFiles.join(', ')}`,
       );
     } finally {
       rmSync(dir, { recursive: true, force: true });

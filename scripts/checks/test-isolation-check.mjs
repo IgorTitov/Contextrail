@@ -124,13 +124,17 @@ export function stripCommentsAndStrings(src) {
 
     // Block comment
     if (c === '/' && c2 === '*') {
-      out[i] = ' '; out[i + 1] = ' '; i += 2;
+      out[i] = ' ';
+      out[i + 1] = ' ';
+      i += 2;
       while (i < src.length - 1 && !(src[i] === '*' && src[i + 1] === '/')) {
         out[i] = src[i] === '\n' ? '\n' : ' ';
         i++;
       }
       if (i < src.length - 1) {
-        out[i] = ' '; out[i + 1] = ' '; i += 2;
+        out[i] = ' ';
+        out[i + 1] = ' ';
+        i += 2;
       }
       continue;
     }
@@ -138,16 +142,22 @@ export function stripCommentsAndStrings(src) {
     // String literals
     if (c === '"' || c === "'") {
       const quote = c;
-      out[i] = ' '; i++;
+      out[i] = ' ';
+      i++;
       while (i < src.length && src[i] !== quote) {
         if (src[i] === '\\' && i + 1 < src.length) {
-          out[i] = ' '; out[i + 1] = src[i + 1] === '\n' ? '\n' : ' '; i += 2;
+          out[i] = ' ';
+          out[i + 1] = src[i + 1] === '\n' ? '\n' : ' ';
+          i += 2;
           continue;
         }
         out[i] = src[i] === '\n' ? '\n' : ' ';
         i++;
       }
-      if (i < src.length) { out[i] = ' '; i++; }
+      if (i < src.length) {
+        out[i] = ' ';
+        i++;
+      }
       prevSignificant = quote;
       continue;
     }
@@ -155,20 +165,29 @@ export function stripCommentsAndStrings(src) {
     // Template literal — strip the literal text but keep ${...} content
     // so an embedded git command in an interpolation is still seen.
     if (c === '`') {
-      out[i] = ' '; i++;
+      out[i] = ' ';
+      i++;
       while (i < src.length && src[i] !== '`') {
         if (src[i] === '\\' && i + 1 < src.length) {
-          out[i] = ' '; out[i + 1] = src[i + 1] === '\n' ? '\n' : ' '; i += 2;
+          out[i] = ' ';
+          out[i + 1] = src[i + 1] === '\n' ? '\n' : ' ';
+          i += 2;
           continue;
         }
         if (src[i] === '$' && src[i + 1] === '{') {
           // Walk to the matching close brace, preserving content.
-          out[i] = ' '; out[i + 1] = ' '; i += 2;
+          out[i] = ' ';
+          out[i + 1] = ' ';
+          i += 2;
           let depth = 1;
           while (i < src.length && depth > 0) {
             if (src[i] === '{') depth++;
             else if (src[i] === '}') depth--;
-            if (depth === 0) { out[i] = ' '; i++; break; }
+            if (depth === 0) {
+              out[i] = ' ';
+              i++;
+              break;
+            }
             // leave content in place
             i++;
           }
@@ -177,7 +196,10 @@ export function stripCommentsAndStrings(src) {
         out[i] = src[i] === '\n' ? '\n' : ' ';
         i++;
       }
-      if (i < src.length) { out[i] = ' '; i++; }
+      if (i < src.length) {
+        out[i] = ' ';
+        i++;
+      }
       prevSignificant = '`';
       continue;
     }
@@ -187,19 +209,26 @@ export function stripCommentsAndStrings(src) {
     // division. We only strip in clear-regex contexts.
     if (c === '/' && isRegexContext(prevSignificant)) {
       // Walk to closing slash, then any flags.
-      out[i] = ' '; i++;
+      out[i] = ' ';
+      i++;
       let inClass = false;
       while (i < src.length) {
         if (src[i] === '\\' && i + 1 < src.length) {
-          out[i] = ' '; out[i + 1] = src[i + 1] === '\n' ? '\n' : ' '; i += 2;
+          out[i] = ' ';
+          out[i + 1] = src[i + 1] === '\n' ? '\n' : ' ';
+          i += 2;
           continue;
         }
         if (src[i] === '[') inClass = true;
         else if (src[i] === ']') inClass = false;
         else if (src[i] === '/' && !inClass) {
-          out[i] = ' '; i++;
+          out[i] = ' ';
+          i++;
           // Eat regex flags
-          while (i < src.length && /[a-z]/i.test(src[i])) { out[i] = ' '; i++; }
+          while (i < src.length && /[a-z]/i.test(src[i])) {
+            out[i] = ' ';
+            i++;
+          }
           break;
         }
         out[i] = src[i] === '\n' ? '\n' : ' ';
@@ -232,9 +261,13 @@ function isRegexContext(prev) {
  * suggestion } for matches in the stripped text. Line/col are 1-based.
  */
 function makeViolation(pattern, src, idx, suggestion) {
-  let line = 1, col = 1;
+  let line = 1,
+    col = 1;
   for (let i = 0; i < idx; i++) {
-    if (src[i] === '\n') { line++; col = 1; } else col++;
+    if (src[i] === '\n') {
+      line++;
+      col = 1;
+    } else col++;
   }
   // Snippet: the full original line, trimmed to 200 chars.
   const lineStart = src.lastIndexOf('\n', idx - 1) + 1;
@@ -274,7 +307,10 @@ function matchCloseParen(s, openIdx) {
   let depth = 0;
   for (let i = openIdx; i < s.length; i++) {
     if (s[i] === '(') depth++;
-    else if (s[i] === ')') { depth--; if (depth === 0) return i; }
+    else if (s[i] === ')') {
+      depth--;
+      if (depth === 0) return i;
+    }
   }
   return -1;
 }
@@ -323,8 +359,14 @@ export function detect(originalSource, filePathPosix = '<input>', options = {}) 
 
   // 1. process.chdir(...) — entirely banned in tests.
   for (const m of stripped.matchAll(/(^|[^\w$])process\s*\.\s*chdir\s*\(/g)) {
-    violations.push(makeViolation('process-chdir', originalSource, m.index + m[1].length,
-      'process.chdir is banned in tests — use {cwd: tmpDir} on the spawn instead'));
+    violations.push(
+      makeViolation(
+        'process-chdir',
+        originalSource,
+        m.index + m[1].length,
+        'process.chdir is banned in tests — use {cwd: tmpDir} on the spawn instead',
+      ),
+    );
   }
 
   // 2. Dynamic import / require of child_process inside a test file —
@@ -339,18 +381,32 @@ export function detect(originalSource, filePathPosix = '<input>', options = {}) 
     if (openIdx === -1 || closeIdx === -1) continue;
     const orig = originalSource.slice(openIdx, closeIdx + 1);
     if (/child_process/.test(orig)) {
-      violations.push(makeViolation('dynamic-import-cp', originalSource, m.index + m[1].length,
-        "Use top-level `import { execSync } from 'node:child_process'` plus safeGit, not dynamic import"));
+      violations.push(
+        makeViolation(
+          'dynamic-import-cp',
+          originalSource,
+          m.index + m[1].length,
+          "Use top-level `import { execSync } from 'node:child_process'` plus safeGit, not dynamic import",
+        ),
+      );
     }
   }
   // require('child_process') / require('node:child_process')
-  for (const m of originalSource.matchAll(/(^|[^\w$])require\s*\(\s*['"`](?:node:)?child_process['"`]\s*\)/g)) {
+  for (const m of originalSource.matchAll(
+    /(^|[^\w$])require\s*\(\s*['"`](?:node:)?child_process['"`]\s*\)/g,
+  )) {
     // Skip if inside a string/comment of the stripped view (the offset
     // in stripped should also match a non-whitespace identifier here).
     const idx = m.index + m[1].length;
     if (/\s/.test(stripped[idx] ?? ' ')) continue;
-    violations.push(makeViolation('dynamic-import-cp', originalSource, idx,
-      "Use top-level static import of node:child_process plus safeGit"));
+    violations.push(
+      makeViolation(
+        'dynamic-import-cp',
+        originalSource,
+        idx,
+        'Use top-level static import of node:child_process plus safeGit',
+      ),
+    );
   }
 
   // 3. R1.3 — paths that point to the live .claims/ directory (ADR-0052).
@@ -371,7 +427,8 @@ export function detect(originalSource, filePathPosix = '<input>', options = {}) 
   // be pointing to a temporary repo, not the live .claims/).
 
   // Pattern 1: new URL('.../.claims', import.meta.url)
-  const claimsUrlRe = /new\s+URL\s*\(\s*['"`][^'"` ]*\.claims[^'"` ]*['"`]\s*,\s*import\.meta\.url/g;
+  const claimsUrlRe =
+    /new\s+URL\s*\(\s*['"`][^'"` ]*\.claims[^'"` ]*['"`]\s*,\s*import\.meta\.url/g;
   for (const m of originalSource.matchAll(claimsUrlRe)) {
     // Skip if this position is blanked out in the stripped view (inside a string/comment).
     if (/^\s*$/.test(stripped.slice(m.index, m.index + 3))) continue;
@@ -379,12 +436,14 @@ export function detect(originalSource, filePathPosix = '<input>', options = {}) 
     const lineEnd = originalSource.indexOf('\n', m.index);
     const line = originalSource.slice(lineStart, lineEnd === -1 ? originalSource.length : lineEnd);
     if (/tmpdir|RUNNER_TEMP|mkdtemp/i.test(line)) continue;
-    violations.push(makeViolation(
-      'claims-dir-leak',
-      originalSource,
-      m.index,
-      "Test must not build a path to the live .claims/ dir — use mkdtempSync(join(tmpdir(),...)) for isolated test repos, or add the live-repo-allowed whitelist annotation if intentional",
-    ));
+    violations.push(
+      makeViolation(
+        'claims-dir-leak',
+        originalSource,
+        m.index,
+        'Test must not build a path to the live .claims/ dir — use mkdtempSync(join(tmpdir(),...)) for isolated test repos, or add the live-repo-allowed whitelist annotation if intentional',
+      ),
+    );
   }
 
   // Pattern 2: join(<repo-root constant>, '.claims') — catches join(ROOT, '.claims'),
@@ -412,17 +471,20 @@ export function detect(originalSource, filePathPosix = '<input>', options = {}) 
     const lineEnd = originalSource.indexOf('\n', m.index);
     const line = originalSource.slice(lineStart, lineEnd === -1 ? originalSource.length : lineEnd);
     if (/tmpdir|RUNNER_TEMP|mkdtemp/i.test(line)) continue;
-    violations.push(makeViolation(
-      'claims-dir-leak',
-      originalSource,
-      m.index,
-      "Test must not build a path to the live .claims/ dir — use mkdtempSync(join(tmpdir(),...)) for isolated test repos, or add the live-repo-allowed whitelist annotation if intentional",
-    ));
+    violations.push(
+      makeViolation(
+        'claims-dir-leak',
+        originalSource,
+        m.index,
+        'Test must not build a path to the live .claims/ dir — use mkdtempSync(join(tmpdir(),...)) for isolated test repos, or add the live-repo-allowed whitelist annotation if intentional',
+      ),
+    );
   }
 
   // 4. fs writes targeting **/.git/** or **/refs/**
   // Scan each call site of fs.write* / fs.appendFile* / writeFile sync etc.
-  const fsWriteRe = /(^|[^\w$])(fs\s*\.\s*)?(writeFile|writeFileSync|appendFile|appendFileSync)\s*\(/g;
+  const fsWriteRe =
+    /(^|[^\w$])(fs\s*\.\s*)?(writeFile|writeFileSync|appendFile|appendFileSync)\s*\(/g;
   for (const m of stripped.matchAll(fsWriteRe)) {
     const openIdx = stripped.indexOf('(', m.index + m[1].length);
     const closeIdx = matchCloseParen(stripped, openIdx);
@@ -434,8 +496,14 @@ export function detect(originalSource, filePathPosix = '<input>', options = {}) 
     if (literalMatch) {
       const literal = literalMatch[2];
       if (/(^|[\\/])\.git([\\/]|$)/.test(literal) || /(^|[\\/])refs([\\/])/.test(literal)) {
-        violations.push(makeViolation('fs-git-write', originalSource, m.index + m[1].length,
-          'Test must not write directly to .git/* or refs/* — use safeGit instead'));
+        violations.push(
+          makeViolation(
+            'fs-git-write',
+            originalSource,
+            m.index + m[1].length,
+            'Test must not write directly to .git/* or refs/* — use safeGit instead',
+          ),
+        );
       }
     }
   }
@@ -461,11 +529,14 @@ export function detect(originalSource, filePathPosix = '<input>', options = {}) 
 
     // String concatenation / variable / template-with-expr → dynamic-cmd
     if (firstArgInfo.dynamic) {
-      violations.push(makeViolation(
-        firstArgInfo.reason === 'variable' ? 'spawn-variable' : 'dynamic-cmd',
-        originalSource, site.nameIdx,
-        'First arg of spawn/exec must be a literal "git ..." or use safeGit(cwd, args)',
-      ));
+      violations.push(
+        makeViolation(
+          firstArgInfo.reason === 'variable' ? 'spawn-variable' : 'dynamic-cmd',
+          originalSource,
+          site.nameIdx,
+          'First arg of spawn/exec must be a literal "git ..." or use safeGit(cwd, args)',
+        ),
+      );
       continue;
     }
 
@@ -473,25 +544,49 @@ export function detect(originalSource, filePathPosix = '<input>', options = {}) 
     // options object for cwd and env.
     const opts = parseOptionsArg(origSplit, site.name);
     if (!opts.hasCwd) {
-      violations.push(makeViolation('no-cwd', originalSource, site.nameIdx,
-        'git invocation must pass {cwd: <tmpdir>} — use safeGit(cwd, args) from tests/_setup/safe-git.mjs'));
+      violations.push(
+        makeViolation(
+          'no-cwd',
+          originalSource,
+          site.nameIdx,
+          'git invocation must pass {cwd: <tmpdir>} — use safeGit(cwd, args) from tests/_setup/safe-git.mjs',
+        ),
+      );
       continue;
     }
     if (!opts.cwdLooksTmpdir) {
-      violations.push(makeViolation('cwd-non-tmpdir', originalSource, site.nameIdx,
-        `cwd must be derived from mkdtempSync()/tmpdir() — got ${JSON.stringify(opts.cwdExpr).slice(0, 80)}`));
+      violations.push(
+        makeViolation(
+          'cwd-non-tmpdir',
+          originalSource,
+          site.nameIdx,
+          `cwd must be derived from mkdtempSync()/tmpdir() — got ${JSON.stringify(opts.cwdExpr).slice(0, 80)}`,
+        ),
+      );
       continue;
     }
     if (!opts.hasGitEnvOverride) {
-      violations.push(makeViolation('no-env-override', originalSource, site.nameIdx,
-        'git invocation must scrub GIT_DIR/GIT_WORK_TREE in env, OR use safeGit(cwd, args) which does it for you'));
+      violations.push(
+        makeViolation(
+          'no-env-override',
+          originalSource,
+          site.nameIdx,
+          'git invocation must scrub GIT_DIR/GIT_WORK_TREE in env, OR use safeGit(cwd, args) which does it for you',
+        ),
+      );
       continue;
     }
     // TPL-272: even with correct cwd and env, raw spawn/exec calls must
     // go through safeGit/safeGitSpawn. The helper centralises env scrubbing
     // and cwd validation so future hardening only needs one change.
-    violations.push(makeViolation('raw-git-call', originalSource, site.nameIdx,
-      'All git calls in tests must use safeGit(cwd, args) or safeGitSpawn(cwd, args) from tests/_setup/safe-git.mjs — raw execSync/spawn is forbidden even with correct cwd and env'));
+    violations.push(
+      makeViolation(
+        'raw-git-call',
+        originalSource,
+        site.nameIdx,
+        'All git calls in tests must use safeGit(cwd, args) or safeGitSpawn(cwd, args) from tests/_setup/safe-git.mjs — raw execSync/spawn is forbidden even with correct cwd and env',
+      ),
+    );
   }
 
   // 5. simpleGit() with no arg or non-tmpdir literal arg.
@@ -501,20 +596,38 @@ export function detect(originalSource, filePathPosix = '<input>', options = {}) 
     if (openIdx === -1 || closeIdx === -1) continue;
     const origArgs = originalSource.slice(openIdx + 1, closeIdx).trim();
     if (origArgs.length === 0) {
-      violations.push(makeViolation('simple-git', originalSource, m.index + m[1].length,
-        'simpleGit() with no arg uses cwd by default — provide a tmpdir path or use safeGit'));
+      violations.push(
+        makeViolation(
+          'simple-git',
+          originalSource,
+          m.index + m[1].length,
+          'simpleGit() with no arg uses cwd by default — provide a tmpdir path or use safeGit',
+        ),
+      );
       continue;
     }
     // Heuristic: literal string argument — accept only if it looks like tmpdir
     if (/^['"`]/.test(origArgs)) {
       if (!/tmpdir|os\.tmpdir|RUNNER_TEMP|mkdtemp/i.test(origArgs)) {
-        violations.push(makeViolation('simple-git', originalSource, m.index + m[1].length,
-          'simpleGit() literal path is not tmpdir-derived'));
+        violations.push(
+          makeViolation(
+            'simple-git',
+            originalSource,
+            m.index + m[1].length,
+            'simpleGit() literal path is not tmpdir-derived',
+          ),
+        );
       }
     } else if (!/tmp|mkdtemp|RUNNER_TEMP/i.test(origArgs)) {
       // Variable name doesn't look tmpdir-derived
-      violations.push(makeViolation('simple-git', originalSource, m.index + m[1].length,
-        'simpleGit(<var>) — variable name does not signal tmpdir derivation; rename or use safeGit'));
+      violations.push(
+        makeViolation(
+          'simple-git',
+          originalSource,
+          m.index + m[1].length,
+          'simpleGit(<var>) — variable name does not signal tmpdir derivation; rename or use safeGit',
+        ),
+      );
     }
   }
 
@@ -535,17 +648,29 @@ function splitTopLevelArgsFromOrig(s) {
   for (let i = 0; i < s.length; i++) {
     const c = s[i];
     if (inStr) {
-      if (c === '\\') { i++; continue; }
+      if (c === '\\') {
+        i++;
+        continue;
+      }
       if (c === inStr) inStr = '';
       continue;
     }
     if (inTpl) {
-      if (c === '\\') { i++; continue; }
+      if (c === '\\') {
+        i++;
+        continue;
+      }
       if (c === '`') inTpl = false;
       continue;
     }
-    if (c === '"' || c === "'") { inStr = c; continue; }
-    if (c === '`') { inTpl = true; continue; }
+    if (c === '"' || c === "'") {
+      inStr = c;
+      continue;
+    }
+    if (c === '`') {
+      inTpl = true;
+      continue;
+    }
     if (c === '(' || c === '[' || c === '{') depth++;
     else if (c === ')' || c === ']' || c === '}') depth--;
     else if (c === ',' && depth === 0) {
@@ -583,7 +708,8 @@ function analyzeFirstArg(expr, looksLikeExec) {
   const isTpl = trimmed.startsWith('`');
   const tplHasExpr = isTpl && /\$\{[\s\S]+?\}/.test(trimmed);
   // Plain literal: starts with quote, no concat, no template expression.
-  const isPlain = (trimmed.startsWith('"') || trimmed.startsWith("'") || (isTpl && !tplHasExpr)) && !hasConcat;
+  const isPlain =
+    (trimmed.startsWith('"') || trimmed.startsWith("'") || (isTpl && !tplHasExpr)) && !hasConcat;
 
   // Identifier-only first arg: e.g. spawn(cmd, ['status']).
   const isBareIdent = /^[a-zA-Z_$][\w$]*$/.test(trimmed);
@@ -592,7 +718,8 @@ function analyzeFirstArg(expr, looksLikeExec) {
     // Strip the surrounding quote, look at content.
     const inner = trimmed.slice(1, -1);
     if (looksLikeExec) {
-      if (/^\s*git(\s|$)/i.test(inner)) return { isGit: true, dynamic: false, reason: 'literal-exec' };
+      if (/^\s*git(\s|$)/i.test(inner))
+        return { isGit: true, dynamic: false, reason: 'literal-exec' };
       return { isGit: false, dynamic: false, reason: 'non-git-exec' };
     }
     // spawn-family — first arg is executable name.
@@ -618,8 +745,7 @@ function analyzeFirstArg(expr, looksLikeExec) {
     const firstSeg = firstSegMatch ? firstSegMatch[1] : '';
     const fixedCommandIsGit = looksLikeExec
       ? /^\s*git[\s\\/]/i.test(firstSeg) || /^\s*git$/i.test(firstSeg.trim())
-      : /^\s*git(\.exe)?$/i.test(firstSeg.trim()) ||
-        /[\\/]git(\.exe)?$/i.test(firstSeg.trim());
+      : /^\s*git(\.exe)?$/i.test(firstSeg.trim()) || /[\\/]git(\.exe)?$/i.test(firstSeg.trim());
 
     if (fixedCommandIsGit) {
       return { isGit: true, dynamic: false, reason: 'template-fixed-git' };
@@ -693,17 +819,29 @@ function hasTopLevelOp(s, op) {
   for (let i = 0; i < s.length; i++) {
     const c = s[i];
     if (inStr) {
-      if (c === '\\') { i++; continue; }
+      if (c === '\\') {
+        i++;
+        continue;
+      }
       if (c === inStr) inStr = '';
       continue;
     }
     if (inTpl) {
-      if (c === '\\') { i++; continue; }
+      if (c === '\\') {
+        i++;
+        continue;
+      }
       if (c === '`') inTpl = false;
       continue;
     }
-    if (c === '"' || c === "'") { inStr = c; continue; }
-    if (c === '`') { inTpl = true; continue; }
+    if (c === '"' || c === "'") {
+      inStr = c;
+      continue;
+    }
+    if (c === '`') {
+      inTpl = true;
+      continue;
+    }
     if (c === '(' || c === '[' || c === '{') depth++;
     else if (c === ')' || c === ']' || c === '}') depth--;
     else if (c === op && depth === 0) return true;
@@ -756,7 +894,8 @@ function parseOptionsArg(args, callName) {
   //   - call to mkdtempSync(...) or mkdtemp(...)
   //   - join(tmpdir(), ...) or join(os.tmpdir(), ...)
   //   - explicit RUNNER_TEMP usage
-  const tmpdirRe = /^(\s*(repo|dir|tmp|sandbox|fixture|wt|workTree|wtPath|tmpDir|tempDir|tempRepo|repoDir|cwd)\s*$)|mkdtemp|tmpdir|RUNNER_TEMP|os\.tmpdir/i;
+  const tmpdirRe =
+    /^(\s*(repo|dir|tmp|sandbox|fixture|wt|workTree|wtPath|tmpDir|tempDir|tempRepo|repoDir|cwd)\s*$)|mkdtemp|tmpdir|RUNNER_TEMP|os\.tmpdir/i;
   const cwdLooksTmpdir = hasCwd && tmpdirRe.test(cwdExpr);
 
   // env: { ... } — look for explicit empty-string OR delete-style
@@ -803,23 +942,34 @@ function walkValueEnd(s, from) {
   for (let i = from; i < s.length; i++) {
     const c = s[i];
     if (inStr) {
-      if (c === '\\') { i++; continue; }
+      if (c === '\\') {
+        i++;
+        continue;
+      }
       if (c === inStr) inStr = '';
       continue;
     }
     if (inTpl) {
-      if (c === '\\') { i++; continue; }
+      if (c === '\\') {
+        i++;
+        continue;
+      }
       if (c === '`') inTpl = false;
       continue;
     }
-    if (c === '"' || c === "'") { inStr = c; continue; }
-    if (c === '`') { inTpl = true; continue; }
+    if (c === '"' || c === "'") {
+      inStr = c;
+      continue;
+    }
+    if (c === '`') {
+      inTpl = true;
+      continue;
+    }
     if (c === '(' || c === '[' || c === '{') depth++;
     else if (c === ')' || c === ']' || c === '}') {
       if (depth === 0) return i;
       depth--;
-    }
-    else if (c === ',' && depth === 0) return i;
+    } else if (c === ',' && depth === 0) return i;
   }
   return s.length;
 }
@@ -933,7 +1083,11 @@ function buildImportClosure(rootFiles) {
     if (visited.has(file)) continue;
     visited.add(file);
     let src;
-    try { src = readFileSync(file, 'utf8'); } catch { continue; }
+    try {
+      src = readFileSync(file, 'utf8');
+    } catch {
+      continue;
+    }
     for (const rel of findRelativeImports(src)) {
       const resolved = resolveRelImport(file, rel);
       if (resolved && !visited.has(resolved)) queue.push(resolved);
@@ -957,7 +1111,9 @@ function loadAllowlist() {
 
 function isAllowlisted(filePosix, allowlist) {
   if (!allowlist || !Array.isArray(allowlist.files)) return false;
-  return allowlist.files.some((entry) => entry === filePosix || entry === filePosix.replace(/^\.\//, ''));
+  return allowlist.files.some(
+    (entry) => entry === filePosix || entry === filePosix.replace(/^\.\//, ''),
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -1000,7 +1156,8 @@ function scanFile(absPath, allowlist, fixturesAreReal = false) {
         ...violations,
         {
           pattern: 'whitelist-incomplete',
-          line: 1, col: 1,
+          line: 1,
+          col: 1,
           snippet: '@test-isolation marker present but file not in allowlist',
           suggestion: `add "${filePosix}" to scripts/checks/test-isolation-allowlist.json files[]`,
         },
@@ -1014,9 +1171,11 @@ function scanFile(absPath, allowlist, fixturesAreReal = false) {
         ...violations,
         {
           pattern: 'whitelist-incomplete',
-          line: 1, col: 1,
+          line: 1,
+          col: 1,
           snippet: 'file in allowlist but missing @test-isolation marker',
-          suggestion: 'add a `// @test-isolation: live-repo-allowed | reason: <≥60 chars>` line in the first 10 lines',
+          suggestion:
+            'add a `// @test-isolation: live-repo-allowed | reason: <≥60 chars>` line in the first 10 lines',
         },
       ],
     };
@@ -1051,8 +1210,14 @@ const SELF_TEST_EXPECTATIONS = {
   'bad-raw-exec-with-safe-env.fixture.mjs': { expect: 'violation', patterns: ['raw-git-call'] },
   // whitelist-mechanism fixtures
   'whitelisted-with-marker-and-allowlist.fixture.mjs': { expect: 'pass-via-whitelist' },
-  'whitelisted-marker-only-no-allowlist.fixture.mjs': { expect: 'violation', patterns: ['whitelist-incomplete'] },
-  'whitelisted-allowlist-no-marker.fixture.mjs': { expect: 'violation', patterns: ['whitelist-incomplete'] },
+  'whitelisted-marker-only-no-allowlist.fixture.mjs': {
+    expect: 'violation',
+    patterns: ['whitelist-incomplete'],
+  },
+  'whitelisted-allowlist-no-marker.fixture.mjs': {
+    expect: 'violation',
+    patterns: ['whitelist-incomplete'],
+  },
   // helper file referenced by bad-helper-import.fixture.mjs.
   // execSync('git status --porcelain') with no options → 'no-cwd'.
   'bad-helper.mjs': { expect: 'violation', patterns: ['no-cwd'] },
@@ -1096,13 +1261,17 @@ function runSelfTest(wantJson) {
 
     if (exp.expect === 'pass') {
       if (violations.length > 0) {
-        failures.push(`${name}: expected zero violations, got ${violations.length} [${violations.map((v) => v.pattern).join(',')}]`);
+        failures.push(
+          `${name}: expected zero violations, got ${violations.length} [${violations.map((v) => v.pattern).join(',')}]`,
+        );
       }
       continue;
     }
     if (exp.expect === 'pass-via-whitelist') {
       if (!whitelisted) {
-        failures.push(`${name}: expected whitelisted=true (got violations=[${violations.map((v) => v.pattern).join(',')}])`);
+        failures.push(
+          `${name}: expected whitelisted=true (got violations=[${violations.map((v) => v.pattern).join(',')}])`,
+        );
       }
       continue;
     }
@@ -1113,7 +1282,9 @@ function runSelfTest(wantJson) {
     }
     for (const wantPat of exp.patterns) {
       if (!violations.some((v) => v.pattern === wantPat)) {
-        failures.push(`${name}: expected pattern '${wantPat}' not detected (got [${violations.map((v) => v.pattern).join(',')}])`);
+        failures.push(
+          `${name}: expected pattern '${wantPat}' not detected (got [${violations.map((v) => v.pattern).join(',')}])`,
+        );
       }
     }
   }
@@ -1164,7 +1335,9 @@ function runMainScan(wantJson) {
     }
     console.log(JSON.stringify({ ok, violations, scanned: allFiles.length }, null, 2));
   } else if (!ok) {
-    console.error(`test-isolation-check: FAIL — ${total} violation(s) across ${fileResults.length} file(s)`);
+    console.error(
+      `test-isolation-check: FAIL — ${total} violation(s) across ${fileResults.length} file(s)`,
+    );
     for (const r of fileResults) {
       console.error(`\n  ${r.filePosix}`);
       for (const v of r.violations) {
@@ -1193,10 +1366,10 @@ function main() {
   runMainScan(wantJson);
 }
 
-const isDirectRun = process.argv[1] && (
-  process.argv[1].endsWith('test-isolation-check.mjs') ||
-  process.argv[1].endsWith('test-isolation-check')
-);
+const isDirectRun =
+  process.argv[1] &&
+  (process.argv[1].endsWith('test-isolation-check.mjs') ||
+    process.argv[1].endsWith('test-isolation-check'));
 
 if (isDirectRun) {
   main();

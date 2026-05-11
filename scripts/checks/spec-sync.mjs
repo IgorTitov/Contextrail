@@ -47,7 +47,9 @@ async function main() {
       const { generatedAt: _a, ...prevSub } = prev;
       const { generatedAt: _b, ...curSub } = payload;
       changed = JSON.stringify(prevSub) !== JSON.stringify(curSub);
-    } catch { /* parse error → treat as changed */ }
+    } catch {
+      /* parse error → treat as changed */
+    }
   }
   if (!changed) payload.generatedAt = JSON.parse(current).generatedAt; // keep old timestamp
   const content = JSON.stringify(payload, null, 2) + '\n';

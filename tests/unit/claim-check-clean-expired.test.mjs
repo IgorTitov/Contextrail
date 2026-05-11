@@ -10,14 +10,7 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import {
-  mkdtempSync,
-  writeFileSync,
-  readdirSync,
-  readFileSync,
-  existsSync,
-  rmSync,
-} from 'node:fs';
+import { mkdtempSync, writeFileSync, readdirSync, readFileSync, existsSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -57,15 +50,11 @@ function pastIso(daysAgo) {
 }
 
 function run(claimsDir, args, envExtra = {}) {
-  return spawnSync(
-    process.execPath,
-    [claimCheckPath, '--clean-expired', ...args, '--json'],
-    {
-      cwd: tmpdir(),
-      encoding: 'utf8',
-      env: makeIsolatedEnv(claimsDir, envExtra),
-    },
-  );
+  return spawnSync(process.execPath, [claimCheckPath, '--clean-expired', ...args, '--json'], {
+    cwd: tmpdir(),
+    encoding: 'utf8',
+    env: makeIsolatedEnv(claimsDir, envExtra),
+  });
 }
 
 describe('claim-check --clean-expired (TPL-309)', () => {
@@ -139,7 +128,11 @@ describe('claim-check --clean-expired (TPL-309)', () => {
       assert.ok(existsSync(join(dir, 'clm-active.json')), 'active kept');
 
       const audit = readFileSync(join(dir, 'audit.log'), 'utf8');
-      const lines = audit.trim().split('\n').filter(Boolean).map((l) => JSON.parse(l));
+      const lines = audit
+        .trim()
+        .split('\n')
+        .filter(Boolean)
+        .map((l) => JSON.parse(l));
       const cleanEvents = lines.filter((l) => l.event === 'claim-clean-expired');
       assert.equal(cleanEvents.length, 2);
       assert.ok(cleanEvents.some((ev) => ev.claimId === 'clm-stale'));

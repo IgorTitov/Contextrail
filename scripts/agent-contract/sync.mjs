@@ -94,7 +94,8 @@ async function writeBodyIfChanged(filePath, body) {
   }
   const currentBody = current === null ? null : stripLeadingInlineHeader(current);
   // Preserve any existing inline header so header-fix can keep stamping it.
-  const headerPrefix = current === null ? '' : current.slice(0, current.length - currentBody.length);
+  const headerPrefix =
+    current === null ? '' : current.slice(0, current.length - currentBody.length);
   if (currentBody === body) return false;
   await writeFile(filePath, headerPrefix + body, 'utf8');
   return true;
@@ -271,9 +272,10 @@ function renderEnforcedRulesSection(contract) {
     return '';
   }
   const items = contract.enforcedRules.map((r) => {
-    const operatorGated = Array.isArray(r.operatorGated) && r.operatorGated.length > 0
-      ? `  - Operator-gated commands: ${r.operatorGated.map((c) => '`' + c + '`').join(', ')}`
-      : null;
+    const operatorGated =
+      Array.isArray(r.operatorGated) && r.operatorGated.length > 0
+        ? `  - Operator-gated commands: ${r.operatorGated.map((c) => '`' + c + '`').join(', ')}`
+        : null;
     const parts = [
       `- **${r.id}** — ${r.rule}.`,
       r.owner ? `  - Owner: \`${r.owner}\`` : null,
@@ -404,7 +406,9 @@ function renderAgents(contract) {
           (profile) =>
             `- **${profile.name}** (≥${profile.minContextTokens.toLocaleString('en-US')} ctx tokens) — ${profile.notes}\n  - Capabilities: ${profile.capabilities.join(', ')}\n  - Harnesses: ${profile.harnessExamples.join(', ')}`,
         )
-        .join('\n')}\n\nLocal-tier support is landing across TPL-208..215. The \`local\` adapter slot in \`adapters\` reserves \`LOCAL.md\` and \`MICRO.md\` for upcoming generation.`
+        .join(
+          '\n',
+        )}\n\nLocal-tier support is landing across TPL-208..215. The \`local\` adapter slot in \`adapters\` reserves \`LOCAL.md\` and \`MICRO.md\` for upcoming generation.`
     : '';
 
   const enforcedRulesSection = renderEnforcedRulesSection(contract);
@@ -607,7 +611,8 @@ export function renderLocalMd(contract) {
     : [];
   const profileSummaries = {
     mid: 'Single-agent tool-use loop. Owns bounded slices inside ONE module.',
-    small: 'Deterministic helper only — header sync, README touch-ups, commit-message templating, prettier-fix. NOT a slice owner.',
+    small:
+      'Deterministic helper only — header sync, README touch-ups, commit-message templating, prettier-fix. NOT a slice owner.',
   };
   const profileLines = profiles
     .map(
@@ -616,8 +621,12 @@ export function renderLocalMd(contract) {
     )
     .join('\n');
 
-  const principlesTrimmed = contract.principles
-    .map((line) => line.replace(/^Before implementing.*?exists\.$/, 'Route user-facing behavior changes through PRD/USM before implementing.'));
+  const principlesTrimmed = contract.principles.map((line) =>
+    line.replace(
+      /^Before implementing.*?exists\.$/,
+      'Route user-facing behavior changes through PRD/USM before implementing.',
+    ),
+  );
 
   const coordinationCmds = (contract.commands.coordination || []).slice(0, 3);
   const compatibilityCmds = contract.commands.compatibility || [];
@@ -957,8 +966,7 @@ export async function renderedTargets(contract) {
       invariants:
         'Token budget under 5K tokens; omits Claude-class concepts (subagents, hooks, MCP, slash commands).',
       tests: ['node scripts/agent-contract/check.mjs'],
-      risks:
-        'Manual edits here can fork local-tier guidance away from frontier-tier adapters.',
+      risks: 'Manual edits here can fork local-tier guidance away from frontier-tier adapters.',
       linkedDocs: ['AGENTS.md', '.claude/CLAUDE.md', 'docs/adr/0013-module-work-surface-budget.md'],
       related: ['MICRO.md', 'docs/agent-contract/compatibility-contract.json'],
       modulePackage: 'root',
@@ -973,10 +981,7 @@ export async function renderedTargets(contract) {
       filePath: 'MICRO.md',
       purpose: 'Ultra-slim adapter for narrow deterministic-helper tasks (<2K token budget).',
       api: 'Local-tier helper instructions',
-      dependsOn: [
-        'docs/agent-contract/compatibility-contract.json',
-        'LOCAL.md',
-      ],
+      dependsOn: ['docs/agent-contract/compatibility-contract.json', 'LOCAL.md'],
       owns: 'The ultra-slim helper adapter for header-fix / README-sync / commit-message bots.',
       boundaries:
         'This adapter is for deterministic transformations only — never a slice owner. Behavior decisions escalate to LOCAL.md or AGENTS.md.',
@@ -1001,7 +1006,10 @@ export async function renderedTargets(contract) {
   for (const skill of contract.skills) {
     const rendered = renderSkill(contract, skill);
     targets.set(path.join(ROOT, `.agents/skills/${skill.name}/SKILL.md`), rendered.content);
-    targets.set(path.join(ROOT, `.agents/skills/${skill.name}/SKILL.md.header.md`), rendered.sidecar);
+    targets.set(
+      path.join(ROOT, `.agents/skills/${skill.name}/SKILL.md.header.md`),
+      rendered.sidecar,
+    );
   }
   return targets;
 }

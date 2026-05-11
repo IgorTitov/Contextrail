@@ -26,14 +26,18 @@ function makeSyntheticRepo() {
 
   function touch(relPath, content = '# stub\n') {
     const full = join(root, relPath);
-    const dir = full.slice(0, full.lastIndexOf('/') + 1) || full.slice(0, full.lastIndexOf('\\') + 1);
+    const dir =
+      full.slice(0, full.lastIndexOf('/') + 1) || full.slice(0, full.lastIndexOf('\\') + 1);
     mkdirSync(dir, { recursive: true });
     writeFileSync(full, content, 'utf8');
   }
 
   // alpha module: manifest + public-api with sidecars, plus domain file with sidecar
   mkdirSync(join(root, 'modules', 'alpha', 'domain'), { recursive: true });
-  touch('modules/alpha/manifest.json', JSON.stringify({ name: 'alpha', version: '1.0.0', dependencies: { modules: ['beta'] } }));
+  touch(
+    'modules/alpha/manifest.json',
+    JSON.stringify({ name: 'alpha', version: '1.0.0', dependencies: { modules: ['beta'] } }),
+  );
   touch('modules/alpha/manifest.json.header.md', '---\nname: alpha manifest\n---\n');
   touch('modules/alpha/public-api.mjs', 'export {}');
   touch('modules/alpha/public-api.mjs.header.md', '---\nname: alpha public-api\n---\n');
@@ -42,14 +46,20 @@ function makeSyntheticRepo() {
 
   // beta module: manifest + public-api with sidecars (dependency of alpha)
   mkdirSync(join(root, 'modules', 'beta'), { recursive: true });
-  touch('modules/beta/manifest.json', JSON.stringify({ name: 'beta', version: '1.0.0', dependencies: { modules: [] } }));
+  touch(
+    'modules/beta/manifest.json',
+    JSON.stringify({ name: 'beta', version: '1.0.0', dependencies: { modules: [] } }),
+  );
   touch('modules/beta/manifest.json.header.md', '---\nname: beta manifest\n---\n');
   touch('modules/beta/public-api.mjs', 'export {}');
   touch('modules/beta/public-api.mjs.header.md', '---\nname: beta public-api\n---\n');
 
   // gamma module: manifest only, no sidecars
   mkdirSync(join(root, 'modules', 'gamma'), { recursive: true });
-  touch('modules/gamma/manifest.json', JSON.stringify({ name: 'gamma', version: '1.0.0', dependencies: { modules: [] } }));
+  touch(
+    'modules/gamma/manifest.json',
+    JSON.stringify({ name: 'gamma', version: '1.0.0', dependencies: { modules: [] } }),
+  );
   // no .header.md files for gamma
 
   return root;
@@ -78,7 +88,11 @@ describe('computeNeighborhood', () => {
   it('deduplication — same sidecar appears only once', () => {
     const root = makeSyntheticRepo();
     // Pass the same module twice
-    const result = computeNeighborhood({ modules: ['alpha', 'alpha'], radius: 'medium', repoRoot: root });
+    const result = computeNeighborhood({
+      modules: ['alpha', 'alpha'],
+      radius: 'medium',
+      repoRoot: root,
+    });
     const unique = new Set(result);
     assert.equal(result.length, unique.size, 'paths must not be duplicated');
   });
@@ -94,14 +108,17 @@ describe('computeNeighborhood', () => {
     const root = makeSyntheticRepo();
     const result = computeNeighborhood({ modules: ['alpha'], radius: 'small', repoRoot: root });
     // small must return >= 1 and <= 5 paths for a single module
-    assert.ok(result.length >= 1 && result.length <= 5, `small must return 1-5 sidecars, got ${result.length}`);
+    assert.ok(
+      result.length >= 1 && result.length <= 5,
+      `small must return 1-5 sidecars, got ${result.length}`,
+    );
     // All must be manifest or public-api sidecars
     for (const p of result) {
       const isManifestSidecar = p.includes('manifest.json.header.md');
       const isPublicApiSidecar = p.includes('public-api.') && p.endsWith('.header.md');
       assert.ok(
         isManifestSidecar || isPublicApiSidecar,
-        `small radius: unexpected sidecar path "${p}" — must be manifest or public-api sidecar`
+        `small radius: unexpected sidecar path "${p}" — must be manifest or public-api sidecar`,
       );
     }
   });
@@ -112,7 +129,10 @@ describe('computeNeighborhood', () => {
     const medium = computeNeighborhood({ modules: ['alpha'], radius: 'medium', repoRoot: root });
     assert.ok(medium.length >= small.length, 'medium must return >= sidecars as small');
     // alpha has 3 sidecars (manifest, public-api, domain/logic), so medium > small
-    assert.ok(medium.length > small.length, 'medium must return more sidecars than small for alpha (which has a domain sidecar)');
+    assert.ok(
+      medium.length > small.length,
+      'medium must return more sidecars than small for alpha (which has a domain sidecar)',
+    );
   });
 
   it('large radius includes dependency sidecars beyond medium', () => {
@@ -121,7 +141,7 @@ describe('computeNeighborhood', () => {
     const large = computeNeighborhood({ modules: ['alpha'], radius: 'large', repoRoot: root });
     // alpha depends on beta — large should include beta sidecars
     assert.ok(large.length >= medium.length, 'large must return >= sidecars as medium');
-    const hasBetaSidecar = large.some(p => p.includes('beta'));
+    const hasBetaSidecar = large.some((p) => p.includes('beta'));
     assert.ok(hasBetaSidecar, 'large radius must include beta (dependency of alpha) sidecars');
   });
 
@@ -143,7 +163,7 @@ describe('computeNeighborhood', () => {
     assert.throws(
       () => computeNeighborhood({ modules: ['alpha'], radius: 'huge', repoRoot: root }),
       /invalid.*radius|radius.*invalid/i,
-      'must throw on invalid radius'
+      'must throw on invalid radius',
     );
   });
 

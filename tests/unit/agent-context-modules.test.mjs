@@ -71,10 +71,7 @@ describe('uniqueModulesFromFiles', () => {
   });
 
   it('all non-module paths returns empty list', () => {
-    const result = uniqueModulesFromFiles([
-      'apps/starter/index.mjs',
-      'scripts/foo.mjs',
-    ]);
+    const result = uniqueModulesFromFiles(['apps/starter/index.mjs', 'scripts/foo.mjs']);
     assert.deepEqual(result, []);
   });
 

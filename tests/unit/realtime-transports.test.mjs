@@ -56,8 +56,12 @@ function createMockTransport(overrides = {}) {
       setState(s);
     },
 
-    isSupported() { return supported; },
-    getState() { return state; },
+    isSupported() {
+      return supported;
+    },
+    getState() {
+      return state;
+    },
 
     async open() {
       setState('connecting');
@@ -68,12 +72,18 @@ function createMockTransport(overrides = {}) {
       setState('connected');
     },
 
-    async close() { setState('disconnected'); },
+    async close() {
+      setState('disconnected');
+    },
     send() {
       if (state !== 'connected') throw new Error('Not connected');
     },
-    onMessage(cb) { messageListeners.push(cb); },
-    onStateChange(cb) { stateListeners.push(cb); },
+    onMessage(cb) {
+      messageListeners.push(cb);
+    },
+    onStateChange(cb) {
+      stateListeners.push(cb);
+    },
   };
 }
 

@@ -44,10 +44,7 @@
 import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import {
-  parseAuditLog,
-  correlateCommitsToPhases,
-} from '../lib/bypass-audit.mjs';
+import { parseAuditLog, correlateCommitsToPhases } from '../lib/bypass-audit.mjs';
 
 const ROOT = resolve(process.cwd());
 const AUDIT_LOG = join(ROOT, '.claims', 'commit-audit.log');
@@ -99,15 +96,19 @@ function main() {
   // nothing to validate.
   if (!existsSync(AUDIT_LOG)) {
     if (jsonMode) {
-      process.stdout.write(JSON.stringify({
-        ok: true,
-        skipped: true,
-        reason: 'no audit log found (fresh clone or pre-R8.4 history)',
-        gaps: [],
-        incomplete: [],
-      }) + '\n');
+      process.stdout.write(
+        JSON.stringify({
+          ok: true,
+          skipped: true,
+          reason: 'no audit log found (fresh clone or pre-R8.4 history)',
+          gaps: [],
+          incomplete: [],
+        }) + '\n',
+      );
     } else {
-      console.log('[bypass-audit] No audit log found — skipping check (fresh clone or pre-R8.4 history).');
+      console.log(
+        '[bypass-audit] No audit log found — skipping check (fresh clone or pre-R8.4 history).',
+      );
     }
     return 0;
   }
@@ -115,7 +116,15 @@ function main() {
   const commits = getRecentCommits(recent);
   if (commits.length === 0) {
     if (jsonMode) {
-      process.stdout.write(JSON.stringify({ ok: true, skipped: true, reason: 'no commits found', gaps: [], incomplete: [] }) + '\n');
+      process.stdout.write(
+        JSON.stringify({
+          ok: true,
+          skipped: true,
+          reason: 'no commits found',
+          gaps: [],
+          incomplete: [],
+        }) + '\n',
+      );
     } else {
       console.log('[bypass-audit] No commits found — nothing to check.');
     }
@@ -127,27 +136,41 @@ function main() {
   const ok = gaps.length === 0 && incomplete.length === 0;
 
   if (jsonMode) {
-    process.stdout.write(JSON.stringify({
-      ok,
-      checked: commits.length,
-      matched: matched.length,
-      gaps: gaps.map(sha => ({ sha, issue: 'no-audit-record' })),
-      incomplete: incomplete.map(({ sha, missing }) => ({ sha, issue: 'missing-non-skippable', missing })),
-    }) + '\n');
+    process.stdout.write(
+      JSON.stringify({
+        ok,
+        checked: commits.length,
+        matched: matched.length,
+        gaps: gaps.map((sha) => ({ sha, issue: 'no-audit-record' })),
+        incomplete: incomplete.map(({ sha, missing }) => ({
+          sha,
+          issue: 'missing-non-skippable',
+          missing,
+        })),
+      }) + '\n',
+    );
   } else if (!ok) {
     console.error('[bypass-audit] FAIL: commit(s) found with missing or incomplete audit records.');
     for (const sha of gaps) {
-      console.error(`  BYPASS: ${sha.slice(0, 12)} — no audit record (likely git commit --no-verify)`);
+      console.error(
+        `  BYPASS: ${sha.slice(0, 12)} — no audit record (likely git commit --no-verify)`,
+      );
     }
     for (const { sha, missing } of incomplete) {
-      console.error(`  INCOMPLETE: ${sha.slice(0, 12)} — missing NON_SKIPPABLE phases: ${missing.join(', ')}`);
+      console.error(
+        `  INCOMPLETE: ${sha.slice(0, 12)} — missing NON_SKIPPABLE phases: ${missing.join(', ')}`,
+      );
     }
     console.error('');
     console.error('Recovery:');
     console.error('  1. Re-do the commit(s) through the normal hook chain to build audit records');
-    console.error('  2. Or accept the gap: re-push with git push --no-verify (documents bypass explicitly)');
+    console.error(
+      '  2. Or accept the gap: re-push with git push --no-verify (documents bypass explicitly)',
+    );
   } else {
-    console.log(`[bypass-audit] OK: ${matched.length}/${commits.length} recent commit(s) have complete audit records.`);
+    console.log(
+      `[bypass-audit] OK: ${matched.length}/${commits.length} recent commit(s) have complete audit records.`,
+    );
   }
 
   if (!ok && !warnOnly) return 1;

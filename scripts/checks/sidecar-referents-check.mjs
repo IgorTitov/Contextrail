@@ -71,7 +71,13 @@ function parseArgs(argv) {
     else if (a.startsWith('--root=')) out.root = a.slice('--root='.length);
     else if (a.startsWith('--staged=')) {
       const csv = a.slice('--staged='.length);
-      out.staged = csv.length === 0 ? [] : csv.split(',').map((s) => s.trim()).filter(Boolean);
+      out.staged =
+        csv.length === 0
+          ? []
+          : csv
+              .split(',')
+              .map((s) => s.trim())
+              .filter(Boolean);
     }
   }
   return out;
@@ -222,8 +228,13 @@ export function deriveFileIdAlternates(sidecarRelPath) {
   const baseStart = lastSlash === -1 ? 0 : lastSlash + 1;
   const lastDot = p.lastIndexOf('.');
   if (lastDot > baseStart) p = p.slice(0, lastDot);
-  const stripped = REPO_ID_PREFIX + ':' +
-    p.split('/').map((seg) => seg.startsWith('.') ? seg.slice(1) : seg).join(':');
+  const stripped =
+    REPO_ID_PREFIX +
+    ':' +
+    p
+      .split('/')
+      .map((seg) => (seg.startsWith('.') ? seg.slice(1) : seg))
+      .join(':');
   return stripped === primary ? [primary] : [primary, stripped];
 }
 
@@ -300,9 +311,7 @@ export function checkSidecar(root, sidecarRelPath) {
         continue;
       }
       if (!fileExists(root, entry)) {
-        warnings.push(
-          `${sidecarRelPath}: tests entry "${entry}" does not exist on disk`,
-        );
+        warnings.push(`${sidecarRelPath}: tests entry "${entry}" does not exist on disk`);
       }
     }
   }
@@ -323,12 +332,7 @@ export function checkSidecar(root, sidecarRelPath) {
 // Walking
 // ---------------------------------------------------------------------------
 
-const SKIP_DIRS = new Set([
-  'node_modules',
-  '.git',
-  '.backups',
-  '.aider.tags.cache.v4',
-]);
+const SKIP_DIRS = new Set(['node_modules', '.git', '.backups', '.aider.tags.cache.v4']);
 
 function walkSidecars(root, dir = root, out = []) {
   let entries;
@@ -361,7 +365,10 @@ function gitStaged(cwd) {
     shell: false,
   });
   if (r.status !== 0) return [];
-  return r.stdout.split('\n').map((s) => s.trim()).filter(Boolean);
+  return r.stdout
+    .split('\n')
+    .map((s) => s.trim())
+    .filter(Boolean);
 }
 
 // ---------------------------------------------------------------------------
@@ -415,9 +422,9 @@ function main() {
   process.exit(0);
 }
 
-const isDirectRun = process.argv[1] && (
-  process.argv[1].endsWith('sidecar-referents-check.mjs') ||
-  process.argv[1].endsWith('sidecar-referents-check')
-);
+const isDirectRun =
+  process.argv[1] &&
+  (process.argv[1].endsWith('sidecar-referents-check.mjs') ||
+    process.argv[1].endsWith('sidecar-referents-check'));
 
 if (isDirectRun) main();

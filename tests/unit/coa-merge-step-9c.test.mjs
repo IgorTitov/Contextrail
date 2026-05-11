@@ -9,9 +9,7 @@
 
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import {
-  mkdtempSync, writeFileSync, readFileSync, mkdirSync, rmSync,
-} from 'node:fs';
+import { mkdtempSync, writeFileSync, readFileSync, mkdirSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { safeGitSpawn } from '../_setup/safe-git.mjs';
@@ -113,7 +111,11 @@ describe('coa-merge Step 9c: restoreGitConfig', () => {
 
       // Mutate config
       const configPath = join(dir, '.git', 'config');
-      writeFileSync(configPath, original + '\n[receive]\n\tdenyCurrentBranch = updateInstead\n', 'utf8');
+      writeFileSync(
+        configPath,
+        original + '\n[receive]\n\tdenyCurrentBranch = updateInstead\n',
+        'utf8',
+      );
       const mutated = readFileSync(configPath, 'utf8');
       assert.notEqual(mutated, original, 'config should be mutated before restore');
 
@@ -147,8 +149,15 @@ describe('coa-merge Step 9c: restoreGitConfig', () => {
 
       // Step 4: verify
       const afterRestore = readFileSync(configPath, 'utf8');
-      assert.equal(afterRestore, captured, 'config must match pre-mutation snapshot after rollback');
-      assert.ok(!afterRestore.includes('denyCurrentBranch'), 'denyCurrentBranch must not appear after rollback');
+      assert.equal(
+        afterRestore,
+        captured,
+        'config must match pre-mutation snapshot after rollback',
+      );
+      assert.ok(
+        !afterRestore.includes('denyCurrentBranch'),
+        'denyCurrentBranch must not appear after rollback',
+      );
       assert.ok(!afterRestore.includes('bare = true'), 'bare=true must not appear after rollback');
     } finally {
       rmSync(dir, { recursive: true, force: true });

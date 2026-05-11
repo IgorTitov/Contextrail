@@ -39,9 +39,7 @@
 
 import { describe, test, after, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
-import {
-  mkdtempSync, writeFileSync, readFileSync, rmSync,
-} from 'node:fs';
+import { mkdtempSync, writeFileSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, basename } from 'node:path';
 import { safeGitSpawn } from '../_setup/safe-git.mjs';
@@ -230,7 +228,8 @@ describe('TPL-315 — nested .cockpit-stable never eligible for teardown-stale',
     });
     assert.equal(exitCode, 0);
     assert.equal(
-      result.eligible.length, 0,
+      result.eligible.length,
+      0,
       '.cockpit-stable must remain ineligible even with --include-dirty',
     );
     const skipped = result.ineligible.find((i) => basename(i.path) === '.cockpit-stable');
@@ -240,7 +239,11 @@ describe('TPL-315 — nested .cockpit-stable never eligible for teardown-stale',
 
   test('Case 3: external tx-* merged worktree is still eligible alongside protected nested infra', () => {
     // Protected nested infra:
-    const { path: wtNested } = addNestedWorktree(root, '.cockpit-stable', 'cockpit-stable-branch-3');
+    const { path: wtNested } = addNestedWorktree(
+      root,
+      '.cockpit-stable',
+      'cockpit-stable-branch-3',
+    );
     detachHead(wtNested);
 
     // Real ceremony tx-*:

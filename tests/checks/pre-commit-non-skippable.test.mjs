@@ -20,7 +20,10 @@ const HOOK = join(REPO_ROOT, '.githooks', 'pre-commit');
 function parseNonSkippablePhases(src) {
   const match = src.match(/^NON_SKIPPABLE_PHASES="([^"]+)"/m);
   if (!match) return null;
-  return match[1].split(',').map((s) => s.trim()).filter(Boolean);
+  return match[1]
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
 }
 
 describe('NON_SKIPPABLE_PHASES — meta-test (CG-R1-3, TPL-241)', () => {

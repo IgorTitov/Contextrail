@@ -18,7 +18,9 @@ import { fileURLToPath } from 'node:url';
 
 import { buildExplainSection } from '../../scripts/agent-context.mjs';
 
-const __dirname = import.meta.dirname ?? (import.meta.url ? fileURLToPath(import.meta.url).replace(/[/\\][^/\\]+$/, '') : process.cwd());
+const __dirname =
+  import.meta.dirname ??
+  (import.meta.url ? fileURLToPath(import.meta.url).replace(/[/\\][^/\\]+$/, '') : process.cwd());
 const ROOT = resolve(__dirname, '..', '..');
 const SCRIPT = join(ROOT, 'scripts', 'agent-context.mjs');
 
@@ -35,19 +37,29 @@ function run(args) {
 describe('buildExplainSection (unit)', () => {
   it('heading is "## Why this brief contains what it contains"', () => {
     const r = buildExplainSection({
-      tier1Tokens: 100, tier2Tokens: 200, tier3Tokens: 150, tier4Tokens: 300,
-      tier2Dropped: false, tier3Dropped: false, radius: 'medium',
+      tier1Tokens: 100,
+      tier2Tokens: 200,
+      tier3Tokens: 150,
+      tier4Tokens: 300,
+      tier2Dropped: false,
+      tier3Dropped: false,
+      radius: 'medium',
     });
     assert.ok(
       r.includes('## Why this brief contains what it contains'),
-      `explain section must have correct heading; got:\n${r}`
+      `explain section must have correct heading; got:\n${r}`,
     );
   });
 
   it('all 4 tier names (Tier-1 through Tier-4) are present', () => {
     const r = buildExplainSection({
-      tier1Tokens: 111, tier2Tokens: 222, tier3Tokens: 333, tier4Tokens: 444,
-      tier2Dropped: false, tier3Dropped: false, radius: 'medium',
+      tier1Tokens: 111,
+      tier2Tokens: 222,
+      tier3Tokens: 333,
+      tier4Tokens: 444,
+      tier2Dropped: false,
+      tier3Dropped: false,
+      radius: 'medium',
     });
     assert.match(r, /Tier-1/, 'must mention Tier-1');
     assert.match(r, /Tier-2/, 'must mention Tier-2');
@@ -57,8 +69,13 @@ describe('buildExplainSection (unit)', () => {
 
   it('token counts appear for each tier', () => {
     const r = buildExplainSection({
-      tier1Tokens: 111, tier2Tokens: 222, tier3Tokens: 333, tier4Tokens: 444,
-      tier2Dropped: false, tier3Dropped: false, radius: 'medium',
+      tier1Tokens: 111,
+      tier2Tokens: 222,
+      tier3Tokens: 333,
+      tier4Tokens: 444,
+      tier2Dropped: false,
+      tier3Dropped: false,
+      radius: 'medium',
     });
     assert.match(r, /111/, 'tier1 token count must appear');
     assert.match(r, /222/, 'tier2 token count must appear');
@@ -68,23 +85,33 @@ describe('buildExplainSection (unit)', () => {
 
   it('tier3 line contains drop reason when tier3Dropped=true', () => {
     const r = buildExplainSection({
-      tier1Tokens: 500, tier2Tokens: 400, tier3Tokens: 0, tier4Tokens: 300,
-      tier2Dropped: false, tier3Dropped: true, radius: 'medium',
+      tier1Tokens: 500,
+      tier2Tokens: 400,
+      tier3Tokens: 0,
+      tier4Tokens: 300,
+      tier2Dropped: false,
+      tier3Dropped: true,
+      radius: 'medium',
     });
     const lines = r.split('\n');
-    const tier3Line = lines.find(l => /Tier-3/.test(l));
+    const tier3Line = lines.find((l) => /Tier-3/.test(l));
     assert.ok(tier3Line, 'must have a Tier-3 line');
     assert.match(
       tier3Line,
       /would have exceeded remaining budget|dropped|budget/i,
-      `Tier-3 line must mention drop reason; got: ${tier3Line}`
+      `Tier-3 line must mention drop reason; got: ${tier3Line}`,
     );
   });
 
   it('tier3 line contains radius when not dropped', () => {
     const r = buildExplainSection({
-      tier1Tokens: 100, tier2Tokens: 200, tier3Tokens: 150, tier4Tokens: 300,
-      tier2Dropped: false, tier3Dropped: false, radius: 'large',
+      tier1Tokens: 100,
+      tier2Tokens: 200,
+      tier3Tokens: 150,
+      tier4Tokens: 300,
+      tier2Dropped: false,
+      tier3Dropped: false,
+      radius: 'large',
     });
     assert.match(r, /radius=large/, 'tier3 line must show radius when not dropped');
   });
@@ -100,7 +127,7 @@ describe('--explain CLI flag', () => {
     const out = run([`--files=${AUTH_FILE}`, '--budget=16000']);
     assert.ok(
       !out.includes('## Why this brief contains what it contains'),
-      'explain section must NOT appear without --explain flag'
+      'explain section must NOT appear without --explain flag',
     );
     assert.ok(out.includes('## Token budget'), '## Token budget must still appear');
   });
@@ -114,7 +141,7 @@ describe('--explain CLI flag', () => {
     assert.ok(budgetIdx !== -1, '## Token budget must still be present');
     assert.ok(
       explainIdx < budgetIdx,
-      `explain section (at ${explainIdx}) must appear before ## Token budget (at ${budgetIdx})`
+      `explain section (at ${explainIdx}) must appear before ## Token budget (at ${budgetIdx})`,
     );
   });
 

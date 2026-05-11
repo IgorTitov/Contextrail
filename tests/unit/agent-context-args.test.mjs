@@ -41,8 +41,13 @@ describe('parseArgs', () => {
   });
 
   it('--files parses comma-separated list', () => {
-    const r = parseArgs(['--files=modules/auth/domain/session.mjs,modules/ai-chat/domain/chat.mjs']);
-    assert.deepEqual(r.files, ['modules/auth/domain/session.mjs', 'modules/ai-chat/domain/chat.mjs']);
+    const r = parseArgs([
+      '--files=modules/auth/domain/session.mjs,modules/ai-chat/domain/chat.mjs',
+    ]);
+    assert.deepEqual(r.files, [
+      'modules/auth/domain/session.mjs',
+      'modules/ai-chat/domain/chat.mjs',
+    ]);
   });
 
   it('--slice stored as string', () => {

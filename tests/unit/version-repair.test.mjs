@@ -201,10 +201,7 @@ describe('rewriteVersionField', () => {
 
 describe('gitCommitsForFile', () => {
   test('parses hash and date correctly', () => {
-    const runGitLines = () => [
-      'abc123def456 2026-05-03',
-      'ffffaaaa0000 2026-04-01',
-    ];
+    const runGitLines = () => ['abc123def456 2026-05-03', 'ffffaaaa0000 2026-04-01'];
     const result = gitCommitsForFile('foo.mjs', { runGitLines });
     assert.deepEqual(result, [
       { hash: 'abc123def456', date: '2026-05-03' },
@@ -263,9 +260,7 @@ describe('findLastContentChangeCommit', () => {
   });
 
   test('file creation commit (all + lines) treated as content change', () => {
-    const commits = [
-      { hash: 'creation-commit', date: '2026-04-01' },
-    ];
+    const commits = [{ hash: 'creation-commit', date: '2026-04-01' }];
     const runGitLines = () => commits.map((c) => `${c.hash} ${c.date}`);
     const runGitText = () =>
       `@@ -0,0 +1,9 @@\n+/* @HEADER\n+ * @version 0.7.1 | 2026-04-01\n+ * @purpose New file.\n+ */\n+export const x = 1;\n`;

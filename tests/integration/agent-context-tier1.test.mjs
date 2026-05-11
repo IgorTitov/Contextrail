@@ -13,7 +13,9 @@ import { execFileSync } from 'node:child_process';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const __dirname = import.meta.dirname ?? (import.meta.url ? fileURLToPath(import.meta.url).replace(/[/\\][^/\\]+$/, '') : process.cwd());
+const __dirname =
+  import.meta.dirname ??
+  (import.meta.url ? fileURLToPath(import.meta.url).replace(/[/\\][^/\\]+$/, '') : process.cwd());
 const ROOT = resolve(__dirname, '..', '..');
 const SCRIPT = join(ROOT, 'scripts', 'agent-context.mjs');
 
@@ -41,7 +43,10 @@ function runExpectFail(args) {
 describe('Tier-1 fragment selection', () => {
   it('auth module emits Core Infrastructure heading', () => {
     const out = run(['--files=modules/auth/domain/auth-state.mjs', '--budget=16000']);
-    assert.ok(out.includes('### Core Infrastructure'), 'should include Core Infrastructure heading');
+    assert.ok(
+      out.includes('### Core Infrastructure'),
+      'should include Core Infrastructure heading',
+    );
     assert.ok(out.includes('| auth |'), 'should include auth row');
   });
 
@@ -51,7 +56,10 @@ describe('Tier-1 fragment selection', () => {
   });
 
   it('multi-module includes both categories', () => {
-    const out = run(['--files=modules/auth/domain/auth-state.mjs,modules/ai-chat/domain/message-history.mjs', '--budget=16000']);
+    const out = run([
+      '--files=modules/auth/domain/auth-state.mjs,modules/ai-chat/domain/message-history.mjs',
+      '--budget=16000',
+    ]);
     assert.ok(out.includes('### Core Infrastructure'), 'should include Core Infrastructure');
     assert.ok(out.includes('### AI & Retrieval'), 'should include AI & Retrieval');
   });
@@ -63,7 +71,10 @@ describe('Tier-1 fragment selection', () => {
   });
 
   it('sections appear in SYSTEM_MAP source order', () => {
-    const out = run(['--files=modules/auth/domain/auth-state.mjs,modules/ai-chat/domain/message-history.mjs', '--budget=16000']);
+    const out = run([
+      '--files=modules/auth/domain/auth-state.mjs,modules/ai-chat/domain/message-history.mjs',
+      '--budget=16000',
+    ]);
     const coreIdx = out.indexOf('### Core Infrastructure');
     const aiIdx = out.indexOf('### AI & Retrieval');
     assert.ok(coreIdx < aiIdx, 'Core Infrastructure should appear before AI & Retrieval');
@@ -72,7 +83,10 @@ describe('Tier-1 fragment selection', () => {
   it('unknown module exits non-zero with clear error', () => {
     const r = runExpectFail(['--files=modules/nonexistent/foo.mjs', '--budget=16000']);
     assert.ok(r.status !== 0);
-    assert.ok(r.stderr.includes('not in SYSTEM_MAP') || r.stderr.includes('nonexistent'), `stderr: ${r.stderr}`);
+    assert.ok(
+      r.stderr.includes('not in SYSTEM_MAP') || r.stderr.includes('nonexistent'),
+      `stderr: ${r.stderr}`,
+    );
   });
 
   it('output has top-level heading', () => {

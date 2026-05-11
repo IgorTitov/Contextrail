@@ -73,11 +73,22 @@ describe('SLICE_ID_OVERRIDE_CATEGORIES', () => {
 
 describe('checkSliceIdUniqueness — no duplicate', () => {
   let dir;
-  before(() => { dir = makeTempRepo('no-dup'); });
-  after(() => { try { rmSync(dir, { recursive: true, force: true }); } catch { /* best-effort */ } });
+  before(() => {
+    dir = makeTempRepo('no-dup');
+  });
+  after(() => {
+    try {
+      rmSync(dir, { recursive: true, force: true });
+    } catch {
+      /* best-effort */
+    }
+  });
 
   test('returns ok when slice ID is not in history', async () => {
-    const result = await checkSliceIdUniqueness('TPL-999', { repoRoot: dir, coaDir: join(dir, '.coa') });
+    const result = await checkSliceIdUniqueness('TPL-999', {
+      repoRoot: dir,
+      coaDir: join(dir, '.coa'),
+    });
     assert.equal(result.ok, true);
     assert.equal(result.reason, 'no-duplicate');
   });
@@ -85,7 +96,10 @@ describe('checkSliceIdUniqueness — no duplicate', () => {
   test('returns ok for a chore commit with no slice ID', async () => {
     // This tests the caller; if sliceId is null, caller skips. But if somehow called with
     // a value not in history, it still returns ok.
-    const result = await checkSliceIdUniqueness('ZZZ-001', { repoRoot: dir, coaDir: join(dir, '.coa') });
+    const result = await checkSliceIdUniqueness('ZZZ-001', {
+      repoRoot: dir,
+      coaDir: join(dir, '.coa'),
+    });
     assert.equal(result.ok, true);
   });
 });
@@ -100,10 +114,19 @@ describe('checkSliceIdUniqueness — duplicate in history, no override', () => {
     dir = makeTempRepo('dup-no-ovr');
     commitWithSubject(dir, 'feat(auth): add token rotation (TPL-500)');
   });
-  after(() => { try { rmSync(dir, { recursive: true, force: true }); } catch { /* best-effort */ } });
+  after(() => {
+    try {
+      rmSync(dir, { recursive: true, force: true });
+    } catch {
+      /* best-effort */
+    }
+  });
 
   test('returns ok=false with duplicate-slice-id reason', async () => {
-    const result = await checkSliceIdUniqueness('TPL-500', { repoRoot: dir, coaDir: join(dir, '.coa') });
+    const result = await checkSliceIdUniqueness('TPL-500', {
+      repoRoot: dir,
+      coaDir: join(dir, '.coa'),
+    });
     assert.equal(result.ok, false);
     assert.equal(result.reason, 'duplicate-slice-id');
     assert.ok(result.duplicate, 'should include duplicate info');
@@ -112,7 +135,10 @@ describe('checkSliceIdUniqueness — duplicate in history, no override', () => {
   });
 
   test('does not confuse partial matches (TPL-5000 does not match TPL-500)', async () => {
-    const result = await checkSliceIdUniqueness('TPL-5000', { repoRoot: dir, coaDir: join(dir, '.coa') });
+    const result = await checkSliceIdUniqueness('TPL-5000', {
+      repoRoot: dir,
+      coaDir: join(dir, '.coa'),
+    });
     assert.equal(result.ok, true);
   });
 });
@@ -127,7 +153,13 @@ describe('checkSliceIdUniqueness — duplicate + valid override', () => {
     dir = makeTempRepo('dup-ovr-ok');
     commitWithSubject(dir, 'feat(state): observable reducer (TPL-600)');
   });
-  after(() => { try { rmSync(dir, { recursive: true, force: true }); } catch { /* best-effort */ } });
+  after(() => {
+    try {
+      rmSync(dir, { recursive: true, force: true });
+    } catch {
+      /* best-effort */
+    }
+  });
 
   test('accepts a fresh valid override and archives it', async () => {
     writeOverride(dir, {
@@ -136,14 +168,25 @@ describe('checkSliceIdUniqueness — duplicate + valid override', () => {
       reason: 'History restoration after ceremony failure',
       category: 'history-restoration',
     });
-    const result = await checkSliceIdUniqueness('TPL-600', { repoRoot: dir, coaDir: join(dir, '.coa') });
+    const result = await checkSliceIdUniqueness('TPL-600', {
+      repoRoot: dir,
+      coaDir: join(dir, '.coa'),
+    });
     assert.equal(result.ok, true);
     assert.equal(result.reason, 'override-accepted');
     // Override file should be deleted
-    assert.ok(!existsSync(join(dir, '.coa', 'slice-id-override.json')), 'override file should be deleted');
+    assert.ok(
+      !existsSync(join(dir, '.coa', 'slice-id-override.json')),
+      'override file should be deleted',
+    );
     // Log entry should exist
-    const logFiles = (await import('node:fs')).readdirSync(join(dir, '.coa', 'slice-id-override-log'));
-    assert.ok(logFiles.some(f => f.includes('TPL-600')), 'log entry should be created');
+    const logFiles = (await import('node:fs')).readdirSync(
+      join(dir, '.coa', 'slice-id-override-log'),
+    );
+    assert.ok(
+      logFiles.some((f) => f.includes('TPL-600')),
+      'log entry should be created',
+    );
   });
 });
 
@@ -157,7 +200,13 @@ describe('checkSliceIdUniqueness — duplicate + expired TTL', () => {
     dir = makeTempRepo('dup-ovr-ttl');
     commitWithSubject(dir, 'feat(cache): LRU eviction (TPL-700)');
   });
-  after(() => { try { rmSync(dir, { recursive: true, force: true }); } catch { /* best-effort */ } });
+  after(() => {
+    try {
+      rmSync(dir, { recursive: true, force: true });
+    } catch {
+      /* best-effort */
+    }
+  });
 
   test('rejects override with expired timestamp', async () => {
     const oldTs = new Date(Date.now() - 120_000).toISOString(); // 2 minutes ago
@@ -167,7 +216,10 @@ describe('checkSliceIdUniqueness — duplicate + expired TTL', () => {
       reason: 'Legitimate history restoration scenario',
       category: 'history-restoration',
     });
-    const result = await checkSliceIdUniqueness('TPL-700', { repoRoot: dir, coaDir: join(dir, '.coa') });
+    const result = await checkSliceIdUniqueness('TPL-700', {
+      repoRoot: dir,
+      coaDir: join(dir, '.coa'),
+    });
     assert.equal(result.ok, false);
     assert.equal(result.reason, 'duplicate-slice-id');
     assert.ok(result.overrideReason, 'should include override rejection reason');
@@ -185,7 +237,13 @@ describe('checkSliceIdUniqueness — duplicate + invalid category', () => {
     dir = makeTempRepo('dup-ovr-cat');
     commitWithSubject(dir, 'fix(event-bus): race condition (TPL-800)');
   });
-  after(() => { try { rmSync(dir, { recursive: true, force: true }); } catch { /* best-effort */ } });
+  after(() => {
+    try {
+      rmSync(dir, { recursive: true, force: true });
+    } catch {
+      /* best-effort */
+    }
+  });
 
   test('rejects override with invalid category', async () => {
     writeOverride(dir, {
@@ -194,7 +252,10 @@ describe('checkSliceIdUniqueness — duplicate + invalid category', () => {
       reason: 'Recovering from failed ceremony — need reuse',
       category: 'hotfix-trunk-blocked', // valid for r5 but not for slice-id override
     });
-    const result = await checkSliceIdUniqueness('TPL-800', { repoRoot: dir, coaDir: join(dir, '.coa') });
+    const result = await checkSliceIdUniqueness('TPL-800', {
+      repoRoot: dir,
+      coaDir: join(dir, '.coa'),
+    });
     assert.equal(result.ok, false);
     assert.equal(result.reason, 'duplicate-slice-id');
     assert.ok(result.overrideReason);

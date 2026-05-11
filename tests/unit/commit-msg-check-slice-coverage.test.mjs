@@ -23,11 +23,7 @@
 
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import {
-  mkdtempSync,
-  writeFileSync,
-  rmSync,
-} from 'node:fs';
+import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -114,10 +110,7 @@ describe('extractSliceIdFromHeader', () => {
   });
 
   test('extracts first ID when multiple IDs present (multi-slice decision: first wins)', () => {
-    assert.equal(
-      extractSliceIdFromHeader('feat: do thing (TPL-281, ZVX-050)'),
-      'TPL-281',
-    );
+    assert.equal(extractSliceIdFromHeader('feat: do thing (TPL-281, ZVX-050)'), 'TPL-281');
   });
 
   test('returns null when no work-item ID in header', () => {

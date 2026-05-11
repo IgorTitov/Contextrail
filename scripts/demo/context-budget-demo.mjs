@@ -272,15 +272,17 @@ function measureParallel() {
   }
 
   // Topological layers — agents per layer can all work in parallel
-  const layers = (graph.layers || []).map((layer, i) => ({
-    layer: i,
-    modules: layer.filter((name) => names.includes(name)),
-    count: layer.filter((name) => names.includes(name)).length,
-    note:
-      i === 0
-        ? 'Leaf modules — fully independent, zero coordination needed'
-        : `Depth ${i} — depends on layer ${i - 1} modules only`,
-  })).filter((layer) => layer.count > 0);
+  const layers = (graph.layers || [])
+    .map((layer, i) => ({
+      layer: i,
+      modules: layer.filter((name) => names.includes(name)),
+      count: layer.filter((name) => names.includes(name)).length,
+      note:
+        i === 0
+          ? 'Leaf modules — fully independent, zero coordination needed'
+          : `Depth ${i} — depends on layer ${i - 1} modules only`,
+    }))
+    .filter((layer) => layer.count > 0);
 
   return {
     scope: measurementScope(),

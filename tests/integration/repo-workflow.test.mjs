@@ -51,10 +51,7 @@ test('VS Code tasks still point at real package scripts', () => {
 });
 
 test('Claude settings use the portable Node hook launcher', () => {
-  const allHooks = [
-    ...(settings.hooks?.PreToolUse ?? []),
-    ...(settings.hooks?.PostToolUse ?? []),
-  ];
+  const allHooks = [...(settings.hooks?.PreToolUse ?? []), ...(settings.hooks?.PostToolUse ?? [])];
   const commands = allHooks.flatMap((entry) => (entry.hooks ?? []).map((hook) => hook.command));
   assert.ok(commands.length >= 2, `expected at least 2 hook commands, got ${commands.length}`);
   for (const command of commands) {

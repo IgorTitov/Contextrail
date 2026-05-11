@@ -82,10 +82,7 @@ export function validateSliceIdConfig(config) {
   }
   if (config.padding !== undefined) {
     if (!Number.isInteger(config.padding) || config.padding < 1 || config.padding > 6) {
-      throw new ConfigSchemaError(
-        '"padding" must be an integer between 1 and 6',
-        'padding',
-      );
+      throw new ConfigSchemaError('"padding" must be an integer between 1 and 6', 'padding');
     }
   }
 }
@@ -108,13 +105,13 @@ export function readSliceIdConfig(repoRoot) {
   if (!existsSync(configPath)) {
     throw new ConfigMissingError(
       `Slice ID config not found: ${configPath}\n` +
-      '\n' +
-      "This repository requires .coa/slice-id-config.json declaring its slice ID convention.\n" +
-      'Run:\n' +
-      '\n' +
-      '  node scripts/bootstrap.mjs --init-slice-config\n' +
-      '\n' +
-      'Or create the file manually — see docs/guides/slice-id-config.md for the full schema.',
+        '\n' +
+        'This repository requires .coa/slice-id-config.json declaring its slice ID convention.\n' +
+        'Run:\n' +
+        '\n' +
+        '  node scripts/bootstrap.mjs --init-slice-config\n' +
+        '\n' +
+        'Or create the file manually — see docs/guides/slice-id-config.md for the full schema.',
     );
   }
   let raw;

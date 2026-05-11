@@ -24,9 +24,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import {
-  mkdtempSync, mkdirSync, writeFileSync, rmSync, cpSync,
-} from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync, cpSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 
@@ -47,7 +45,11 @@ function runCheck(cwd, extraArgs = [], envOverrides = {}) {
     encoding: 'utf8',
   });
   let payload = null;
-  try { payload = JSON.parse(r.stdout || '{}'); } catch { /* leave null */ }
+  try {
+    payload = JSON.parse(r.stdout || '{}');
+  } catch {
+    /* leave null */
+  }
   return { code: r.status, stdout: r.stdout, stderr: r.stderr, payload };
 }
 
@@ -69,8 +71,14 @@ function makeTempWorkspace(suffix) {
   cpSync(LIB, join(dir, 'scripts', 'lib', 'hook-integrity.mjs'));
 
   // Write two mock hooks
-  writeFileSync(join(dir, '.githooks', 'pre-commit'), '#!/usr/bin/env bash\n# mock pre-commit\necho ok\n');
-  writeFileSync(join(dir, '.githooks', 'pre-push'), '#!/usr/bin/env bash\n# mock pre-push\necho ok\n');
+  writeFileSync(
+    join(dir, '.githooks', 'pre-commit'),
+    '#!/usr/bin/env bash\n# mock pre-commit\necho ok\n',
+  );
+  writeFileSync(
+    join(dir, '.githooks', 'pre-push'),
+    '#!/usr/bin/env bash\n# mock pre-push\necho ok\n',
+  );
 
   return dir;
 }
@@ -96,7 +104,11 @@ describe('hook-integrity-check integration', () => {
     try {
       generateRegistry(dir);
       const r = runCheck(dir);
-      assert.equal(r.code, 0, `Expected exit 0, got ${r.code}\nstdout: ${r.stdout}\nstderr: ${r.stderr}`);
+      assert.equal(
+        r.code,
+        0,
+        `Expected exit 0, got ${r.code}\nstdout: ${r.stdout}\nstderr: ${r.stderr}`,
+      );
       assert.equal(r.payload?.ok, true);
       assert.equal(r.payload?.mismatches?.length, 0);
       assert.equal(r.payload?.extras?.length, 0);
@@ -192,23 +204,14 @@ describe('hook-integrity-check integration', () => {
     const dir = makeTempWorkspace('update-op');
     try {
       // First: tamper, then update — registry should reflect current state
-      writeFileSync(
-        join(dir, '.githooks', 'pre-commit'),
-        '#!/usr/bin/env bash\n# v1\n',
-      );
-      writeFileSync(
-        join(dir, '.githooks', 'pre-push'),
-        '#!/usr/bin/env bash\n# v1\n',
-      );
+      writeFileSync(join(dir, '.githooks', 'pre-commit'), '#!/usr/bin/env bash\n# v1\n');
+      writeFileSync(join(dir, '.githooks', 'pre-push'), '#!/usr/bin/env bash\n# v1\n');
 
       // Generate initial registry
       generateRegistry(dir);
 
       // Tamper
-      writeFileSync(
-        join(dir, '.githooks', 'pre-commit'),
-        '#!/usr/bin/env bash\n# v2 CHANGED\n',
-      );
+      writeFileSync(join(dir, '.githooks', 'pre-commit'), '#!/usr/bin/env bash\n# v2 CHANGED\n');
 
       // Verify tamper is detected
       const r1 = runCheck(dir);
@@ -216,7 +219,11 @@ describe('hook-integrity-check integration', () => {
 
       // Update with operator flag — this legitimizes the change
       const update = runCheck(dir, ['--update'], { COA_OPERATOR: '1' });
-      assert.equal(update.code, 0, `--update should succeed, got: ${update.stdout} ${update.stderr}`);
+      assert.equal(
+        update.code,
+        0,
+        `--update should succeed, got: ${update.stdout} ${update.stderr}`,
+      );
       assert.equal(update.payload?.ok, true);
       assert.equal(update.payload?.action, 'updated');
 
@@ -238,7 +245,7 @@ describe('hook-integrity-check integration', () => {
       assert.equal(r.payload?.ok, false);
       assert.ok(
         r.payload?.error?.toLowerCase().includes('registry') ||
-        r.payload?.error?.toLowerCase().includes('fingerprint'),
+          r.payload?.error?.toLowerCase().includes('fingerprint'),
         `error should mention registry, got: ${r.payload?.error}`,
       );
     } finally {

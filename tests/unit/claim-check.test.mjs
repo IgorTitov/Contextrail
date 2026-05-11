@@ -380,11 +380,7 @@ describe('detectOverlaps()', () => {
 
   test('default behaviour unchanged when selfStagedFiles is omitted', () => {
     const claims = [makeClaim()]; // targets auth/public-api.mjs, action: extend
-    const overlaps = detectOverlaps(
-      claims,
-      ['modules/auth/public-api.mjs'],
-      'extend',
-    );
+    const overlaps = detectOverlaps(claims, ['modules/auth/public-api.mjs'], 'extend');
     assert.equal(overlaps.length, 1);
     assert.equal(overlaps[0].severity, 'advisory');
   });
@@ -401,7 +397,7 @@ describe('detectOverlaps()', () => {
     assert.equal(
       overlaps.length,
       0,
-      'committer\'s own claim must be treated as authorizing and excluded',
+      "committer's own claim must be treated as authorizing and excluded",
     );
   });
 
@@ -474,12 +470,7 @@ describe('detectOverlaps()', () => {
         ],
       }),
     ];
-    const overlaps = detectOverlaps(
-      claims,
-      ['pnpm-lock.yaml'],
-      'extend',
-      DEFAULT_PROTECTED_PATHS,
-    );
+    const overlaps = detectOverlaps(claims, ['pnpm-lock.yaml'], 'extend', DEFAULT_PROTECTED_PATHS);
     assert.equal(overlaps.length, 1);
     assert.equal(
       overlaps[0].severity,
@@ -1474,7 +1465,10 @@ describe('loadProtectedPaths()', () => {
 
   test('matchesProtectedPattern resolves the new wildcard entries', () => {
     assert.equal(matchesProtectedPattern('.claude/rules/development.md', '.claude/rules/*'), true);
-    assert.equal(matchesProtectedPattern('.claude/hooks/cockpit-agent-marker.mjs', '.claude/hooks/*'), true);
+    assert.equal(
+      matchesProtectedPattern('.claude/hooks/cockpit-agent-marker.mjs', '.claude/hooks/*'),
+      true,
+    );
     assert.equal(matchesProtectedPattern('.claude/CLAUDE.md', '.claude/CLAUDE.md'), true);
     assert.equal(matchesProtectedPattern('.claude/agents/foo.md', '.claude/rules/*'), false);
   });
@@ -2078,7 +2072,7 @@ describe('checkClaimAbandoned() — TPL-225 structured signals', () => {
     assert.equal(r.confidence, ABANDONED_CONFIDENCE.MEDIUM);
   });
 
-  test("alive signal beats abandoned signals (young claim with no git/stash matches still LOW)", () => {
+  test('alive signal beats abandoned signals (young claim with no git/stash matches still LOW)', () => {
     const r = checkClaimAbandoned({
       claim: oldClaim,
       gitCmd: silentGit,
@@ -2140,9 +2134,7 @@ describe('tryExtendClaim() — TPL-222', () => {
     created: '2026-04-27T20:00:00Z',
     expires: '2026-04-28T04:00:00Z',
     status: 'active',
-    targets: [
-      { path: 'scripts/coa-merge.mjs', action: 'modify', surface: 'shared-infra' },
-    ],
+    targets: [{ path: 'scripts/coa-merge.mjs', action: 'modify', surface: 'shared-infra' }],
     strategy: 'modify-in-place',
     dependsOn: [],
   };
@@ -2187,7 +2179,11 @@ describe('tryExtendClaim() — TPL-222', () => {
     assert.equal(r1.success, false);
     assert.match(r1.error, /caller must self-identify/);
 
-    const r2 = tryExtendClaim({ claim: baseClaim, callerAgent: undefined, addTargets: ['VERSION'] });
+    const r2 = tryExtendClaim({
+      claim: baseClaim,
+      callerAgent: undefined,
+      addTargets: ['VERSION'],
+    });
     assert.equal(r2.success, false);
     assert.match(r2.error, /self-identify/);
   });

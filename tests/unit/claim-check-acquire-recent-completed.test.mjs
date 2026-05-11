@@ -55,15 +55,11 @@ function writeClaim(claimsDir, claim) {
 }
 
 function runAcquire(claimsDir, args, envExtra = {}) {
-  return spawnSync(
-    process.execPath,
-    [claimCheckPath, '--acquire', ...args],
-    {
-      cwd: tmpdir(),
-      encoding: 'utf8',
-      env: makeIsolatedEnv(claimsDir, envExtra),
-    },
-  );
+  return spawnSync(process.execPath, [claimCheckPath, '--acquire', ...args], {
+    cwd: tmpdir(),
+    encoding: 'utf8',
+    env: makeIsolatedEnv(claimsDir, envExtra),
+  });
 }
 
 const baseAcquireArgs = [
@@ -77,8 +73,11 @@ describe('claim-check --acquire Layer 1.5 (recently-completed)', () => {
     const claimsDir = makeClaimsDir();
     try {
       const result = runAcquire(claimsDir, [...baseAcquireArgs, '--slice=FRESH-001']);
-      assert.equal(result.status, 0,
-        `expected exit 0, got ${result.status}\nstderr: ${result.stderr}`);
+      assert.equal(
+        result.status,
+        0,
+        `expected exit 0, got ${result.status}\nstderr: ${result.stderr}`,
+      );
     } finally {
       rmSync(claimsDir, { recursive: true, force: true });
     }
@@ -101,10 +100,14 @@ describe('claim-check --acquire Layer 1.5 (recently-completed)', () => {
       });
       const result = runAcquire(claimsDir, [...baseAcquireArgs, '--slice=BUSY-001']);
       assert.equal(result.status, 1, 'should refuse');
-      assert.ok(result.stderr.includes('slice-id-collision'),
-        `stderr should mention slice-id-collision: ${result.stderr}`);
-      assert.ok(result.stderr.includes('active claim'),
-        `should be the active-claim message, not Layer 1.5: ${result.stderr}`);
+      assert.ok(
+        result.stderr.includes('slice-id-collision'),
+        `stderr should mention slice-id-collision: ${result.stderr}`,
+      );
+      assert.ok(
+        result.stderr.includes('active claim'),
+        `should be the active-claim message, not Layer 1.5: ${result.stderr}`,
+      );
     } finally {
       rmSync(claimsDir, { recursive: true, force: true });
     }
@@ -129,10 +132,14 @@ describe('claim-check --acquire Layer 1.5 (recently-completed)', () => {
       });
       const result = runAcquire(claimsDir, [...baseAcquireArgs, '--slice=RACE-001']);
       assert.equal(result.status, 1, `should refuse, got ${result.status}: ${result.stderr}`);
-      assert.ok(result.stderr.includes('recently-completed'),
-        `stderr should mention recently-completed: ${result.stderr}`);
-      assert.ok(result.stderr.includes('RACE-001'),
-        `stderr should mention slice ID: ${result.stderr}`);
+      assert.ok(
+        result.stderr.includes('recently-completed'),
+        `stderr should mention recently-completed: ${result.stderr}`,
+      );
+      assert.ok(
+        result.stderr.includes('RACE-001'),
+        `stderr should mention slice ID: ${result.stderr}`,
+      );
     } finally {
       rmSync(claimsDir, { recursive: true, force: true });
     }
@@ -156,8 +163,11 @@ describe('claim-check --acquire Layer 1.5 (recently-completed)', () => {
         notes: '',
       });
       const result = runAcquire(claimsDir, [...baseAcquireArgs, '--slice=OLD-001']);
-      assert.equal(result.status, 0,
-        `should pass — completed_at outside window. stderr: ${result.stderr}`);
+      assert.equal(
+        result.status,
+        0,
+        `should pass — completed_at outside window. stderr: ${result.stderr}`,
+      );
     } finally {
       rmSync(claimsDir, { recursive: true, force: true });
     }
@@ -172,8 +182,11 @@ describe('claim-check --acquire Layer 1.5 (recently-completed)', () => {
     const claimsDir = makeClaimsDir();
     try {
       const result = runAcquire(claimsDir, [...baseAcquireArgs, '--slice=NOHIST-001']);
-      assert.equal(result.status, 0,
-        `with history check skipped and no claim, should succeed: ${result.stderr}`);
+      assert.equal(
+        result.status,
+        0,
+        `with history check skipped and no claim, should succeed: ${result.stderr}`,
+      );
     } finally {
       rmSync(claimsDir, { recursive: true, force: true });
     }
@@ -200,8 +213,11 @@ describe('claim-check --acquire Layer 1.5 (recently-completed)', () => {
         [...baseAcquireArgs, '--slice=BYPASS-001', '--allow-id-collision'],
         { COA_OPERATOR: '1' },
       );
-      assert.equal(result.status, 0,
-        `--allow-id-collision + COA_OPERATOR=1 should bypass: ${result.stderr}`);
+      assert.equal(
+        result.status,
+        0,
+        `--allow-id-collision + COA_OPERATOR=1 should bypass: ${result.stderr}`,
+      );
     } finally {
       rmSync(claimsDir, { recursive: true, force: true });
     }
@@ -223,13 +239,14 @@ describe('claim-check --acquire Layer 1.5 (recently-completed)', () => {
         dependsOn: [],
         notes: '',
       });
-      const result = runAcquire(
-        claimsDir,
-        [...baseAcquireArgs, '--slice=WIN-001'],
-        { CLAIM_ACQUIRE_RECENT_WINDOW_S: '10' },
+      const result = runAcquire(claimsDir, [...baseAcquireArgs, '--slice=WIN-001'], {
+        CLAIM_ACQUIRE_RECENT_WINDOW_S: '10',
+      });
+      assert.equal(
+        result.status,
+        0,
+        `with window=10s and completed 30s ago, should pass: ${result.stderr}`,
       );
-      assert.equal(result.status, 0,
-        `with window=10s and completed 30s ago, should pass: ${result.stderr}`);
     } finally {
       rmSync(claimsDir, { recursive: true, force: true });
     }
@@ -259,7 +276,11 @@ describe('claim-check --acquire Layer 1.5 (recently-completed)', () => {
       const lines = readFileSync(auditPath, 'utf8').trim().split('\n').filter(Boolean);
       const refuseEvents = lines
         .map((l) => {
-          try { return JSON.parse(l); } catch { return null; }
+          try {
+            return JSON.parse(l);
+          } catch {
+            return null;
+          }
         })
         .filter((e) => e && e.event === 'claim-acquire-recent-completed-refuse');
       assert.equal(refuseEvents.length, 1, 'one refuse event expected');

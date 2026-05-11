@@ -52,8 +52,20 @@ describe('parseAuditLog', () => {
     const dir = mkdtempSync(join(tmpdir(), 'ba-unit-'));
     try {
       const logPath = join(dir, 'commit-audit.log');
-      const r1 = { ts: '2026-05-04T10:00:00Z', phases: ['1.0', '2.5', '7'], skipped: [], skipReason: '', commitSha: 'abc123' };
-      const r2 = { ts: '2026-05-04T11:00:00Z', phases: ['1.0', '2.5', '7'], skipped: ['1', '2'], skipReason: '1,2', commitSha: 'def456' };
+      const r1 = {
+        ts: '2026-05-04T10:00:00Z',
+        phases: ['1.0', '2.5', '7'],
+        skipped: [],
+        skipReason: '',
+        commitSha: 'abc123',
+      };
+      const r2 = {
+        ts: '2026-05-04T11:00:00Z',
+        phases: ['1.0', '2.5', '7'],
+        skipped: ['1', '2'],
+        skipReason: '1,2',
+        commitSha: 'def456',
+      };
       writeFileSync(logPath, JSON.stringify(r1) + '\n' + JSON.stringify(r2) + '\n');
 
       const result = parseAuditLog(logPath);
@@ -70,7 +82,13 @@ describe('parseAuditLog', () => {
     const dir = mkdtempSync(join(tmpdir(), 'ba-unit-'));
     try {
       const logPath = join(dir, 'commit-audit.log');
-      const good = JSON.stringify({ ts: 't', phases: ['1.0'], skipped: [], skipReason: '', commitSha: 'sha1' });
+      const good = JSON.stringify({
+        ts: 't',
+        phases: ['1.0'],
+        skipped: [],
+        skipReason: '',
+        commitSha: 'sha1',
+      });
       writeFileSync(logPath, `${good}\nNOT_JSON\n{incomplete\n`);
 
       const result = parseAuditLog(logPath);
@@ -101,7 +119,13 @@ describe('parseAuditLog', () => {
     const dir = mkdtempSync(join(tmpdir(), 'ba-unit-'));
     try {
       const logPath = join(dir, 'commit-audit.log');
-      const good = JSON.stringify({ ts: 't', phases: ['7'], skipped: [], skipReason: '', commitSha: 'sha1' });
+      const good = JSON.stringify({
+        ts: 't',
+        phases: ['7'],
+        skipped: [],
+        skipReason: '',
+        commitSha: 'sha1',
+      });
       writeFileSync(logPath, `${good}\n\n\n`);
 
       const result = parseAuditLog(logPath);
@@ -207,7 +231,11 @@ describe('correlateCommitsToPhases', () => {
       { commitSha: 'null', phases: ['1.0', '2.5', '7'] },
     ];
     const { gaps } = correlateCommitsToPhases(commits, records);
-    assert.deepEqual(gaps, ['real'], 'records with null/string-null SHA must not match real commits');
+    assert.deepEqual(
+      gaps,
+      ['real'],
+      'records with null/string-null SHA must not match real commits',
+    );
   });
 
   it('uses the most recent record when multiple records share a SHA (last write wins)', () => {
@@ -243,7 +271,12 @@ describe('formatPhaseRecord', () => {
   });
 
   it('handles null commitSha', () => {
-    const line = formatPhaseRecord({ phases: ['1.0'], skipped: [], skipReason: '', commitSha: null });
+    const line = formatPhaseRecord({
+      phases: ['1.0'],
+      skipped: [],
+      skipReason: '',
+      commitSha: null,
+    });
     const obj = JSON.parse(line);
     assert.equal(obj.commitSha, null);
   });
@@ -270,8 +303,12 @@ describe('NON_SKIPPABLE_PHASES', () => {
   });
 
   it('is frozen (immutable)', () => {
-    assert.throws(() => {
-      NON_SKIPPABLE_PHASES.push('99');
-    }, TypeError, 'pushing to a frozen array should throw');
+    assert.throws(
+      () => {
+        NON_SKIPPABLE_PHASES.push('99');
+      },
+      TypeError,
+      'pushing to a frozen array should throw',
+    );
   });
 });

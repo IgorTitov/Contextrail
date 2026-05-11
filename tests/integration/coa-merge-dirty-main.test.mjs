@@ -37,9 +37,7 @@
 
 import { describe, test, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
-import {
-  mkdirSync, mkdtempSync, writeFileSync, rmSync, existsSync, readFileSync,
-} from 'node:fs';
+import { mkdirSync, mkdtempSync, writeFileSync, rmSync, existsSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -79,10 +77,7 @@ function createDirtyMainFixture(baseDir) {
 
   mkdirSync(join(mainRoot, '.claims'), { recursive: true });
   writeFileSync(join(mainRoot, 'VERSION'), '0.0.1\n');
-  writeFileSync(
-    join(mainRoot, 'CHANGELOG.md'),
-    '# Changelog\n\n## [Unreleased]\n\n- initial\n',
-  );
+  writeFileSync(join(mainRoot, 'CHANGELOG.md'), '# Changelog\n\n## [Unreleased]\n\n- initial\n');
   writeFileSync(
     join(mainRoot, 'package.json'),
     JSON.stringify({ name: 'tpl273-fixture', version: '0.0.1' }, null, 2) + '\n',
@@ -99,7 +94,11 @@ function createDirtyMainFixture(baseDir) {
   // TPL-304: step 0.5 requires a .coa-session in the tx-worktree.
   writeFileSync(
     join(txRoot, '.coa-session'),
-    JSON.stringify({ sessionName: 'tx-TPL-273-test', agent: 'test-tpl273-agent', created: new Date().toISOString() }) + '\n',
+    JSON.stringify({
+      sessionName: 'tx-TPL-273-test',
+      agent: 'test-tpl273-agent',
+      created: new Date().toISOString(),
+    }) + '\n',
   );
 
   // Populate [Unreleased] for coa-merge step 5 gate.
@@ -152,8 +151,11 @@ function createDirtyMainFixture(baseDir) {
 function subprocessEnv() {
   const env = { ...process.env };
   for (const key of [
-    'GIT_DIR', 'GIT_WORK_TREE', 'GIT_INDEX_FILE',
-    'GIT_OBJECT_DIRECTORY', 'GIT_ALTERNATE_OBJECT_DIRECTORIES',
+    'GIT_DIR',
+    'GIT_WORK_TREE',
+    'GIT_INDEX_FILE',
+    'GIT_OBJECT_DIRECTORY',
+    'GIT_ALTERNATE_OBJECT_DIRECTORIES',
   ]) {
     delete env[key];
   }
@@ -173,7 +175,11 @@ describe('coa-merge: step 9c dirty-main fallback (TPL-273)', () => {
 
   afterEach(() => {
     if (baseDir && existsSync(baseDir)) {
-      try { rmSync(baseDir, { recursive: true, force: true }); } catch { /* best effort */ }
+      try {
+        rmSync(baseDir, { recursive: true, force: true });
+      } catch {
+        /* best effort */
+      }
       baseDir = undefined;
     }
   });

@@ -216,7 +216,9 @@ export function mergingMarkerContent({ pid, branch, ts }) {
     throw new Error('mergingMarkerContent: pid must be a positive finite number');
   }
   if (!isTransportBranchName(branch)) {
-    throw new Error(`mergingMarkerContent: branch must be a transport-branch name, got "${branch}"`);
+    throw new Error(
+      `mergingMarkerContent: branch must be a transport-branch name, got "${branch}"`,
+    );
   }
   if (!Number.isFinite(ts) || ts <= 0) {
     throw new Error('mergingMarkerContent: ts must be a positive finite number');
@@ -380,9 +382,7 @@ export function isValidSliceId(id) {
  */
 export function transportBranchNameForSlice(id) {
   if (!isValidSliceId(id)) {
-    throw new Error(
-      `transportBranchNameForSlice: not a valid slice ID: ${JSON.stringify(id)}`,
-    );
+    throw new Error(`transportBranchNameForSlice: not a valid slice ID: ${JSON.stringify(id)}`);
   }
   return `tx-${id}`;
 }
@@ -448,7 +448,10 @@ export function parseWorktreeListPorcelain(output) {
   for (const raw of lines) {
     const line = raw.trim();
     if (line === '') {
-      if (current) { entries.push(current); current = null; }
+      if (current) {
+        entries.push(current);
+        current = null;
+      }
       continue;
     }
     if (line.startsWith('worktree ')) {
@@ -461,9 +464,7 @@ export function parseWorktreeListPorcelain(output) {
       current.head = line.slice('HEAD '.length);
     } else if (line.startsWith('branch ')) {
       const ref = line.slice('branch '.length);
-      current.branch = ref.startsWith('refs/heads/')
-        ? ref.slice('refs/heads/'.length)
-        : ref;
+      current.branch = ref.startsWith('refs/heads/') ? ref.slice('refs/heads/'.length) : ref;
     } else if (line === 'bare') {
       current.bare = true;
     }
@@ -485,9 +486,12 @@ export function parseWorktreeListPorcelain(output) {
  */
 export function findMainWorktree(worktreeListOutput, trunkName = 'main') {
   if (typeof trunkName !== 'string' || trunkName.length === 0) return null;
-  const entries = typeof worktreeListOutput === 'string'
-    ? parseWorktreeListPorcelain(worktreeListOutput)
-    : Array.isArray(worktreeListOutput) ? worktreeListOutput : [];
+  const entries =
+    typeof worktreeListOutput === 'string'
+      ? parseWorktreeListPorcelain(worktreeListOutput)
+      : Array.isArray(worktreeListOutput)
+        ? worktreeListOutput
+        : [];
   for (const entry of entries) {
     if (!entry || entry.bare) continue;
     if (entry.branch === trunkName) return entry;
@@ -543,16 +547,17 @@ export function classifyFfUpdateMethod({
  * straight into a shell and rerun coa-merge.
  */
 export function composeUpdateInsteadSetupHint(mainWorktreePath) {
-  const path = typeof mainWorktreePath === 'string' && mainWorktreePath.length > 0
-    ? mainWorktreePath
-    : '<main-worktree-path>';
+  const path =
+    typeof mainWorktreePath === 'string' && mainWorktreePath.length > 0
+      ? mainWorktreePath
+      : '<main-worktree-path>';
   return [
     'R2 transport-mode ff-update refuses: main worktree at',
     `  ${path}`,
     'has no `receive.denyCurrentBranch=updateInstead` setting.',
     '',
     'Without it, `git push` to the checked-out trunk would silently',
-    'leave the main worktree desync\'d (F12 incident shape).',
+    "leave the main worktree desync'd (F12 incident shape).",
     '',
     'One-time setup (run once per repo, then rerun coa-merge):',
     `  git -C ${path} config receive.denyCurrentBranch updateInstead`,

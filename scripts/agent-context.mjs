@@ -30,7 +30,8 @@ import {
   approximateTokenCount,
 } from './lib/module-work-surface.mjs';
 
-const __dirname = import.meta.dirname ?? fileURLToPath(import.meta.url).replace(/[/\\][^/\\]+$/, '');
+const __dirname =
+  import.meta.dirname ?? fileURLToPath(import.meta.url).replace(/[/\\][^/\\]+$/, '');
 const ROOT = resolve(__dirname, '..');
 
 const PROFILE_BUDGETS = { small: 12000, mid: 16000, frontier: 64000 };
@@ -76,7 +77,11 @@ export function parseArgs(argv) {
     } else if (arg.startsWith('--budget=')) {
       explicitBudget = parseInt(arg.slice('--budget='.length), 10);
     } else if (arg.startsWith('--files=')) {
-      files = arg.slice('--files='.length).split(',').map(f => f.trim()).filter(Boolean);
+      files = arg
+        .slice('--files='.length)
+        .split(',')
+        .map((f) => f.trim())
+        .filter(Boolean);
     } else if (arg.startsWith('--slice=')) {
       slice = arg.slice('--slice='.length);
     } else if (arg.startsWith('--out=')) {
@@ -84,7 +89,9 @@ export function parseArgs(argv) {
     } else if (arg.startsWith('--neighborhood-radius=')) {
       neighborhoodRadius = arg.slice('--neighborhood-radius='.length);
       if (!VALID_RADII.has(neighborhoodRadius)) {
-        throw new Error(`Invalid --neighborhood-radius: "${neighborhoodRadius}". Valid: ${[...VALID_RADII].join(', ')}`);
+        throw new Error(
+          `Invalid --neighborhood-radius: "${neighborhoodRadius}". Valid: ${[...VALID_RADII].join(', ')}`,
+        );
       }
     } else if (arg.startsWith('--format=')) {
       format = arg.slice('--format='.length);
@@ -112,7 +119,15 @@ export function parseArgs(argv) {
  * @param {boolean} opts.tier3Dropped
  * @param {string} [opts.radius='medium']
  */
-export function buildExplainSection({ tier1Tokens, tier2Tokens, tier3Tokens, tier4Tokens, tier2Dropped, tier3Dropped, radius = 'medium' }) {
+export function buildExplainSection({
+  tier1Tokens,
+  tier2Tokens,
+  tier3Tokens,
+  tier4Tokens,
+  tier2Dropped,
+  tier3Dropped,
+  radius = 'medium',
+}) {
   const t1line = `Tier-1 (architectural map): included — ${tier1Tokens} tokens; always included (architectural foundation)`;
   const t2line = tier2Dropped
     ? `Tier-2 (module manifests): partially or fully dropped — ${tier2Tokens} tokens; would have exceeded remaining budget`
@@ -172,7 +187,9 @@ export function uniqueModulesFromFiles(files) {
  */
 export function computeNeighborhood({ modules = [], radius = 'medium', repoRoot }) {
   if (!VALID_RADII.has(radius)) {
-    throw new Error(`Invalid --neighborhood-radius: "${radius}". Valid: ${[...VALID_RADII].join(', ')}`);
+    throw new Error(
+      `Invalid --neighborhood-radius: "${radius}". Valid: ${[...VALID_RADII].join(', ')}`,
+    );
   }
 
   const paths = new Set();
@@ -203,7 +220,7 @@ export function computeNeighborhood({ modules = [], radius = 'medium', repoRoot 
   }
 
   // Filter to only existing paths (skip missing sidecars)
-  const result = [...paths].filter(p => existsSync(join(repoRoot, p)));
+  const result = [...paths].filter((p) => existsSync(join(repoRoot, p)));
 
   // Stable sort
   result.sort();
@@ -341,7 +358,7 @@ export function resolveBudgetAllocation({ tier1Cost, tier2Cost, tier3Cost, tier4
   if (fixedCost > budget) {
     throw new Error(
       `Tier-1 + Tier-4 cost (${fixedCost} tokens) exceeds --budget (${budget} tokens). ` +
-      `Raise --budget or reduce --files to fix this.`
+        `Raise --budget or reduce --files to fix this.`,
     );
   }
 
@@ -462,7 +479,7 @@ function resolveArchSection(files, systemMapText) {
     .sort((a, b) => a[0] - b[0])
     .map(([, cat]) => cat);
 
-  return sortedCategories.map(cat => cat.content.trimEnd()).join('\n\n');
+  return sortedCategories.map((cat) => cat.content.trimEnd()).join('\n\n');
 }
 
 function emitTier1Brief({ files, budget, systemMapText, slice, repoRoot }) {
@@ -489,7 +506,9 @@ function emitTier1Brief({ files, budget, systemMapText, slice, repoRoot }) {
   const tier1Tokens = approximateTokenCount(prefixParts + '\n## Token budget\n');
 
   if (tier1Tokens > budget) {
-    process.stderr.write(`Error: Tier-1 output (${tier1Tokens} tokens) exceeds budget (${budget}). Tier-1 cannot be dropped.\n`);
+    process.stderr.write(
+      `Error: Tier-1 output (${tier1Tokens} tokens) exceeds budget (${budget}). Tier-1 cannot be dropped.\n`,
+    );
     process.exit(1);
   }
 
@@ -508,7 +527,7 @@ function emitTier1Brief({ files, budget, systemMapText, slice, repoRoot }) {
   if (tier1Tokens + tier4Tokens > budget) {
     process.stderr.write(
       `Error: Tier-1 + Tier-4 cost (${tier1Tokens + tier4Tokens} tokens) exceeds --budget (${budget} tokens). ` +
-      `Raise --budget or reduce --files to fix this.\n`
+        `Raise --budget or reduce --files to fix this.\n`,
     );
     process.exit(1);
   }
@@ -526,7 +545,15 @@ function emitTier1Brief({ files, budget, systemMapText, slice, repoRoot }) {
     ``,
   ].join('\n');
 
-  return prefixParts + '\n' + tier2EmptySection + tier3EmptySection + tier4Section + suggestedNextActionsSection + tokenBudgetSection;
+  return (
+    prefixParts +
+    '\n' +
+    tier2EmptySection +
+    tier3EmptySection +
+    tier4Section +
+    suggestedNextActionsSection +
+    tokenBudgetSection
+  );
 }
 
 /** Load manifest.json for a module; returns { path, content } or null if not found. */
@@ -650,7 +677,14 @@ function buildTier3Section({ modules, radius, repoRoot, remainingBudget }) {
  * Extracted from emitBrief to share computation between markdown and JSON paths.
  * Exits the process on budget violations (same behaviour as before).
  */
-function computeBriefComponents({ files, budget, systemMapText, slice, repoRoot, neighborhoodRadius = 'medium' }) {
+function computeBriefComponents({
+  files,
+  budget,
+  systemMapText,
+  slice,
+  repoRoot,
+  neighborhoodRadius = 'medium',
+}) {
   const archSection = resolveArchSection(files, systemMapText);
   const sliceLine = slice ? `**Slice:** ${slice}  \n` : '';
   const filesLine = `**Files:** ${files.join(', ')}  \n`;
@@ -671,7 +705,9 @@ function computeBriefComponents({ files, budget, systemMapText, slice, repoRoot,
   const tier1HeaderTokens = approximateTokenCount(prefixParts + '\n## Token budget\n');
 
   if (tier1HeaderTokens > budget) {
-    process.stderr.write(`Error: Tier-1 output (${tier1HeaderTokens} tokens) exceeds budget (${budget}). Tier-1 cannot be dropped.\n`);
+    process.stderr.write(
+      `Error: Tier-1 output (${tier1HeaderTokens} tokens) exceeds budget (${budget}). Tier-1 cannot be dropped.\n`,
+    );
     process.exit(1);
   }
 
@@ -687,7 +723,7 @@ function computeBriefComponents({ files, budget, systemMapText, slice, repoRoot,
   if (tier1HeaderTokens + tier4Tokens > budget) {
     process.stderr.write(
       `Error: Tier-1 + Tier-4 cost (${tier1HeaderTokens + tier4Tokens} tokens) exceeds --budget (${budget} tokens). ` +
-      `Raise --budget or reduce --files to fix this.\n`
+        `Raise --budget or reduce --files to fix this.\n`,
     );
     process.exit(1);
   }
@@ -696,24 +732,46 @@ function computeBriefComponents({ files, budget, systemMapText, slice, repoRoot,
 
   const remainingForTier2andTier3 = budget - tier1HeaderTokens - tier4Tokens;
 
-  const tier2Section = buildTier2Section({ modules, repoRoot, remainingBudget: remainingForTier2andTier3 });
+  const tier2Section = buildTier2Section({
+    modules,
+    repoRoot,
+    remainingBudget: remainingForTier2andTier3,
+  });
   const tier2ActualTokens = approximateTokenCount(tier2Section);
 
   const remainingForTier3 = remainingForTier2andTier3 - tier2ActualTokens;
-  const tier3Section = buildTier3Section({ modules, radius: neighborhoodRadius, repoRoot, remainingBudget: remainingForTier3 });
+  const tier3Section = buildTier3Section({
+    modules,
+    radius: neighborhoodRadius,
+    repoRoot,
+    remainingBudget: remainingForTier3,
+  });
   const tier3ActualTokens = approximateTokenCount(tier3Section);
 
   const tier2Full = buildTier2Section({ modules, repoRoot, remainingBudget: budget });
   const tier2FullTokens = approximateTokenCount(tier2Full);
-  const tier3Full = buildTier3Section({ modules, radius: neighborhoodRadius, repoRoot, remainingBudget: budget });
+  const tier3Full = buildTier3Section({
+    modules,
+    radius: neighborhoodRadius,
+    repoRoot,
+    remainingBudget: budget,
+  });
   const tier3FullTokens = approximateTokenCount(tier3Full);
 
   const tier2DropMatch = tier2Section.match(/\[truncated:\s*(\d+)\s*module/);
   const tier3DropMatch = tier3Section.match(/\[truncated:\s*(\d+)\s*sidecar/);
   const tier2DroppedBool = tier2FullTokens > 0 && tier2ActualTokens < tier2FullTokens;
   const tier3DroppedBool = tier3FullTokens > 0 && tier3ActualTokens < tier3FullTokens;
-  const tier2DroppedCount = tier2DropMatch ? parseInt(tier2DropMatch[1], 10) : (tier2DroppedBool ? 1 : 0);
-  const tier3DroppedCount = tier3DropMatch ? parseInt(tier3DropMatch[1], 10) : (tier3DroppedBool ? 1 : 0);
+  const tier2DroppedCount = tier2DropMatch
+    ? parseInt(tier2DropMatch[1], 10)
+    : tier2DroppedBool
+      ? 1
+      : 0;
+  const tier3DroppedCount = tier3DropMatch
+    ? parseInt(tier3DropMatch[1], 10)
+    : tier3DroppedBool
+      ? 1
+      : 0;
 
   const tier2DropLabel = tier2DroppedCount > 0 ? ` [truncated: ${tier2DroppedCount} dropped]` : '';
   const tier3DropLabel = tier3DroppedCount > 0 ? ` [truncated: ${tier3DroppedCount} dropped]` : '';
@@ -760,10 +818,32 @@ function computeBriefComponents({ files, budget, systemMapText, slice, repoRoot,
  * For non-module file lists, delegates to emitTier1Brief for byte-identical output.
  * Output is byte-identical to pre-TPL-295 when --explain and --format=json are not used.
  */
-function emitBrief({ files, budget, systemMapText, slice, repoRoot, neighborhoodRadius = 'medium' }) {
-  const c = computeBriefComponents({ files, budget, systemMapText, slice, repoRoot, neighborhoodRadius });
+function emitBrief({
+  files,
+  budget,
+  systemMapText,
+  slice,
+  repoRoot,
+  neighborhoodRadius = 'medium',
+}) {
+  const c = computeBriefComponents({
+    files,
+    budget,
+    systemMapText,
+    slice,
+    repoRoot,
+    neighborhoodRadius,
+  });
   // Assemble: # Slice context → How to read → Architectural map → Module manifests → Sidecar neighborhood → Touched files → Suggested next actions → Token budget
-  return c.prefixParts + '\n' + c.tier2Section + c.tier3Section + c.tier4Section + c.suggestedNextActionsSection + c.tokenBudgetSection;
+  return (
+    c.prefixParts +
+    '\n' +
+    c.tier2Section +
+    c.tier3Section +
+    c.tier4Section +
+    c.suggestedNextActionsSection +
+    c.tokenBudgetSection
+  );
 }
 
 /**
@@ -772,10 +852,24 @@ function emitBrief({ files, budget, systemMapText, slice, repoRoot, neighborhood
  */
 function buildJsonObject({ components, explain, profile }) {
   const {
-    prefixParts, tier1Tokens, tier2Section, tier2Tokens, tier2Dropped,
-    tier3Section, tier3Tokens, tier3Dropped, tier4Section, tier4Tokens,
-    totalTokens, tokenBudgetSection, suggestedNextActionsSection,
-    modules, neighborhoodRadius, budget, files, slice,
+    prefixParts,
+    tier1Tokens,
+    tier2Section,
+    tier2Tokens,
+    tier2Dropped,
+    tier3Section,
+    tier3Tokens,
+    tier3Dropped,
+    tier4Section,
+    tier4Tokens,
+    totalTokens,
+    tokenBudgetSection,
+    suggestedNextActionsSection,
+    modules,
+    neighborhoodRadius,
+    budget,
+    files,
+    slice,
   } = components;
 
   const headings = [
@@ -809,7 +903,15 @@ function buildJsonObject({ components, explain, profile }) {
   }
 
   const explainData = explain
-    ? buildExplainData({ tier1Tokens, tier2Tokens, tier3Tokens, tier4Tokens, tier2Dropped, tier3Dropped, radius: neighborhoodRadius })
+    ? buildExplainData({
+        tier1Tokens,
+        tier2Tokens,
+        tier3Tokens,
+        tier4Tokens,
+        tier2Dropped,
+        tier3Dropped,
+        radius: neighborhoodRadius,
+      })
     : null;
 
   return {
@@ -820,8 +922,17 @@ function buildJsonObject({ components, explain, profile }) {
     budget,
     tiers: {
       tier1: { tokens: tier1Tokens, content: prefixParts },
-      tier2: { tokens: tier2Tokens, content: tier2Section, dropped: tier2Dropped ? [{ reason: 'exceeded budget' }] : [] },
-      tier3: { tokens: tier3Tokens, content: tier3Section, radius: neighborhoodRadius, dropped: tier3Dropped ? [{ reason: 'exceeded budget' }] : [] },
+      tier2: {
+        tokens: tier2Tokens,
+        content: tier2Section,
+        dropped: tier2Dropped ? [{ reason: 'exceeded budget' }] : [],
+      },
+      tier3: {
+        tokens: tier3Tokens,
+        content: tier3Section,
+        radius: neighborhoodRadius,
+        dropped: tier3Dropped ? [{ reason: 'exceeded budget' }] : [],
+      },
       tier4: { tokens: tier4Tokens, files: tier4Files },
     },
     totalTokens,
@@ -831,21 +942,41 @@ function buildJsonObject({ components, explain, profile }) {
 }
 
 /** Build structured explain data object (used by --format=json --explain). */
-function buildExplainData({ tier1Tokens, tier2Tokens, tier3Tokens, tier4Tokens, tier2Dropped, tier3Dropped, radius }) {
+function buildExplainData({
+  tier1Tokens,
+  tier2Tokens,
+  tier3Tokens,
+  tier4Tokens,
+  tier2Dropped,
+  tier3Dropped,
+  radius,
+}) {
   return {
-    tier1: { status: 'included', tokens: tier1Tokens, reason: 'always included (architectural foundation)' },
+    tier1: {
+      status: 'included',
+      tokens: tier1Tokens,
+      reason: 'always included (architectural foundation)',
+    },
     tier2: {
       status: tier2Dropped ? 'partially dropped' : 'included',
       tokens: tier2Tokens,
-      reason: tier2Dropped ? 'would have exceeded remaining budget' : 'all module manifests fit within budget',
+      reason: tier2Dropped
+        ? 'would have exceeded remaining budget'
+        : 'all module manifests fit within budget',
     },
     tier3: {
       status: tier3Dropped ? 'dropped' : 'included',
       tokens: tier3Tokens,
       radius,
-      reason: tier3Dropped ? 'would have exceeded remaining budget by the allocated amount' : `radius=${radius}; all sidecars fit within budget`,
+      reason: tier3Dropped
+        ? 'would have exceeded remaining budget by the allocated amount'
+        : `radius=${radius}; all sidecars fit within budget`,
     },
-    tier4: { status: 'included', tokens: tier4Tokens, reason: 'always included (full source of touched files)' },
+    tier4: {
+      status: 'included',
+      tokens: tier4Tokens,
+      reason: 'always included (full source of touched files)',
+    },
   };
 }
 
@@ -882,7 +1013,15 @@ async function main() {
       const tier1Tokens = tier1Match ? parseInt(tier1Match[1], 10) : 0;
       const tier4Tokens = tier4Match ? parseInt(tier4Match[1], 10) : 0;
       const explainData = explain
-        ? buildExplainData({ tier1Tokens, tier2Tokens: 0, tier3Tokens: 0, tier4Tokens, tier2Dropped: false, tier3Dropped: false, radius: neighborhoodRadius })
+        ? buildExplainData({
+            tier1Tokens,
+            tier2Tokens: 0,
+            tier3Tokens: 0,
+            tier4Tokens,
+            tier2Dropped: false,
+            tier3Dropped: false,
+            radius: neighborhoodRadius,
+          })
         : null;
       const jsonObj = {
         version: 1,
@@ -898,23 +1037,36 @@ async function main() {
         },
         totalTokens,
         headings: [
-          '# Slice context', '## How to read this brief', '## Architectural map',
-          '## Module manifests', '## Sidecar neighborhood', '## Touched files (full source)',
-          '## Suggested next actions', '## Token budget',
+          '# Slice context',
+          '## How to read this brief',
+          '## Architectural map',
+          '## Module manifests',
+          '## Sidecar neighborhood',
+          '## Touched files (full source)',
+          '## Suggested next actions',
+          '## Token budget',
         ],
         explain: explainData,
       };
       output = JSON.stringify(jsonObj, null, 2);
     } else {
-      const components = computeBriefComponents({ files, budget, systemMapText, slice, repoRoot: ROOT, neighborhoodRadius });
+      const components = computeBriefComponents({
+        files,
+        budget,
+        systemMapText,
+        slice,
+        repoRoot: ROOT,
+        neighborhoodRadius,
+      });
       const jsonObj = buildJsonObject({ components, explain, profile });
       output = JSON.stringify(jsonObj, null, 2);
     }
   } else {
     // Markdown path (default) — byte-identical to pre-TPL-295 when --explain not set
-    const mdOutput = modules.length === 0
-      ? emitTier1Brief({ files, budget, systemMapText, slice, repoRoot: ROOT })
-      : emitBrief({ files, budget, systemMapText, slice, repoRoot: ROOT, neighborhoodRadius });
+    const mdOutput =
+      modules.length === 0
+        ? emitTier1Brief({ files, budget, systemMapText, slice, repoRoot: ROOT })
+        : emitBrief({ files, budget, systemMapText, slice, repoRoot: ROOT, neighborhoodRadius });
 
     if (explain) {
       // Extract tier costs from the token budget section to build explain section
@@ -926,11 +1078,18 @@ async function main() {
       const tier2Tokens = tier2Match ? parseInt(tier2Match[1], 10) : 0;
       const tier3Tokens = tier3Match ? parseInt(tier3Match[1], 10) : 0;
       const tier4Tokens = tier4Match ? parseInt(tier4Match[1], 10) : 0;
-      const tier2Dropped = mdOutput.includes('[truncated:') && /- Tier-2.*\[truncated:/.test(mdOutput);
-      const tier3Dropped = mdOutput.includes('[truncated:') && /- Tier-3.*\[truncated:/.test(mdOutput);
+      const tier2Dropped =
+        mdOutput.includes('[truncated:') && /- Tier-2.*\[truncated:/.test(mdOutput);
+      const tier3Dropped =
+        mdOutput.includes('[truncated:') && /- Tier-3.*\[truncated:/.test(mdOutput);
       const explainSection = buildExplainSection({
-        tier1Tokens, tier2Tokens, tier3Tokens, tier4Tokens,
-        tier2Dropped, tier3Dropped, radius: neighborhoodRadius,
+        tier1Tokens,
+        tier2Tokens,
+        tier3Tokens,
+        tier4Tokens,
+        tier2Dropped,
+        tier3Dropped,
+        radius: neighborhoodRadius,
       });
       // Insert explain section immediately before ## Token budget
       output = mdOutput.replace('\n## Token budget', '\n' + explainSection + '\n## Token budget');
@@ -947,12 +1106,14 @@ async function main() {
 }
 
 // Only run main() when invoked directly (not when imported by tests)
-const isMain = process.argv[1] &&
-  (process.argv[1].replace(/\\/g, '/') === import.meta.url.replace(/^file:\/\/\//i, '').replace(/\\/g, '/') ||
-   process.argv[1] === fileURLToPath(import.meta.url));
+const isMain =
+  process.argv[1] &&
+  (process.argv[1].replace(/\\/g, '/') ===
+    import.meta.url.replace(/^file:\/\/\//i, '').replace(/\\/g, '/') ||
+    process.argv[1] === fileURLToPath(import.meta.url));
 
 if (isMain) {
-  main().catch(e => {
+  main().catch((e) => {
     process.stderr.write(e.message + '\n');
     process.exit(1);
   });

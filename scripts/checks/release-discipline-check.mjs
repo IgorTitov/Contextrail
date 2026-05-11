@@ -78,7 +78,7 @@ if (workingVersion && headVersion) {
   ) {
     errors.push(
       `VERSION jump: ${headVersion} → ${workingVersion}. Expected ${expectedPatch} (patch), ${expectedMinor} (minor), or ${expectedMajor} (major). ` +
-      'Did you forget git pull --rebase? Or did you pre-pick a version number?',
+        'Did you forget git pull --rebase? Or did you pre-pick a version number?',
     );
   }
 }
@@ -101,7 +101,8 @@ if (workingVersion) {
       if (content && content !== '_Nothing yet._') {
         errors.push(
           '[Unreleased] has content that should be in a versioned section. Move entries to [' +
-          workingVersion + '] before committing.',
+            workingVersion +
+            '] before committing.',
         );
       }
     }

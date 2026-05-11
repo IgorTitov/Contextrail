@@ -16,12 +16,11 @@ import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 
-import {
-  resolveBudgetAllocation,
-  buildTier4Section,
-} from '../../scripts/agent-context.mjs';
+import { resolveBudgetAllocation, buildTier4Section } from '../../scripts/agent-context.mjs';
 
-const __dirname = import.meta.dirname ?? (import.meta.url ? fileURLToPath(import.meta.url).replace(/[/\\][^/\\]+$/, '') : process.cwd());
+const __dirname =
+  import.meta.dirname ??
+  (import.meta.url ? fileURLToPath(import.meta.url).replace(/[/\\][^/\\]+$/, '') : process.cwd());
 const ROOT = resolve(__dirname, '..', '..');
 
 // ---------------------------------------------------------------------------
@@ -54,7 +53,7 @@ describe('resolveBudgetAllocation', () => {
     // Check that droppedTier3Count or droppedTier2Count is > 0
     assert.ok(
       result.droppedTier2Count > 0 || result.droppedTier3Count > 0,
-      'at least one tier must be dropped when budget is tight'
+      'at least one tier must be dropped when budget is tight',
     );
     // Tier-3 must be fully dropped before tier-2 starts dropping
     // tier3 is dropped first (300 dropped), tier2 gets the 200 remaining
@@ -111,15 +110,16 @@ describe('resolveBudgetAllocation', () => {
 
   it('tier1 + tier4 over budget: throws error with "exceeds --budget"', () => {
     assert.throws(
-      () => resolveBudgetAllocation({
-        tier1Cost: 800,
-        tier2Cost: 100,
-        tier3Cost: 100,
-        tier4Cost: 800,
-        budget: 1000,
-      }),
+      () =>
+        resolveBudgetAllocation({
+          tier1Cost: 800,
+          tier2Cost: 100,
+          tier3Cost: 100,
+          tier4Cost: 800,
+          budget: 1000,
+        }),
       /exceeds --budget/i,
-      'must throw when tier1+tier4 exceeds budget'
+      'must throw when tier1+tier4 exceeds budget',
     );
   });
 
@@ -134,10 +134,14 @@ describe('resolveBudgetAllocation', () => {
     // All should fit comfortably
     assert.ok('droppedTier2Count' in result, 'result must have droppedTier2Count');
     assert.ok('droppedTier3Count' in result, 'result must have droppedTier3Count');
-    assert.ok('tier2Survivors' in result || 'remainingForTier2' in result || result !== null,
-      'result must have tier2 budget info');
-    assert.ok('tier3Survivors' in result || 'remainingForTier3' in result || result !== null,
-      'result must have tier3 budget info');
+    assert.ok(
+      'tier2Survivors' in result || 'remainingForTier2' in result || result !== null,
+      'result must have tier2 budget info',
+    );
+    assert.ok(
+      'tier3Survivors' in result || 'remainingForTier3' in result || result !== null,
+      'result must have tier3 budget info',
+    );
   });
 
   it('no truncation when budget fits exactly: all tiers present, no drops', () => {
@@ -208,7 +212,7 @@ describe('buildTier4Section', () => {
     assert.throws(
       () => buildTier4Section({ files: [missingPath], repoRoot: ROOT }),
       /not found|does not exist|ENOENT|missing/i,
-      'must throw clear error for missing file'
+      'must throw clear error for missing file',
     );
   });
 
@@ -216,7 +220,7 @@ describe('buildTier4Section', () => {
     const dir = mkdtempSync(join(tmpdir(), 'tpl293-'));
     const binPath = join(dir, 'image.bin');
     // Write a buffer with null bytes (definitive binary indicator)
-    writeFileSync(binPath, Buffer.from([0x00, 0x01, 0x02, 0xFF, 0xFE, 0x00, 0x42]));
+    writeFileSync(binPath, Buffer.from([0x00, 0x01, 0x02, 0xff, 0xfe, 0x00, 0x42]));
 
     const result = buildTier4Section({ files: [binPath], repoRoot: ROOT });
     assert.ok(result.includes('[binary file:'), 'must emit binary placeholder');

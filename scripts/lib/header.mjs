@@ -173,8 +173,7 @@ export const HEADER_EXEMPT_SUFFIXES = ['.help.md'];
  * (`clm-ex0001..3.json`, see EXAMPLE_CLAIM_ID_PREFIX in
  * scripts/checks/claim-check.mjs) are documentation and DO get sidecars.
  */
-const OPERATIONAL_CLAIM_PATTERN =
-  /^\.claims\/(clm-(?!ex)|teardown-stale-marker-)[^/]+\.json$/;
+const OPERATIONAL_CLAIM_PATTERN = /^\.claims\/(clm-(?!ex)|teardown-stale-marker-)[^/]+\.json$/;
 
 export function isHeaderExempt(file) {
   const posix = file.replaceAll('\\', '/');
@@ -204,7 +203,21 @@ export function commentStyle(file, currentText = '') {
   // Comment-unsafe formats (ADR-0009): sidecar-only, no inline header.
   // This check must come before path-based checks so JSON files inside
   // .githooks/ or other directories still get sidecar treatment.
-  if (['.json', '.svg', '.png', '.jpg', '.jpeg', '.gif', '.ico', '.woff', '.woff2', '.ttf', '.eot'].includes(ext)) {
+  if (
+    [
+      '.json',
+      '.svg',
+      '.png',
+      '.jpg',
+      '.jpeg',
+      '.gif',
+      '.ico',
+      '.woff',
+      '.woff2',
+      '.ttf',
+      '.eot',
+    ].includes(ext)
+  ) {
     return 'sidecar';
   }
 

@@ -25,9 +25,7 @@
 
 import { describe, test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
-import {
-  mkdtempSync, mkdirSync, writeFileSync, rmSync, existsSync,
-} from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -68,15 +66,22 @@ function writeActiveClaim(root, sliceId) {
   const claimsDir = join(root, '.claims');
   mkdirSync(claimsDir, { recursive: true });
   const id = `clm-ap-${sliceId.replace(/[^a-z0-9]/gi, '')}`;
-  writeFileSync(join(claimsDir, `${id}.json`), JSON.stringify({
-    id,
-    agent: 'test-agent',
-    slice: sliceId,
-    targets: [],
-    action: 'extend',
-    status: 'active',
-    createdAt: new Date().toISOString(),
-  }, null, 2) + '\n');
+  writeFileSync(
+    join(claimsDir, `${id}.json`),
+    JSON.stringify(
+      {
+        id,
+        agent: 'test-agent',
+        slice: sliceId,
+        targets: [],
+        action: 'extend',
+        status: 'active',
+        createdAt: new Date().toISOString(),
+      },
+      null,
+      2,
+    ) + '\n',
+  );
   return id;
 }
 
@@ -86,8 +91,16 @@ function writeActiveClaim(root, sliceId) {
 
 describe('autoPickNextSliceId: empty repo', () => {
   let root;
-  before(() => { root = makeRepo('t1'); });
-  after(() => { try { rmSync(root, { recursive: true, force: true }); } catch { /* best effort */ } });
+  before(() => {
+    root = makeRepo('t1');
+  });
+  after(() => {
+    try {
+      rmSync(root, { recursive: true, force: true });
+    } catch {
+      /* best effort */
+    }
+  });
 
   test('T1: picks PREFIX-001 when no history and no claims', () => {
     const id = autoPickNextSliceId(root, 'TST', join(root, '.claims'));
@@ -105,7 +118,13 @@ describe('autoPickNextSliceId: history scan', () => {
     root = makeRepo('t2');
     addCommit(root, 'feat(auth): implement login (TPL-100)');
   });
-  after(() => { try { rmSync(root, { recursive: true, force: true }); } catch { /* best effort */ } });
+  after(() => {
+    try {
+      rmSync(root, { recursive: true, force: true });
+    } catch {
+      /* best effort */
+    }
+  });
 
   test('T2: picks max+1 from history when no active claims', () => {
     const id = autoPickNextSliceId(root, 'TPL', join(root, '.claims'));
@@ -124,7 +143,13 @@ describe('autoPickNextSliceId: history + active claim', () => {
     addCommit(root, 'feat(auth): implement login (TPL-100)');
     writeActiveClaim(root, 'TPL-101');
   });
-  after(() => { try { rmSync(root, { recursive: true, force: true }); } catch { /* best effort */ } });
+  after(() => {
+    try {
+      rmSync(root, { recursive: true, force: true });
+    } catch {
+      /* best effort */
+    }
+  });
 
   test('T3: picks max(history,claims)+1 when active claim exists', () => {
     const id = autoPickNextSliceId(root, 'TPL', join(root, '.claims'));
@@ -148,7 +173,13 @@ describe('autoPickNextSliceId: retry on collision (race simulation)', () => {
   before(() => {
     root = makeRepo('t4');
   });
-  after(() => { try { rmSync(root, { recursive: true, force: true }); } catch { /* best effort */ } });
+  after(() => {
+    try {
+      rmSync(root, { recursive: true, force: true });
+    } catch {
+      /* best effort */
+    }
+  });
 
   test('T4: two sequential auto-picks see different IDs when claims accumulate', () => {
     // First auto-pick: no history, no claims → TST-001
@@ -175,11 +206,20 @@ describe('autoPickNextSliceId: prefix override', () => {
     root = makeRepo('t5');
     // Config declares prefix 'TPL'; detectDefaultPrefix reads config, not git history
     mkdirSync(join(root, '.coa'), { recursive: true });
-    writeFileSync(join(root, '.coa', 'slice-id-config.json'), JSON.stringify({ prefix: 'TPL' }, null, 2) + 
-'', 'utf8');
+    writeFileSync(
+      join(root, '.coa', 'slice-id-config.json'),
+      JSON.stringify({ prefix: 'TPL' }, null, 2) + '',
+      'utf8',
+    );
     addCommit(root, 'feat: initial (TPL-100)');
   });
-  after(() => { try { rmSync(root, { recursive: true, force: true }); } catch { /* best effort */ } });
+  after(() => {
+    try {
+      rmSync(root, { recursive: true, force: true });
+    } catch {
+      /* best effort */
+    }
+  });
 
   test('T5: --auto-pick-prefix=AIC overrides config TPL prefix', () => {
     // Config declares TPL; detectDefaultPrefix reads from config
@@ -200,7 +240,10 @@ describe('autoPickNextSliceId: prefix override', () => {
     });
     assert.strictEqual(exitCode, 0, `runCreate failed: ${result?.error}`);
     assert.ok(result.autoPicked, 'result must have autoPicked field');
-    assert.ok(result.autoPicked.startsWith('AIC-'), `expected AIC- prefix, got ${result.autoPicked}`);
+    assert.ok(
+      result.autoPicked.startsWith('AIC-'),
+      `expected AIC- prefix, got ${result.autoPicked}`,
+    );
   });
 });
 
@@ -210,8 +253,16 @@ describe('autoPickNextSliceId: prefix override', () => {
 
 describe('runCreate: --slice + --auto-pick conflict', () => {
   let root;
-  before(() => { root = makeRepo('t6'); });
-  after(() => { try { rmSync(root, { recursive: true, force: true }); } catch { /* best effort */ } });
+  before(() => {
+    root = makeRepo('t6');
+  });
+  after(() => {
+    try {
+      rmSync(root, { recursive: true, force: true });
+    } catch {
+      /* best effort */
+    }
+  });
 
   test('T6: refused when both --slice and --auto-pick are set', () => {
     const { exitCode, result } = runCreate(root, {
@@ -234,8 +285,16 @@ describe('runCreate: --slice + --auto-pick conflict', () => {
 
 describe('runCreate: auto-pick stdout announcement', () => {
   let root;
-  before(() => { root = makeRepo('t7'); });
-  after(() => { try { rmSync(root, { recursive: true, force: true }); } catch { /* best effort */ } });
+  before(() => {
+    root = makeRepo('t7');
+  });
+  after(() => {
+    try {
+      rmSync(root, { recursive: true, force: true });
+    } catch {
+      /* best effort */
+    }
+  });
 
   test('T7: result.autoPicked is set when auto-pick mode fires', () => {
     const { exitCode, result } = runCreate(root, {
@@ -285,7 +344,10 @@ describe('runCreate: auto-pick stdout announcement', () => {
     });
     assert.strictEqual(exitCode, 0, `runCreate failed: ${result?.error}`);
     assert.ok(result.autoPicked, 'result.autoPicked must be set for default create');
-    assert.ok(result.autoPicked.startsWith('DEF-'), `expected DEF- prefix, got ${result.autoPicked}`);
+    assert.ok(
+      result.autoPicked.startsWith('DEF-'),
+      `expected DEF- prefix, got ${result.autoPicked}`,
+    );
   });
 });
 
@@ -300,7 +362,13 @@ describe('autoPickNextSliceId: anomaly threshold guard', () => {
     // git history: TST-164
     addCommit(root, 'feat(auth): something (TST-164)');
   });
-  after(() => { try { rmSync(root, { recursive: true, force: true }); } catch { /* best effort */ } });
+  after(() => {
+    try {
+      rmSync(root, { recursive: true, force: true });
+    } catch {
+      /* best effort */
+    }
+  });
 
   test('T8a: gap within threshold (claim=214, git=164, diff=50) accepts', () => {
     // claimMaxN = gitLogMaxN + ANOMALY_THRESHOLD → exactly at boundary (not over)
@@ -318,7 +386,10 @@ describe('autoPickNextSliceId: anomaly threshold guard', () => {
       (err) => {
         assert.ok(err.anomaly === true, 'err.anomaly must be true');
         assert.ok(err.message.includes('auto-pick refused'), `unexpected message: ${err.message}`);
-        assert.ok(err.message.includes('TST-999'), `message must include claim max: ${err.message}`);
+        assert.ok(
+          err.message.includes('TST-999'),
+          `message must include claim max: ${err.message}`,
+        );
         return true;
       },
     );

@@ -27,8 +27,12 @@ test('MouseCollector collects samples on mousemove', () => {
   const origDocument = globalThis.document;
 
   globalThis.document = {
-    addEventListener(event, handler) { listeners[event] = handler; },
-    removeEventListener(event) { delete listeners[event]; },
+    addEventListener(event, handler) {
+      listeners[event] = handler;
+    },
+    removeEventListener(event) {
+      delete listeners[event];
+    },
     hidden: false,
   };
   globalThis.window = globalThis.window || {};
@@ -70,8 +74,12 @@ test('MouseCollector start/stop lifecycle', () => {
   const origDocument = globalThis.document;
 
   globalThis.document = {
-    addEventListener(event, handler) { listeners[event] = handler; },
-    removeEventListener(event) { delete listeners[event]; },
+    addEventListener(event, handler) {
+      listeners[event] = handler;
+    },
+    removeEventListener(event) {
+      delete listeners[event];
+    },
     hidden: false,
   };
 
@@ -99,8 +107,12 @@ test('MouseCollector destroy flushes remaining samples', () => {
   const origDocument = globalThis.document;
 
   globalThis.document = {
-    addEventListener(event, handler) { listeners[event] = handler; },
-    removeEventListener(event) { delete listeners[event]; },
+    addEventListener(event, handler) {
+      listeners[event] = handler;
+    },
+    removeEventListener(event) {
+      delete listeners[event];
+    },
     hidden: false,
   };
   globalThis.window = globalThis.window || {};
@@ -138,8 +150,12 @@ test('MouseCollector reduces sample rate when page not focused', () => {
   const origDocument = globalThis.document;
 
   const doc = {
-    addEventListener(event, handler) { listeners[event] = handler; },
-    removeEventListener(event) { delete listeners[event]; },
+    addEventListener(event, handler) {
+      listeners[event] = handler;
+    },
+    removeEventListener(event) {
+      delete listeners[event];
+    },
     hidden: false,
   };
   globalThis.document = doc;

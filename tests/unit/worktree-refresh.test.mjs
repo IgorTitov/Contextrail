@@ -24,13 +24,19 @@ import {
 describe('parseHunkHeader', () => {
   test('parses standard "@@ -A,B +C,D @@" form', () => {
     assert.deepEqual(parseHunkHeader('@@ -1,5 +1,5 @@'), {
-      oldStart: 1, oldCount: 5, newStart: 1, newCount: 5,
+      oldStart: 1,
+      oldCount: 5,
+      newStart: 1,
+      newCount: 5,
     });
   });
 
   test('parses single-line "@@ -A +B @@" form (count defaults to 1)', () => {
     assert.deepEqual(parseHunkHeader('@@ -2 +2 @@'), {
-      oldStart: 2, oldCount: 1, newStart: 2, newCount: 1,
+      oldStart: 2,
+      oldCount: 1,
+      newStart: 2,
+      newCount: 1,
     });
   });
 
@@ -258,11 +264,7 @@ describe('classifyDiff — has-logic verdicts (must preserve)', () => {
   });
 
   test('mode-change diff → has-logic', () => {
-    const diff = [
-      'diff --git a/run.sh b/run.sh',
-      'old mode 100644',
-      'new mode 100755',
-    ].join('\n');
+    const diff = ['diff --git a/run.sh b/run.sh', 'old mode 100644', 'new mode 100755'].join('\n');
     assert.equal(classifyDiff(diff), 'has-logic');
   });
 
@@ -346,10 +348,7 @@ describe('classifyDiff — boundary behavior', () => {
   });
 
   test('non-empty diff with no hunks (metadata only) → has-logic', () => {
-    const diff = [
-      'diff --git a/foo.mjs b/foo.mjs',
-      'index aaaa..bbbb 100644',
-    ].join('\n');
+    const diff = ['diff --git a/foo.mjs b/foo.mjs', 'index aaaa..bbbb 100644'].join('\n');
     assert.equal(classifyDiff(diff), 'has-logic');
   });
 

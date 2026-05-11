@@ -15,7 +15,9 @@ import { execFileSync } from 'node:child_process';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const __dirname = import.meta.dirname ?? (import.meta.url ? fileURLToPath(import.meta.url).replace(/[/\\][^/\\]+$/, '') : process.cwd());
+const __dirname =
+  import.meta.dirname ??
+  (import.meta.url ? fileURLToPath(import.meta.url).replace(/[/\\][^/\\]+$/, '') : process.cwd());
 const ROOT = resolve(__dirname, '..', '..');
 const SCRIPT = join(ROOT, 'scripts', 'agent-context.mjs');
 
@@ -42,7 +44,10 @@ describe('Tier-2 module manifests', () => {
 
   it('single module: auth manifest.json included under ### auth/manifest.json', () => {
     const out = run(['--files=modules/auth/domain/auth-state.mjs', '--budget=16000']);
-    assert.ok(out.includes('### modules/auth/manifest.json'), 'auth manifest sub-heading must be present');
+    assert.ok(
+      out.includes('### modules/auth/manifest.json'),
+      'auth manifest sub-heading must be present',
+    );
     assert.ok(out.includes('"name": "auth"'), 'manifest content must appear');
   });
 
@@ -50,7 +55,7 @@ describe('Tier-2 module manifests', () => {
     const out = run(['--files=modules/auth/domain/auth-state.mjs', '--budget=16000']);
     assert.ok(
       out.includes('### modules/auth/public-api.mjs') || out.includes('### modules/auth/index.mjs'),
-      'public-api or index sub-heading must be present'
+      'public-api or index sub-heading must be present',
     );
   });
 
@@ -69,7 +74,10 @@ describe('Tier-2 module manifests', () => {
       '--budget=32000',
     ]);
     assert.ok(out.includes('### modules/auth/manifest.json'), 'auth manifest must be present');
-    assert.ok(out.includes('### modules/ai-chat/manifest.json'), 'ai-chat manifest must be present');
+    assert.ok(
+      out.includes('### modules/ai-chat/manifest.json'),
+      'ai-chat manifest must be present',
+    );
   });
 
   it('two-module brief: both public-APIs present', () => {
@@ -79,11 +87,12 @@ describe('Tier-2 module manifests', () => {
     ]);
     assert.ok(
       out.includes('### modules/auth/public-api.mjs') || out.includes('### modules/auth/index.mjs'),
-      'auth public-api must be present'
+      'auth public-api must be present',
     );
     assert.ok(
-      out.includes('### modules/ai-chat/public-api.mjs') || out.includes('### modules/ai-chat/index.mjs'),
-      'ai-chat public-api must be present'
+      out.includes('### modules/ai-chat/public-api.mjs') ||
+        out.includes('### modules/ai-chat/index.mjs'),
+      'ai-chat public-api must be present',
     );
   });
 
@@ -115,10 +124,16 @@ describe('Tier-2 module manifests', () => {
     // Tier-2 (## Module manifests) must not include apps/ headings
     const tier2Start = out.indexOf('## Module manifests');
     const tier2End = out.indexOf('\n## ', tier2Start + 1);
-    const tier2Section = tier2Start !== -1 && tier2End !== -1
-      ? out.slice(tier2Start, tier2End)
-      : (tier2Start !== -1 ? out.slice(tier2Start) : '');
-    assert.ok(!tier2Section.includes('### apps/'), 'apps/ file must not appear as a Tier-2 sub-heading');
+    const tier2Section =
+      tier2Start !== -1 && tier2End !== -1
+        ? out.slice(tier2Start, tier2End)
+        : tier2Start !== -1
+          ? out.slice(tier2Start)
+          : '';
+    assert.ok(
+      !tier2Section.includes('### apps/'),
+      'apps/ file must not appear as a Tier-2 sub-heading',
+    );
   });
 
   it('budget drop: tight budget causes [truncated] marker with Tier-1 still present', () => {
@@ -141,7 +156,10 @@ describe('Tier-2 module manifests', () => {
     ]);
 
     assert.ok(tightOut.includes('## Architectural map'), 'Tier-1 must be present in tight budget');
-    assert.ok(tightOut.includes('[truncated'), '[truncated] marker must appear when budget is tight');
+    assert.ok(
+      tightOut.includes('[truncated'),
+      '[truncated] marker must appear when budget is tight',
+    );
   });
 
   it('budget drop: Tier-1 remains even when Tier-2 manifests are dropped', () => {
@@ -172,7 +190,10 @@ describe('Tier-2 module manifests', () => {
 
   it('Tier-1 regression: auth brief still contains Core Infrastructure heading', () => {
     const out = run(['--files=modules/auth/domain/auth-state.mjs', '--budget=16000']);
-    assert.ok(out.includes('### Core Infrastructure'), 'Tier-1 Core Infrastructure heading must still appear');
+    assert.ok(
+      out.includes('### Core Infrastructure'),
+      'Tier-1 Core Infrastructure heading must still appear',
+    );
   });
 
   it('Tier-1 regression: brief still has ## Token budget footer', () => {

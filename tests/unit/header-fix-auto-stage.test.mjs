@@ -58,19 +58,22 @@ function createTempRepo(label) {
   writeFileSync(join(dir, 'VERSION'), '0.7.62\n');
 
   // A slim-header JS file with a stale @version that eager stamping will update.
-  writeFileSync(join(dir, 'sample.mjs'), [
-    '/* @HEADER',
-    ' * @version 0.1.0 | 2026-01-01',
-    ' * @purpose TPL-261 cascade-leak regression fixture.',
-    ' * @sidecar sample.mjs.header.md',
-    ' * @layer util | @hex _none_ | @ctx _none_',
-    ' * @public false',
-    ' * @edit rewrite-ok',
-    ' */',
-    '',
-    'export const x = 1;',
-    '',
-  ].join('\n'));
+  writeFileSync(
+    join(dir, 'sample.mjs'),
+    [
+      '/* @HEADER',
+      ' * @version 0.1.0 | 2026-01-01',
+      ' * @purpose TPL-261 cascade-leak regression fixture.',
+      ' * @sidecar sample.mjs.header.md',
+      ' * @layer util | @hex _none_ | @ctx _none_',
+      ' * @public false',
+      ' * @edit rewrite-ok',
+      ' */',
+      '',
+      'export const x = 1;',
+      '',
+    ].join('\n'),
+  );
 
   git(dir, ['add', 'VERSION', 'sample.mjs']);
   git(dir, ['commit', '-m', 'init', '--quiet']);
@@ -97,7 +100,11 @@ describe('header-fix --use-current-version auto-stage — TPL-261', () => {
         { cwd: dir, env, encoding: 'utf8', stdio: 'pipe' },
       );
 
-      assert.equal(out.status, 0, `header-fix exited with ${out.status}:\n${out.stderr}\n${out.stdout}`);
+      assert.equal(
+        out.status,
+        0,
+        `header-fix exited with ${out.status}:\n${out.stderr}\n${out.stdout}`,
+      );
 
       const json = JSON.parse(out.stdout);
       assert.equal(json.ok, true, 'header-fix must report ok:true');
@@ -112,7 +119,10 @@ describe('header-fix --use-current-version auto-stage — TPL-261', () => {
       // index — it was auto-staged even though COA_PRE_COMMIT was unset.
       const staged = git(dir, ['diff', '--cached', '--name-only']);
       assert.ok(
-        staged.trim().split('\n').some((f) => f === 'sample.mjs'),
+        staged
+          .trim()
+          .split('\n')
+          .some((f) => f === 'sample.mjs'),
         `expected sample.mjs to be staged in git index, got staged files: "${staged.trim()}"`,
       );
     } finally {
@@ -132,7 +142,11 @@ describe('header-fix --use-current-version auto-stage — TPL-261', () => {
         { cwd: dir, env, encoding: 'utf8', stdio: 'pipe' },
       );
 
-      assert.equal(out.status, 0, `header-fix exited with ${out.status}:\n${out.stderr}\n${out.stdout}`);
+      assert.equal(
+        out.status,
+        0,
+        `header-fix exited with ${out.status}:\n${out.stderr}\n${out.stdout}`,
+      );
 
       const json = JSON.parse(out.stdout);
       assert.equal(json.ok, true);
@@ -146,7 +160,10 @@ describe('header-fix --use-current-version auto-stage — TPL-261', () => {
       // File was staged.
       const staged = git(dir, ['diff', '--cached', '--name-only']);
       assert.ok(
-        staged.trim().split('\n').some((f) => f === 'sample.mjs'),
+        staged
+          .trim()
+          .split('\n')
+          .some((f) => f === 'sample.mjs'),
         `expected sample.mjs to be staged, got: "${staged.trim()}"`,
       );
     } finally {
@@ -163,11 +180,12 @@ describe('header-fix --use-current-version auto-stage — TPL-261', () => {
       delete env.COA_PRE_COMMIT;
 
       // Run without --use-current-version — this is the normal manual invocation.
-      const out = spawnSync(
-        process.execPath,
-        [HEADER_FIX, '--all', '--json'],
-        { cwd: dir, env, encoding: 'utf8', stdio: 'pipe' },
-      );
+      const out = spawnSync(process.execPath, [HEADER_FIX, '--all', '--json'], {
+        cwd: dir,
+        env,
+        encoding: 'utf8',
+        stdio: 'pipe',
+      });
 
       assert.equal(out.status, 0, `header-fix failed: ${out.stderr}`);
 

@@ -226,8 +226,14 @@ test('validateAgentProfiles rejects duplicate profile names', () => {
 
 test('validateCapabilityTiers accepts allowed tiers on roles and skills', () => {
   const contract = {
-    roles: [{ name: 'r1', capabilityTier: 'frontier' }, { name: 'r2', capabilityTier: 'any' }],
-    skills: [{ name: 's1', capabilityTier: 'mid' }, { name: 's2', capabilityTier: 'small' }],
+    roles: [
+      { name: 'r1', capabilityTier: 'frontier' },
+      { name: 'r2', capabilityTier: 'any' },
+    ],
+    skills: [
+      { name: 's1', capabilityTier: 'mid' },
+      { name: 's2', capabilityTier: 'small' },
+    ],
   };
   assert.deepEqual(collectTierErrors(contract), []);
 });

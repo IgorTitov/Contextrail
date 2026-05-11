@@ -51,13 +51,15 @@ export function safeTxtName(name) {
  * lowercased, dash-collapsed).
  */
 export function safeZipName(name) {
-  return String(name || 'repo')
-    .replace(/^@/, '')
-    .replace(/\//g, '-')
-    .replace(/[^a-zA-Z0-9_.-]+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '')
-    .toLowerCase() || 'repo';
+  return (
+    String(name || 'repo')
+      .replace(/^@/, '')
+      .replace(/\//g, '-')
+      .replace(/[^a-zA-Z0-9_.-]+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '')
+      .toLowerCase() || 'repo'
+  );
 }
 
 /**
@@ -79,8 +81,12 @@ export function parseChangelogVersions(changelogText) {
  * Compare two semver-ish strings. Returns -1 / 0 / 1.
  */
 export function compareVersions(a, b) {
-  const pa = String(a).split('.').map((n) => Number(n) || 0);
-  const pb = String(b).split('.').map((n) => Number(n) || 0);
+  const pa = String(a)
+    .split('.')
+    .map((n) => Number(n) || 0);
+  const pb = String(b)
+    .split('.')
+    .map((n) => Number(n) || 0);
   for (let i = 0; i < 3; i++) {
     const x = pa[i] || 0;
     const y = pb[i] || 0;
@@ -189,7 +195,10 @@ function parseArgs(argv = process.argv.slice(2)) {
   }
   return {
     has: (k) => map.has(k),
-    get: (k) => { const v = map.get(k); return v === true ? undefined : v; },
+    get: (k) => {
+      const v = map.get(k);
+      return v === true ? undefined : v;
+    },
   };
 }
 
@@ -225,29 +234,42 @@ function main() {
   });
 
   if (wantJson) {
-    console.log(JSON.stringify({
-      kind: 'snapshot-coverage-check',
-      ok,
-      generatedAt: new Date().toISOString(),
-      mode: sinceRef ? `since=${sinceRef}` : 'full',
-      checked: versionsToCheck.length,
-      gaps,
-      errors,
-    }, null, 2));
+    console.log(
+      JSON.stringify(
+        {
+          kind: 'snapshot-coverage-check',
+          ok,
+          generatedAt: new Date().toISOString(),
+          mode: sinceRef ? `since=${sinceRef}` : 'full',
+          checked: versionsToCheck.length,
+          gaps,
+          errors,
+        },
+        null,
+        2,
+      ),
+    );
   } else {
-    console.log(`snapshot-coverage-check: ${ok ? 'OK' : 'FAIL'} (${versionsToCheck.length} version(s) checked)`);
+    console.log(
+      `snapshot-coverage-check: ${ok ? 'OK' : 'FAIL'} (${versionsToCheck.length} version(s) checked)`,
+    );
     if (!ok) {
       console.log(`  ${gaps.length} version(s) missing snapshot artifacts:`);
       for (const e of errors) console.log(`  - ${e}`);
       console.log('');
-      console.log('  This usually means a commit bypassed coa-merge (e.g. `git commit --no-verify`).');
-      console.log('  Recovery: check out the commit at the missing version and run `pnpm mergezip`,');
-      console.log('  or accept the gap with `git push --no-verify` if you understand the consequences.');
+      console.log(
+        '  This usually means a commit bypassed coa-merge (e.g. `git commit --no-verify`).',
+      );
+      console.log(
+        '  Recovery: check out the commit at the missing version and run `pnpm mergezip`,',
+      );
+      console.log(
+        '  or accept the gap with `git push --no-verify` if you understand the consequences.',
+      );
     }
   }
   process.exit(ok ? 0 : 1);
 }
 
-const isDirectRun = process.argv[1]
-  && process.argv[1].endsWith('snapshot-coverage-check.mjs');
+const isDirectRun = process.argv[1] && process.argv[1].endsWith('snapshot-coverage-check.mjs');
 if (isDirectRun) main();

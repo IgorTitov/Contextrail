@@ -25,9 +25,7 @@
 
 import { describe, test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
-import {
-  mkdtempSync, writeFileSync, existsSync, rmSync,
-} from 'node:fs';
+import { mkdtempSync, writeFileSync, existsSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, basename } from 'node:path';
 import { safeGit, safeGitSpawn } from '../_setup/safe-git.mjs';
@@ -89,7 +87,9 @@ describe('TPL-285 Case 1: --teardown of merged branch deletes worktree dir and b
     safeGitSpawn(root, ['checkout', 'main']);
   });
 
-  after(() => { if (root) rmSync(root, { recursive: true, force: true }); });
+  after(() => {
+    if (root) rmSync(root, { recursive: true, force: true });
+  });
 
   test('worktree dir is gone after teardown', () => {
     const { exitCode, result } = runTeardown(root, { sessionName: branch, silent: true });
@@ -135,7 +135,9 @@ describe('TPL-285 Case 2: --teardown of unmerged branch preserves branch ref wit
     safeGitSpawn(root, ['checkout', 'main']);
   });
 
-  after(() => { if (root) rmSync(root, { recursive: true, force: true }); });
+  after(() => {
+    if (root) rmSync(root, { recursive: true, force: true });
+  });
 
   test('teardown exits 0 even for unmerged branch (no hard failure)', () => {
     const { exitCode } = runTeardown(root, { sessionName: branch, silent: true });
@@ -173,8 +175,12 @@ describe('TPL-285 Case 2: --teardown of unmerged branch preserves branch ref wit
 describe('TPL-285 Case 3: --teardown on non-existent worktree returns error', () => {
   let root;
 
-  before(() => { root = createBaseRepo('c3'); });
-  after(() => { if (root) rmSync(root, { recursive: true, force: true }); });
+  before(() => {
+    root = createBaseRepo('c3');
+  });
+  after(() => {
+    if (root) rmSync(root, { recursive: true, force: true });
+  });
 
   test('exitCode is 1 and error message mentions not found', () => {
     const { exitCode, result } = runTeardown(root, {
@@ -203,12 +209,14 @@ describe('TPL-285 Case 4: --teardown of detached-HEAD worktree — no branch ref
     safeGitSpawn(root, ['worktree', 'add', '--detach', wtPath, 'main']);
   });
 
-  after(() => { if (root) rmSync(root, { recursive: true, force: true }); });
+  after(() => {
+    if (root) rmSync(root, { recursive: true, force: true });
+  });
 
   test('teardown of detached-HEAD worktree exits 0', () => {
     // Use basename of wtPath as the session name since there is no branch.
     const { exitCode, result } = runTeardown(root, {
-      sessionName: wtPath,  // full path — resolveWorktreePath accepts it
+      sessionName: wtPath, // full path — resolveWorktreePath accepts it
       silent: true,
     });
     assert.equal(exitCode, 0, `expected ok; got: ${JSON.stringify(result)}`);

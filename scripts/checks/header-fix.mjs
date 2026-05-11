@@ -65,12 +65,12 @@ const { filter: scopeFilter, isScoped } = resolveScope(args.get('--scope'));
 if (!fromPreCommit && !changedOnly && !isScoped && !sinceRef && !allFlag && !filesFromArg) {
   console.error(
     'header-fix: manual run requires one of --scope=<dir> | --changed | --since=<ref> | --files-from=<path|-> | --all.\n' +
-    'Running without a selector in a parallel session can overwrite other sessions\' files.\n' +
-    'Use: node scripts/checks/header-fix.mjs --scope=apps/my-app\n' +
-    'Or:  node scripts/checks/header-fix.mjs --changed\n' +
-    'Or:  node scripts/checks/header-fix.mjs --since=HEAD\n' +
-    'Or:  node scripts/checks/header-fix.mjs --files-from=- (read paths from stdin)\n' +
-    'Or:  node scripts/checks/header-fix.mjs --all   (explicit global refactor only)',
+      "Running without a selector in a parallel session can overwrite other sessions' files.\n" +
+      'Use: node scripts/checks/header-fix.mjs --scope=apps/my-app\n' +
+      'Or:  node scripts/checks/header-fix.mjs --changed\n' +
+      'Or:  node scripts/checks/header-fix.mjs --since=HEAD\n' +
+      'Or:  node scripts/checks/header-fix.mjs --files-from=- (read paths from stdin)\n' +
+      'Or:  node scripts/checks/header-fix.mjs --all   (explicit global refactor only)',
   );
   process.exit(1);
 }
@@ -167,9 +167,10 @@ async function main() {
         const parsedVersionOnly = parsed.version
           ? String(parsed.version).split('|')[0].trim()
           : null;
-        const stampedVersion = (!useCurrentVersion && lazyStamp && parsedVersionOnly)
-          ? parsedVersionOnly
-          : repoVersionStamp;
+        const stampedVersion =
+          !useCurrentVersion && lazyStamp && parsedVersionOnly
+            ? parsedVersionOnly
+            : repoVersionStamp;
         const slimData = {
           version: stampedVersion,
           purpose: parsed.purpose,

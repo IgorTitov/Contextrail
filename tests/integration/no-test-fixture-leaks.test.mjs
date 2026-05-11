@@ -52,13 +52,13 @@ const FIXTURE_AGENTS = [
 // Slice ID prefixes and patterns that only appear in test fixture claims.
 // These match the dynamic IDs used by integration tests (timestamp-suffixed).
 const FIXTURE_SLICE_PATTERNS = [
-  /^CWALOCK-/i,       // coa-worktree-slice-id-lock (Template)
-  /^C4LOCK-/i,        // coa-worktree-slice-id-lock (Zvenix variant)
-  /^C4RACE-/i,        // coa-worktree-slice-id-race
-  /^TST-/,            // generic test prefix (not a real project prefix)
-  /^FST-/,            // coa-worktree-fail-stop test prefix
+  /^CWALOCK-/i, // coa-worktree-slice-id-lock (Template)
+  /^C4LOCK-/i, // coa-worktree-slice-id-lock (Zvenix variant)
+  /^C4RACE-/i, // coa-worktree-slice-id-race
+  /^TST-/, // generic test prefix (not a real project prefix)
+  /^FST-/, // coa-worktree-fail-stop test prefix
   /^FIXTURE-/i,
-  /^ZVX-CWA-FIXTURE$/i,  // claims-worktree-aware test
+  /^ZVX-CWA-FIXTURE$/i, // claims-worktree-aware test
 ];
 
 // ---------------------------------------------------------------------------
@@ -117,7 +117,12 @@ describe('R1.3 meta-test — no test fixture residue in .claims/', () => {
       if (!parsed) continue;
       if (parsed.status === 'expired' || parsed.status === 'completed') continue;
       if (isFixtureAgentClaim(parsed) || isFixtureSliceClaim(parsed)) {
-        leaks.push({ file, sliceId: parsed.sliceId ?? parsed.slice_id, agent: parsed.agent, status: parsed.status });
+        leaks.push({
+          file,
+          sliceId: parsed.sliceId ?? parsed.slice_id,
+          agent: parsed.agent,
+          status: parsed.status,
+        });
       }
     }
 
@@ -125,8 +130,10 @@ describe('R1.3 meta-test — no test fixture residue in .claims/', () => {
       leaks,
       [],
       `Fixture claim residue detected in .claims/. These files were created during tests but not cleaned up:\n` +
-      leaks.map((l) => `  ${l.file} (sliceId=${l.sliceId}, agent=${l.agent}, status=${l.status})`).join('\n') +
-      '\n\nEnsure test after() hooks run correctly and clean up claim files. See ADR-0052.',
+        leaks
+          .map((l) => `  ${l.file} (sliceId=${l.sliceId}, agent=${l.agent}, status=${l.status})`)
+          .join('\n') +
+        '\n\nEnsure test after() hooks run correctly and clean up claim files. See ADR-0052.',
     );
   });
 

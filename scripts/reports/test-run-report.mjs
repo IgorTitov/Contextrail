@@ -130,7 +130,9 @@ async function main() {
         runner: 'node:test',
       });
       appendFileSync(path.join(REPORT_DIR, 'green-history.jsonl'), greenEntry + '\n', 'utf8');
-    } catch { /* skip if git or VERSION not available */ }
+    } catch {
+      /* skip if git or VERSION not available */
+    }
   }
 
   const hasTestResults = summaryReport.totalTests > 0;

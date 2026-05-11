@@ -20,9 +20,7 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import {
-  mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync,
-} from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { safeGit } from '../_setup/safe-git.mjs';
@@ -75,14 +73,23 @@ describe('per-file-version-semantics: last-content-change invariant (CG-H2-1)', 
   test('--use-current-version stamps A (changed) but leaves B (unchanged) unmodified in its commit blob', () => {
     const repo = setupRepo('cg-h2-1');
     try {
-      writeFileSync(join(repo, 'scripts', 'a.mjs'), slimFile('a.mjs', '0.1.0', 'export const v = 1;'));
-      writeFileSync(join(repo, 'scripts', 'b.mjs'), slimFile('b.mjs', '0.1.0', 'export const v = 1;'));
+      writeFileSync(
+        join(repo, 'scripts', 'a.mjs'),
+        slimFile('a.mjs', '0.1.0', 'export const v = 1;'),
+      );
+      writeFileSync(
+        join(repo, 'scripts', 'b.mjs'),
+        slimFile('b.mjs', '0.1.0', 'export const v = 1;'),
+      );
       safeGit(repo, 'add -A', { stdio: 'pipe' });
       safeGit(repo, 'commit -m "init" --quiet', { stdio: 'pipe' });
 
       // Bump VERSION and edit only a.mjs body.
       writeFileSync(join(repo, 'VERSION'), '0.2.0\n');
-      writeFileSync(join(repo, 'scripts', 'a.mjs'), slimFile('a.mjs', '0.1.0', 'export const v = 2;'));
+      writeFileSync(
+        join(repo, 'scripts', 'a.mjs'),
+        slimFile('a.mjs', '0.1.0', 'export const v = 2;'),
+      );
       safeGit(repo, 'add VERSION scripts/a.mjs', { stdio: 'pipe' });
 
       // Simulate Phase 5 with --use-current-version.
@@ -99,9 +106,14 @@ describe('per-file-version-semantics: last-content-change invariant (CG-H2-1)', 
       // b.mjs is NOT in the --since=HEAD scope — must be byte-identical to HEAD.
       const bOnDisk = readFileSync(join(repo, 'scripts', 'b.mjs'), 'utf8');
       const bAtHead = safeGit(repo, 'show HEAD:scripts/b.mjs', {
-        encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'],
+        encoding: 'utf8',
+        stdio: ['pipe', 'pipe', 'pipe'],
       });
-      assert.equal(bOnDisk, bAtHead, 'b.mjs must remain byte-identical to HEAD (not in changed set)');
+      assert.equal(
+        bOnDisk,
+        bAtHead,
+        'b.mjs must remain byte-identical to HEAD (not in changed set)',
+      );
     } finally {
       rmSync(repo, { recursive: true, force: true });
     }
@@ -117,8 +129,14 @@ describe('per-file-version-semantics: working-tree convergence after commit (TPL
     const repo = setupRepo('convergence');
     try {
       // Scaffold: two slim-header files + hooks pointing to the real scripts.
-      writeFileSync(join(repo, 'scripts', 'a.mjs'), slimFile('a.mjs', '0.1.0', 'export const v = 1;'));
-      writeFileSync(join(repo, 'scripts', 'b.mjs'), slimFile('b.mjs', '0.1.0', 'export const v = 1;'));
+      writeFileSync(
+        join(repo, 'scripts', 'a.mjs'),
+        slimFile('a.mjs', '0.1.0', 'export const v = 1;'),
+      );
+      writeFileSync(
+        join(repo, 'scripts', 'b.mjs'),
+        slimFile('b.mjs', '0.1.0', 'export const v = 1;'),
+      );
 
       // Install the real pre-commit and post-commit hooks so the git commit
       // invokes them. We copy the hook bodies and point them at REPO_ROOT's
@@ -143,14 +161,19 @@ describe('per-file-version-semantics: working-tree convergence after commit (TPL
       writeFileSync(join(repo, '.git', 'hooks', 'pre-commit'), preCommitBody, { mode: 0o755 });
 
       // Post-commit is a no-op (TPL-246).
-      writeFileSync(join(repo, '.git', 'hooks', 'post-commit'), '#!/usr/bin/env bash\nexit 0\n', { mode: 0o755 });
+      writeFileSync(join(repo, '.git', 'hooks', 'post-commit'), '#!/usr/bin/env bash\nexit 0\n', {
+        mode: 0o755,
+      });
 
       safeGit(repo, 'add -A', { stdio: 'pipe' });
       safeGit(repo, 'commit -m "init" --quiet', { stdio: 'pipe' });
 
       // Simulate a ceremony: bump VERSION + edit a.mjs body, stage both.
       writeFileSync(join(repo, 'VERSION'), '0.2.0\n');
-      writeFileSync(join(repo, 'scripts', 'a.mjs'), slimFile('a.mjs', '0.1.0', 'export const v = 99;'));
+      writeFileSync(
+        join(repo, 'scripts', 'a.mjs'),
+        slimFile('a.mjs', '0.1.0', 'export const v = 99;'),
+      );
       safeGit(repo, 'add VERSION scripts/a.mjs', { stdio: 'pipe' });
 
       // Commit triggers the pre-commit hook which stamps + re-stages.
@@ -158,17 +181,15 @@ describe('per-file-version-semantics: working-tree convergence after commit (TPL
 
       // Working tree MUST be clean after the commit.
       const status = safeGit(repo, 'status --porcelain', {
-        encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'],
+        encoding: 'utf8',
+        stdio: ['pipe', 'pipe', 'pipe'],
       });
-      assert.equal(
-        status.trim(),
-        '',
-        `Expected empty git status after commit; got:\n${status}`,
-      );
+      assert.equal(status.trim(), '', `Expected empty git status after commit; got:\n${status}`);
 
       // And a.mjs in HEAD should carry @version 0.2.0.
       const aInHead = safeGit(repo, 'show HEAD:scripts/a.mjs', {
-        encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'],
+        encoding: 'utf8',
+        stdio: ['pipe', 'pipe', 'pipe'],
       });
       assert.match(aInHead, /@version 0\.2\.0/, 'a.mjs in HEAD commit should have @version 0.2.0');
     } finally {
@@ -179,19 +200,33 @@ describe('per-file-version-semantics: working-tree convergence after commit (TPL
   test('--use-current-version result: useCurrentVersion flag is true in JSON output', () => {
     const repo = setupRepo('json-flag');
     try {
-      writeFileSync(join(repo, 'scripts', 'a.mjs'), slimFile('a.mjs', '0.1.0', 'export const v = 1;'));
+      writeFileSync(
+        join(repo, 'scripts', 'a.mjs'),
+        slimFile('a.mjs', '0.1.0', 'export const v = 1;'),
+      );
       safeGit(repo, 'add -A', { stdio: 'pipe' });
       safeGit(repo, 'commit -m "init" --quiet', { stdio: 'pipe' });
 
       writeFileSync(join(repo, 'VERSION'), '0.2.0\n');
-      writeFileSync(join(repo, 'scripts', 'a.mjs'), slimFile('a.mjs', '0.1.0', 'export const v = 2;'));
+      writeFileSync(
+        join(repo, 'scripts', 'a.mjs'),
+        slimFile('a.mjs', '0.1.0', 'export const v = 2;'),
+      );
       safeGit(repo, 'add VERSION scripts/a.mjs', { stdio: 'pipe' });
 
       const result = runHeaderFix(repo, ['--since=HEAD', '--use-current-version', '--json']);
       assert.equal(result.status, 0);
       const json = JSON.parse(result.stdout);
-      assert.equal(json.data.useCurrentVersion, true, 'JSON output should report useCurrentVersion: true');
-      assert.equal(json.data.lazyStamp, false, 'lazyStamp should be false when --use-current-version is used alone');
+      assert.equal(
+        json.data.useCurrentVersion,
+        true,
+        'JSON output should report useCurrentVersion: true',
+      );
+      assert.equal(
+        json.data.lazyStamp,
+        false,
+        'lazyStamp should be false when --use-current-version is used alone',
+      );
     } finally {
       rmSync(repo, { recursive: true, force: true });
     }

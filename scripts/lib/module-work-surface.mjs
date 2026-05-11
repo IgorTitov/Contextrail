@@ -138,10 +138,12 @@ export function pickRepresentativeTest(moduleName, testDirsAbs) {
       .filter((n) => n.endsWith('.test.mjs') || n.endsWith('.test.js'))
       .filter((n) => {
         const lower = n.toLowerCase();
-        return lower === `${prefix}.test.mjs`
-          || lower === `${prefix}.test.js`
-          || lower.startsWith(`${prefix}-`)
-          || lower.startsWith(`${prefix}.`);
+        return (
+          lower === `${prefix}.test.mjs` ||
+          lower === `${prefix}.test.js` ||
+          lower.startsWith(`${prefix}-`) ||
+          lower.startsWith(`${prefix}.`)
+        );
       })
       .sort();
     if (matches.length > 0) return join(dirAbs, matches[0]);
@@ -201,7 +203,8 @@ export function measureWorkSurface(moduleName, opts = {}) {
   // Sidecars for the two public surface files.
   const sidecarPaths = [];
   if (existsSync(manifestAbs + '.header.md')) sidecarPaths.push(manifestAbs + '.header.md');
-  if (publicApiAbs && existsSync(publicApiAbs + '.header.md')) sidecarPaths.push(publicApiAbs + '.header.md');
+  if (publicApiAbs && existsSync(publicApiAbs + '.header.md'))
+    sidecarPaths.push(publicApiAbs + '.header.md');
   let sidecarTokens = 0;
   for (const sc of sidecarPaths) sidecarTokens += approximateTokenCount(safeReadText(sc));
   if (sidecarPaths.length === 0) missing.push('sidecars');
@@ -219,7 +222,7 @@ export function measureWorkSurface(moduleName, opts = {}) {
 
   const totalTokens = manifestTokens + publicApiTokens + sidecarTokens + implTokens + testTokens;
 
-  const toRel = (abs) => abs ? abs.slice(rootAbs.length + 1).replaceAll('\\', '/') : null;
+  const toRel = (abs) => (abs ? abs.slice(rootAbs.length + 1).replaceAll('\\', '/') : null);
 
   return {
     module: moduleName,
@@ -332,7 +335,7 @@ export function discoverDirectModuleDependencies(moduleName, opts = {}) {
   }
   const deps = manifest?.dependencies?.modules;
   if (!Array.isArray(deps)) return [];
-  return deps.filter(d => typeof d === 'string');
+  return deps.filter((d) => typeof d === 'string');
 }
 
 /**

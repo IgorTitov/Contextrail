@@ -26,7 +26,13 @@ import {
 const ITEMS = [
   { id: 'create-project', title: 'Create your first project', order: 1, group: 'Getting started' },
   { id: 'add-member', title: 'Invite a team member', order: 2, group: 'Getting started' },
-  { id: 'create-board', title: 'Create a board', order: 3, group: 'Getting started', requiredBefore: 'create-project' },
+  {
+    id: 'create-board',
+    title: 'Create a board',
+    order: 3,
+    group: 'Getting started',
+    requiredBefore: 'create-project',
+  },
   { id: 'enable-api', title: 'Enable API access', order: 4, group: 'Advanced' },
 ];
 

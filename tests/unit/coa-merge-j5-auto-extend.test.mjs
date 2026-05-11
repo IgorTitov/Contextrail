@@ -20,10 +20,7 @@
 
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import {
-  resolveAutoExtendPaths,
-  DEFAULT_CEREMONY_FILES,
-} from '../../scripts/coa-merge.mjs';
+import { resolveAutoExtendPaths, DEFAULT_CEREMONY_FILES } from '../../scripts/coa-merge.mjs';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -74,7 +71,10 @@ describe('J5 auto-extend: ceremony files always extended', () => {
       filesUserStaged: ['package.json'],
       sidecarExists: mockSidecarExists(),
     });
-    assert.ok(paths.includes('package.json'), 'package.json must still be extended when pre-staged');
+    assert.ok(
+      paths.includes('package.json'),
+      'package.json must still be extended when pre-staged',
+    );
   });
 
   test('all DEFAULT_CEREMONY_FILES appear even when all pre-staged', () => {
@@ -137,9 +137,15 @@ describe('J5 auto-extend: sidecar pair detection', () => {
         'scripts/c.mjs.header.md', // exists on disk, not staged
       ),
     });
-    assert.ok(!paths.includes('scripts/a.mjs.header.md'), 'a sidecar exists but not staged — not added');
+    assert.ok(
+      !paths.includes('scripts/a.mjs.header.md'),
+      'a sidecar exists but not staged — not added',
+    );
     assert.ok(paths.includes('scripts/b.mjs.header.md'), 'b has no sidecar — added (new file)');
-    assert.ok(!paths.includes('scripts/c.mjs.header.md'), 'c sidecar exists but not staged — not added');
+    assert.ok(
+      !paths.includes('scripts/c.mjs.header.md'),
+      'c sidecar exists but not staged — not added',
+    );
   });
 
   test('sidecar already staged → still added (claim-check --extend deduplicates)', () => {
@@ -320,10 +326,7 @@ describe('J5 auto-extend: Bug 2 — phantom sidecar targets excluded', () => {
       regenPaths: [],
       sidecarExists: mockSidecarExists('VERSION.header.md'),
     });
-    assert.ok(
-      !paths.includes('VERSION.header.md'),
-      'VERSION must not trigger sidecar detection',
-    );
+    assert.ok(!paths.includes('VERSION.header.md'), 'VERSION must not trigger sidecar detection');
   });
 
   test('CHANGELOG.md staged triggers sidecar detection (it is .md, eligible extension)', () => {

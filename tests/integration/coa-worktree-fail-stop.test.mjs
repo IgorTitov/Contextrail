@@ -28,9 +28,7 @@
 
 import { describe, test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
-import {
-  mkdtempSync, mkdirSync, writeFileSync, rmSync, existsSync,
-} from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -81,7 +79,12 @@ describe('coa-worktree fail-stop on branch-already-exists', () => {
 
   test('exitCode=1 and output contains STOP, escalate, recovery when branch already exists', () => {
     // First create succeeds, creating branch tx-FST-001.
-    const first = runCreate(repoA, { sliceId: 'FST-001', skipSliceCheck: true, silent: true, trunk: 'main' });
+    const first = runCreate(repoA, {
+      sliceId: 'FST-001',
+      skipSliceCheck: true,
+      silent: true,
+      trunk: 'main',
+    });
     assert.equal(first.exitCode, 0, 'first --create should succeed');
 
     // Capture stderr from the second call.
@@ -107,7 +110,12 @@ describe('coa-worktree fail-stop on branch-already-exists', () => {
   });
 
   test('error message includes existing worktree path when branch is a registered worktree', () => {
-    const first = runCreate(repoB, { sliceId: 'FST-001', skipSliceCheck: true, silent: true, trunk: 'main' });
+    const first = runCreate(repoB, {
+      sliceId: 'FST-001',
+      skipSliceCheck: true,
+      silent: true,
+      trunk: 'main',
+    });
     assert.equal(first.exitCode, 0, 'first --create should succeed');
 
     const messages = [];

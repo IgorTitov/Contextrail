@@ -33,8 +33,9 @@ function extractSpecRefsFromHeaders(text) {
   const source = String(text);
   // Legacy form: `# SpecRefs: TPL-001` (capital S, comment-marker prefix required).
   for (const match of source.matchAll(/^\s*(?:#|\/\/|\*|<!--)\s*SpecRefs:\s*(.+)$/gm)) {
-    const raw = match[1].trim()
-      .replace(/\s*-->$/g, '')   // strip HTML comment closer
+    const raw = match[1]
+      .trim()
+      .replace(/\s*-->$/g, '') // strip HTML comment closer
       .replace(/\s*\*\/$/g, ''); // strip block comment closer
     const normalizedRaw = raw.replace(/[,'"]+$/g, '').replace(/^['"]+|['"]+$/g, '');
     if (!normalizedRaw || normalizedRaw === '_none_') continue;

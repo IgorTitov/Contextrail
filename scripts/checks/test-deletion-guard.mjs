@@ -230,14 +230,16 @@ export function runGuard({ cwd = process.cwd(), env = process.env } = {}) {
   const editMsgPath = commitEditMsgPath(cwd);
   let commitMsg = '';
   if (editMsgPath && existsSync(editMsgPath)) {
-    try { commitMsg = readFileSync(editMsgPath, 'utf8'); } catch { /* fall through */ }
+    try {
+      commitMsg = readFileSync(editMsgPath, 'utf8');
+    } catch {
+      /* fall through */
+    }
   }
   const reason = extractOverrideReason(commitMsg);
 
   if (operatorEnv && reason) {
-    process.stderr.write(
-      `[test-deletion-guard] override accepted: ${reason}\n`,
-    );
+    process.stderr.write(`[test-deletion-guard] override accepted: ${reason}\n`);
     return { ok: true, net, perFile, override: reason };
   }
 
@@ -267,10 +269,13 @@ function explainRefusal(result) {
   lines.push('');
   lines.push('If this deletion is intentional, BOTH factors are required to override:');
   lines.push('  1. Set COA_OPERATOR=1 in your environment.');
-  lines.push('  2. Add a line `Allow-test-deletion: <reason ≥3 chars>` to the commit-message body.');
+  lines.push(
+    '  2. Add a line `Allow-test-deletion: <reason ≥3 chars>` to the commit-message body.',
+  );
   lines.push('');
   if (!result.operatorEnv) lines.push('  Currently: COA_OPERATOR is NOT set.');
-  if (!result.hasReason) lines.push('  Currently: Allow-test-deletion line is missing or reason is too short.');
+  if (!result.hasReason)
+    lines.push('  Currently: Allow-test-deletion line is missing or reason is too short.');
   lines.push('');
   lines.push('See docs/adr/0041-test-deletion-guard.md.');
   return lines.join('\n');
@@ -284,11 +289,13 @@ function main() {
 
   if (result.ok) {
     if (wantJson) {
-      console.log(JSON.stringify({
-        ok: true,
-        net: result.net,
-        override: result.override ?? null,
-      }));
+      console.log(
+        JSON.stringify({
+          ok: true,
+          net: result.net,
+          override: result.override ?? null,
+        }),
+      );
     }
     process.exit(0);
   }
@@ -296,23 +303,25 @@ function main() {
   if (wantJson) {
     const perFile = {};
     for (const [k, v] of result.perFile.entries()) perFile[k] = v;
-    console.log(JSON.stringify({
-      ok: false,
-      net: result.net,
-      perFile,
-      operatorEnv: result.operatorEnv,
-      hasReason: result.hasReason,
-    }));
+    console.log(
+      JSON.stringify({
+        ok: false,
+        net: result.net,
+        perFile,
+        operatorEnv: result.operatorEnv,
+        hasReason: result.hasReason,
+      }),
+    );
   } else {
     console.error(explainRefusal(result));
   }
   process.exit(1);
 }
 
-const isDirectRun = process.argv[1] && (
-  process.argv[1].endsWith('test-deletion-guard.mjs') ||
-  process.argv[1].endsWith('test-deletion-guard')
-);
+const isDirectRun =
+  process.argv[1] &&
+  (process.argv[1].endsWith('test-deletion-guard.mjs') ||
+    process.argv[1].endsWith('test-deletion-guard'));
 
 if (isDirectRun) main();
 

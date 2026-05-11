@@ -100,7 +100,9 @@ function renderSummary(distribution, warnTokens, errorTokens, overWarn, overErro
   const lines = [];
   lines.push('');
   lines.push('Distribution (tokens per module work surface):');
-  lines.push(`  count=${distribution.count}  min=${distribution.min}  p50=${distribution.p50}  p75=${distribution.p75}  p95=${distribution.p95}  max=${distribution.max}  mean=${distribution.mean}`);
+  lines.push(
+    `  count=${distribution.count}  min=${distribution.min}  p50=${distribution.p50}  p75=${distribution.p75}  p95=${distribution.p95}  max=${distribution.max}  mean=${distribution.mean}`,
+  );
   lines.push(`  >= warn (${warnTokens}): ${overWarn.length}`);
   lines.push(`  >= error (${errorTokens}): ${overError.length}`);
   return lines.join('\n');
@@ -127,8 +129,12 @@ async function main(argv = process.argv.slice(2)) {
 
   const totals = records.map((r) => r.totalTokens);
   const distribution = computeDistribution(totals);
-  const overWarn = records.filter((r) => r.totalTokens >= warnTokens).map((r) => ({ module: r.module, totalTokens: r.totalTokens }));
-  const overError = records.filter((r) => r.totalTokens >= errorTokens).map((r) => ({ module: r.module, totalTokens: r.totalTokens }));
+  const overWarn = records
+    .filter((r) => r.totalTokens >= warnTokens)
+    .map((r) => ({ module: r.module, totalTokens: r.totalTokens }));
+  const overError = records
+    .filter((r) => r.totalTokens >= errorTokens)
+    .map((r) => ({ module: r.module, totalTokens: r.totalTokens }));
 
   const output = {
     ok: warnOnly ? true : overError.length === 0,
@@ -145,7 +151,10 @@ async function main(argv = process.argv.slice(2)) {
     ensureDir(reportDir);
     const reportPath = join(reportDir, 'module-fit-report.json');
     writeFileSync(reportPath, JSON.stringify(output, null, 2) + '\n', 'utf8');
-    if (!wantJson) console.log(`module-fit-check: report written to ${reportPath.slice(ROOT.length + 1).replaceAll('\\', '/')}`);
+    if (!wantJson)
+      console.log(
+        `module-fit-check: report written to ${reportPath.slice(ROOT.length + 1).replaceAll('\\', '/')}`,
+      );
   }
 
   if (wantJson) {
@@ -157,14 +166,18 @@ async function main(argv = process.argv.slice(2)) {
       console.log('');
       console.log(`Warnings (${overWarn.length} module(s) over warn threshold):`);
       for (const m of overWarn) {
-        console.log(`  WARN module-fit: ${m.module} = ${m.totalTokens} tokens (warn=${warnTokens})`);
+        console.log(
+          `  WARN module-fit: ${m.module} = ${m.totalTokens} tokens (warn=${warnTokens})`,
+        );
       }
     }
     if (overError.length > 0 && !warnOnly) {
       console.log('');
       console.log(`Errors (${overError.length} module(s) over error threshold):`);
       for (const m of overError) {
-        console.log(`  ERR module-fit: ${m.module} = ${m.totalTokens} tokens (error=${errorTokens})`);
+        console.log(
+          `  ERR module-fit: ${m.module} = ${m.totalTokens} tokens (error=${errorTokens})`,
+        );
       }
     }
   }
@@ -175,8 +188,10 @@ async function main(argv = process.argv.slice(2)) {
   process.exit(overError.length === 0 ? 0 : 1);
 }
 
-const isDirectRun = process.argv[1]
-  && (process.argv[1].endsWith('module-fit-check.mjs') || process.argv[1].endsWith('module-fit-check'));
+const isDirectRun =
+  process.argv[1] &&
+  (process.argv[1].endsWith('module-fit-check.mjs') ||
+    process.argv[1].endsWith('module-fit-check'));
 
 if (isDirectRun) {
   main().catch((err) => {

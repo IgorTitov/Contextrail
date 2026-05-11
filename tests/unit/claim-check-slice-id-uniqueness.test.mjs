@@ -25,13 +25,7 @@
 import { describe, test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import {
-  mkdtempSync,
-  mkdirSync,
-  writeFileSync,
-  rmSync,
-  existsSync,
-} from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -175,7 +169,10 @@ describe('findCommittedSliceUse()', () => {
 
       const result = await findCommittedSliceUse('PAST-001', repo);
       assert.ok(result !== null, 'should find commit');
-      assert.ok(typeof result.hash === 'string' && result.hash.length > 0, 'hash should be non-empty');
+      assert.ok(
+        typeof result.hash === 'string' && result.hash.length > 0,
+        'hash should be non-empty',
+      );
       assert.ok(result.subject.includes('PAST-001'), 'subject should contain slice ID');
     } finally {
       rmSync(repo, { recursive: true, force: true });
@@ -235,16 +232,15 @@ describe('CLI --acquire slice-id-collision blocking', () => {
     for (const f of createdClaimFiles) {
       try {
         if (existsSync(f)) rmSync(f);
-      } catch { /* non-fatal */ }
+      } catch {
+        /* non-fatal */
+      }
     }
   });
 
   test('6. --acquire --slice=USED-001 when active claim exists → exit 1 + slice-id-collision', async () => {
     // First acquire USED-CLI-001 via CLI to create an active claim in .claims/
-    const liveClaimsDir = join(
-      fileURLToPath(new URL('../../', import.meta.url)),
-      '.claims',
-    );
+    const liveClaimsDir = join(fileURLToPath(new URL('../../', import.meta.url)), '.claims');
     const repo = fileURLToPath(new URL('../../', import.meta.url));
 
     // First acquire — should succeed and create a claim file
@@ -305,14 +301,18 @@ describe('CLI --acquire slice-id-collision blocking', () => {
 
   test('8. --acquire --allow-id-collision without COA_OPERATOR=1 → exit 1', () => {
     const repo = fileURLToPath(new URL('../../', import.meta.url));
-    const result = runClaimCheckCLI(repo, [
-      '--acquire',
-      '--agent=test-allow-collision',
-      '--slice=COL-CLI-001',
-      '--targets=tests/unit/claim-check-slice-id-uniqueness.test.mjs',
-      '--action=extend',
-      '--allow-id-collision',
-    ], { COA_OPERATOR: '' }); // explicitly NOT set to '1'
+    const result = runClaimCheckCLI(
+      repo,
+      [
+        '--acquire',
+        '--agent=test-allow-collision',
+        '--slice=COL-CLI-001',
+        '--targets=tests/unit/claim-check-slice-id-uniqueness.test.mjs',
+        '--action=extend',
+        '--allow-id-collision',
+      ],
+      { COA_OPERATOR: '' },
+    ); // explicitly NOT set to '1'
     assert.equal(result.status, 1, 'should fail without COA_OPERATOR=1');
     assert.ok(
       (result.stderr || '').includes('COA_OPERATOR=1'),
@@ -336,14 +336,15 @@ describe('CLI --acquire slice-id-collision blocking', () => {
       // Register for cleanup
       const match = result.stdout.match(/clm-[\w-]+/);
       if (match) {
-        const liveClaimsDir = join(
-          fileURLToPath(new URL('../../', import.meta.url)),
-          '.claims',
-        );
+        const liveClaimsDir = join(fileURLToPath(new URL('../../', import.meta.url)), '.claims');
         createdClaimFiles.push(join(liveClaimsDir, `${match[0]}.json`));
       }
     }
 
-    assert.equal(result.status, 0, `should succeed for unique slice ID, got stderr: ${result.stderr}`);
+    assert.equal(
+      result.status,
+      0,
+      `should succeed for unique slice ID, got stderr: ${result.stderr}`,
+    );
   });
 });

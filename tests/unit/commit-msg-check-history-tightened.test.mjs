@@ -117,7 +117,6 @@ function makeEmptyGitRepo() {
 // ---------------------------------------------------------------------------
 
 describe('history-match tightening — Layer 2 (TPL-299 / ADR-0031)', () => {
-
   test('1. active claim → ok=true reason=active-claim (regression)', async () => {
     const sliceId = 'HMT-ACTIVE-001';
     const claimsDir = emptyClaimsDir();
@@ -279,5 +278,4 @@ describe('history-match tightening — Layer 2 (TPL-299 / ADR-0031)', () => {
       rmSync(repoRoot, { recursive: true, force: true });
     }
   });
-
 });

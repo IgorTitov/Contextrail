@@ -83,9 +83,7 @@ export function parsePushRefspecs(stdin) {
  */
 export function isPushToTrunk(refspec, trunkBranches = TRUNK_BRANCHES) {
   const ref = refspec.remoteRef || '';
-  const short = ref.startsWith('refs/heads/')
-    ? ref.slice('refs/heads/'.length)
-    : ref;
+  const short = ref.startsWith('refs/heads/') ? ref.slice('refs/heads/'.length) : ref;
   return trunkBranches.includes(short);
 }
 
@@ -106,8 +104,8 @@ export function isPushToTrunk(refspec, trunkBranches = TRUNK_BRANCHES) {
  * @returns {boolean}
  */
 export function isForcePush({ refspec, remoteIsAncestor }) {
-  if (refspec.localSha === ZERO_SHA) return false;   // deletion push — not force
-  if (refspec.remoteSha === ZERO_SHA) return false;  // first push to new branch
+  if (refspec.localSha === ZERO_SHA) return false; // deletion push — not force
+  if (refspec.remoteSha === ZERO_SHA) return false; // first push to new branch
   return !remoteIsAncestor;
 }
 
@@ -133,28 +131,27 @@ export function isForcePush({ refspec, remoteIsAncestor }) {
  */
 export function classifyPush({ trunkRefspecs, env = {} }) {
   const forced = trunkRefspecs.filter(({ refspec, remoteIsAncestor }) =>
-    isForcePush({ refspec, remoteIsAncestor })
+    isForcePush({ refspec, remoteIsAncestor }),
   );
 
   if (forced.length === 0) {
     return { allowed: true };
   }
 
-  const operatorOverride =
-    env.COA_OPERATOR === '1' && env.COA_FORCE_TRUNK === '1';
+  const operatorOverride = env.COA_OPERATOR === '1' && env.COA_FORCE_TRUNK === '1';
 
   if (operatorOverride) {
     return {
       allowed: true,
       operatorOverride: true,
-      forcePushRefspecs: forced.map(f => f.refspec),
+      forcePushRefspecs: forced.map((f) => f.refspec),
     };
   }
 
-  const refs = forced.map(f => f.refspec.remoteRef).join(', ');
+  const refs = forced.map((f) => f.refspec.remoteRef).join(', ');
   return {
     allowed: false,
     deniedReason: `force-push to trunk detected (${refs}) — use COA_OPERATOR=1 COA_FORCE_TRUNK=1 to override (audited)`,
-    forcePushRefspecs: forced.map(f => f.refspec),
+    forcePushRefspecs: forced.map((f) => f.refspec),
   };
 }

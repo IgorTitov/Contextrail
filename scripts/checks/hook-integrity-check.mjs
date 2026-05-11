@@ -91,7 +91,10 @@ function parseArgs(argv = process.argv.slice(2)) {
   }
   return {
     has: (k) => map.has(k),
-    get: (k) => { const v = map.get(k); return v === true ? undefined : v; },
+    get: (k) => {
+      const v = map.get(k);
+      return v === true ? undefined : v;
+    },
   };
 }
 
@@ -113,7 +116,8 @@ function main() {
     // integrity before Addition B is ever reached. (ADR-0019)
     const authorized = process.env.COA_OPERATOR || fromPreCommitHook;
     if (!authorized) {
-      const msg = '--update requires COA_OPERATOR=1. ' +
+      const msg =
+        '--update requires COA_OPERATOR=1. ' +
         'Set this env var only when you intentionally modified hooks.';
       if (wantJson) {
         console.log(JSON.stringify({ kind: 'hook-integrity-check', ok: false, error: msg }));
@@ -138,16 +142,24 @@ function main() {
     writeFileSync(REGISTRY_PATH, content, 'utf8');
 
     if (wantJson) {
-      console.log(JSON.stringify({
-        kind: 'hook-integrity-check',
-        ok: true,
-        action: 'updated',
-        registryPath: REGISTRY_PATH,
-        entries: hookFiles.length,
-        generatedAt: new Date().toISOString(),
-      }, null, 2));
+      console.log(
+        JSON.stringify(
+          {
+            kind: 'hook-integrity-check',
+            ok: true,
+            action: 'updated',
+            registryPath: REGISTRY_PATH,
+            entries: hookFiles.length,
+            generatedAt: new Date().toISOString(),
+          },
+          null,
+          2,
+        ),
+      );
     } else {
-      console.log(`hook-integrity-check: registry updated — ${hookFiles.length} hook(s) fingerprinted`);
+      console.log(
+        `hook-integrity-check: registry updated — ${hookFiles.length} hook(s) fingerprinted`,
+      );
       console.log(`  written to: ${REGISTRY_PATH}`);
     }
     process.exit(0);
@@ -162,7 +174,8 @@ function main() {
     registry = parsed.hooks || {};
   } catch (err) {
     if (err.code === 'ENOENT') {
-      const msg = `Fingerprint registry not found: ${REGISTRY_PATH}. ` +
+      const msg =
+        `Fingerprint registry not found: ${REGISTRY_PATH}. ` +
         'Run: COA_OPERATOR=1 node scripts/checks/hook-integrity-check.mjs --update';
       if (wantJson) {
         console.log(JSON.stringify({ kind: 'hook-integrity-check', ok: false, error: msg }));
@@ -180,15 +193,21 @@ function main() {
   const ok = mismatches.length === 0 && missing.length === 0 && extras.length === 0;
 
   if (wantJson) {
-    console.log(JSON.stringify({
-      kind: 'hook-integrity-check',
-      ok,
-      generatedAt: new Date().toISOString(),
-      checked: hookFiles.length,
-      mismatches,
-      missing,
-      extras,
-    }, null, 2));
+    console.log(
+      JSON.stringify(
+        {
+          kind: 'hook-integrity-check',
+          ok,
+          generatedAt: new Date().toISOString(),
+          checked: hookFiles.length,
+          mismatches,
+          missing,
+          extras,
+        },
+        null,
+        2,
+      ),
+    );
   } else {
     const total = hookFiles.length;
     console.log(`hook-integrity-check: ${ok ? 'OK' : 'FAIL'} (${total} hook(s) checked)`);
@@ -224,6 +243,5 @@ function main() {
   process.exit(ok ? 0 : 1);
 }
 
-const isDirectRun = process.argv[1]
-  && process.argv[1].endsWith('hook-integrity-check.mjs');
+const isDirectRun = process.argv[1] && process.argv[1].endsWith('hook-integrity-check.mjs');
 if (isDirectRun) main();

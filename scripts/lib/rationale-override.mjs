@@ -46,7 +46,11 @@ export const CLOCK_SKEW_TOLERANCE_MS = 5_000;
  * @param {{ configKey: string, categoryWhitelist: string[], logDir: string }} options
  * @returns {{ valid: boolean, reason?: string, logEntry?: object, logPath?: string }}
  */
-export function validateAndConsumeOverride(overridePath, expectedValue, { configKey, categoryWhitelist, logDir }) {
+export function validateAndConsumeOverride(
+  overridePath,
+  expectedValue,
+  { configKey, categoryWhitelist, logDir },
+) {
   if (!existsSync(overridePath)) {
     return { valid: false, reason: `No override file found at ${overridePath}.` };
   }
@@ -66,7 +70,10 @@ export function validateAndConsumeOverride(overridePath, expectedValue, { config
     return { valid: false, reason: `Override file: missing or invalid "${configKey}" field.` };
   }
   if (value !== expectedValue) {
-    return { valid: false, reason: `Override file: "${configKey}" is "${value}" but expected "${expectedValue}".` };
+    return {
+      valid: false,
+      reason: `Override file: "${configKey}" is "${value}" but expected "${expectedValue}".`,
+    };
   }
 
   // timestamp required
@@ -75,7 +82,10 @@ export function validateAndConsumeOverride(overridePath, expectedValue, { config
   }
   const ts = Date.parse(timestamp);
   if (isNaN(ts)) {
-    return { valid: false, reason: `Override file: "timestamp" is not a valid ISO-8601 date: ${timestamp}` };
+    return {
+      valid: false,
+      reason: `Override file: "timestamp" is not a valid ISO-8601 date: ${timestamp}`,
+    };
   }
 
   // Far-future rejection (clock-skew guard)
@@ -85,17 +95,27 @@ export function validateAndConsumeOverride(overridePath, expectedValue, { config
 
   // TTL check
   if (Date.now() - ts > TTL_MS) {
-    return { valid: false, reason: 'Override file: timestamp is older than 60 seconds (TTL expired). Re-create the file.' };
+    return {
+      valid: false,
+      reason:
+        'Override file: timestamp is older than 60 seconds (TTL expired). Re-create the file.',
+    };
   }
 
   // reason must be >= 20 characters
   if (!reason || typeof reason !== 'string' || reason.length < 20) {
-    return { valid: false, reason: `Override file: "reason" must be >= 20 characters (got ${reason?.length ?? 0}).` };
+    return {
+      valid: false,
+      reason: `Override file: "reason" must be >= 20 characters (got ${reason?.length ?? 0}).`,
+    };
   }
 
   // category must be in whitelist
   if (!categoryWhitelist.includes(category)) {
-    return { valid: false, reason: `Override file: "category" must be one of: ${categoryWhitelist.join(', ')}. Got: ${JSON.stringify(category)}` };
+    return {
+      valid: false,
+      reason: `Override file: "category" must be one of: ${categoryWhitelist.join(', ')}. Got: ${JSON.stringify(category)}`,
+    };
   }
 
   // Build log entry — consumed_at set here after all validation passes.

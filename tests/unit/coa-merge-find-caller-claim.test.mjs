@@ -19,10 +19,7 @@
 
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import {
-  pickCallerClaim,
-  PICK_CALLER_CLAIM_TIERS,
-} from '../../scripts/coa-merge.mjs';
+import { pickCallerClaim, PICK_CALLER_CLAIM_TIERS } from '../../scripts/coa-merge.mjs';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -144,11 +141,7 @@ describe('pickCallerClaim: tier 3 (target overlap)', () => {
       id: 'clm-wide',
       agent: 'agent-x',
       slice: 'TPL-X',
-      targets: [
-        { path: 'VERSION' },
-        { path: 'CHANGELOG.md' },
-        { path: 'package.json' },
-      ],
+      targets: [{ path: 'VERSION' }, { path: 'CHANGELOG.md' }, { path: 'package.json' }],
       created: '2026-05-06T10:00:00.000Z',
     });
     const narrow = claim({
@@ -271,22 +264,14 @@ describe('pickCallerClaim: TPL-280 Incident #2 regression', () => {
       id: 'clm-a5c0ce',
       agent: 'feature-implementer',
       slice: 'TPL-280',
-      targets: [
-        { path: 'VERSION' },
-        { path: 'CHANGELOG.md' },
-        { path: 'package.json' },
-      ],
+      targets: [{ path: 'VERSION' }, { path: 'CHANGELOG.md' }, { path: 'package.json' }],
       created: '2026-05-05T12:00:00.000Z',
     });
     const parallelClaim = claim({
       id: 'clm-683a3a',
       agent: 'other-agent',
       slice: 'TPL-292',
-      targets: [
-        { path: 'VERSION' },
-        { path: 'CHANGELOG.md' },
-        { path: 'package.json' },
-      ],
+      targets: [{ path: 'VERSION' }, { path: 'CHANGELOG.md' }, { path: 'package.json' }],
       created: '2026-05-05T12:00:00.001Z', // 1ms newer
     });
     const r = pickCallerClaim({

@@ -21,9 +21,7 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import {
-  mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync, cpSync,
-} from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync, cpSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { safeGitSpawn } from '../_setup/safe-git.mjs';
@@ -103,7 +101,11 @@ function runCheck(cwd, stdinRefspecs, extraEnv = {}) {
     },
   });
   let payload = null;
-  try { payload = JSON.parse(r.stdout || '{}'); } catch { /* leave null */ }
+  try {
+    payload = JSON.parse(r.stdout || '{}');
+  } catch {
+    /* leave null */
+  }
   return { code: r.status, payload };
 }
 
@@ -195,7 +197,10 @@ describe('trunk-integrity-check integration', () => {
       assert.equal(payload?.operatorOverride, true);
       // Audit record should have been written
       const logContent = readFileSync(join(dir, '.claims', 'audit.log'), 'utf8');
-      assert.ok(logContent.includes('force-trunk-override'), 'audit log should contain override event');
+      assert.ok(
+        logContent.includes('force-trunk-override'),
+        'audit log should contain override event',
+      );
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

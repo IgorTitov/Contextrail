@@ -28,8 +28,15 @@ import { t } from '../messages.mjs';
  */
 
 const REQUIRED = [
-  'create', 'getById', 'getByUser', 'updateStatus',
-  'changePlan', 'recordUsage', 'checkEntitlement', 'listPlans', 'clear',
+  'create',
+  'getById',
+  'getByUser',
+  'updateStatus',
+  'changePlan',
+  'recordUsage',
+  'checkEntitlement',
+  'listPlans',
+  'clear',
 ];
 
 /**

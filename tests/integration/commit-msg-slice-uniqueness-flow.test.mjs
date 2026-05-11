@@ -20,10 +20,7 @@
 
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import {
-  mkdtempSync, mkdirSync, writeFileSync, existsSync,
-  readdirSync, rmSync,
-} from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, existsSync, readdirSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -82,7 +79,11 @@ describe('commit-msg-slice-uniqueness-flow — unique ID', () => {
       assert.equal(result.ok, true);
       assert.equal(result.reason, 'no-duplicate');
     } finally {
-      try { rmSync(dir, { recursive: true, force: true }); } catch { /* best-effort */ }
+      try {
+        rmSync(dir, { recursive: true, force: true });
+      } catch {
+        /* best-effort */
+      }
     }
   });
 });
@@ -103,7 +104,11 @@ describe('commit-msg-slice-uniqueness-flow — duplicate detected', () => {
       assert.ok(result.duplicate, 'should have duplicate info');
       assert.ok(result.duplicate.subject.includes('TPL-2001'));
     } finally {
-      try { rmSync(dir, { recursive: true, force: true }); } catch { /* best-effort */ }
+      try {
+        rmSync(dir, { recursive: true, force: true });
+      } catch {
+        /* best-effort */
+      }
     }
   });
 
@@ -118,7 +123,11 @@ describe('commit-msg-slice-uniqueness-flow — duplicate detected', () => {
       });
       assert.equal(result.ok, true);
     } finally {
-      try { rmSync(dir, { recursive: true, force: true }); } catch { /* best-effort */ }
+      try {
+        rmSync(dir, { recursive: true, force: true });
+      } catch {
+        /* best-effort */
+      }
     }
   });
 });
@@ -141,20 +150,33 @@ describe('commit-msg-slice-uniqueness-flow — valid override consumed', () => {
         coaDir: join(dir, '.coa'),
       });
 
-      assert.equal(result.ok, true, `Expected ok=true but got reason: ${result.overrideReason || result.reason}`);
+      assert.equal(
+        result.ok,
+        true,
+        `Expected ok=true but got reason: ${result.overrideReason || result.reason}`,
+      );
       assert.equal(result.reason, 'override-accepted');
       assert.ok(result.duplicate, 'should report the duplicate that was overridden');
 
       // Override file must be deleted
-      assert.ok(!existsSync(join(dir, '.coa', 'slice-id-override.json')),
-        'input override file should be deleted after consumption');
+      assert.ok(
+        !existsSync(join(dir, '.coa', 'slice-id-override.json')),
+        'input override file should be deleted after consumption',
+      );
 
       // Log entry must exist
       const logFiles = readdirSync(join(dir, '.coa', 'slice-id-override-log'));
       assert.ok(logFiles.length > 0, 'log entry should be created in archive dir');
-      assert.ok(logFiles.some(f => f.includes('TPL-3001')), 'log file name should include slice ID');
+      assert.ok(
+        logFiles.some((f) => f.includes('TPL-3001')),
+        'log file name should include slice ID',
+      );
     } finally {
-      try { rmSync(dir, { recursive: true, force: true }); } catch { /* best-effort */ }
+      try {
+        rmSync(dir, { recursive: true, force: true });
+      } catch {
+        /* best-effort */
+      }
     }
   });
 });
@@ -181,7 +203,11 @@ describe('commit-msg-slice-uniqueness-flow — expired override', () => {
       assert.equal(result.reason, 'duplicate-slice-id');
       assert.match(result.overrideReason, /TTL expired|older than 60/);
     } finally {
-      try { rmSync(dir, { recursive: true, force: true }); } catch { /* best-effort */ }
+      try {
+        rmSync(dir, { recursive: true, force: true });
+      } catch {
+        /* best-effort */
+      }
     }
   });
 });
@@ -208,7 +234,11 @@ describe('commit-msg-slice-uniqueness-flow — future timestamp rejected', () =>
       assert.equal(result.reason, 'duplicate-slice-id');
       assert.match(result.overrideReason, /timestamp-in-future|future/i);
     } finally {
-      try { rmSync(dir, { recursive: true, force: true }); } catch { /* best-effort */ }
+      try {
+        rmSync(dir, { recursive: true, force: true });
+      } catch {
+        /* best-effort */
+      }
     }
   });
 });

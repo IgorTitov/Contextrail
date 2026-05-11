@@ -116,9 +116,8 @@ jobs:
       - run: pnpm capabilities-check
       - run: pnpm readme-check
       - run: pnpm changelog-sync -- --check
-      - run: node scripts/checks/spec-check.mjs
-      - run: node scripts/checks/usm-check.mjs
-      - run: node scripts/checks/pre-impl-gate.mjs
+      # spec-check, usm-check, pre-impl-gate require docs/backlog/ and docs/usm/
+      # which are internal development artifacts not shipped in the public template.
       - run: node scripts/checks/delivery-flow-check.mjs
       - run: node scripts/checks/control-plane-check.mjs
       - run: node scripts/agent-contract/check.mjs

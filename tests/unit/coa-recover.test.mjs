@@ -9,9 +9,7 @@
 
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import {
-  detectVersionDrift,
-} from '../../scripts/coa-recover.mjs';
+import { detectVersionDrift } from '../../scripts/coa-recover.mjs';
 
 describe('coa-recover: detectVersionDrift', () => {
   test('no drift when valid patch bump', () => {

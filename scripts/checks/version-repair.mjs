@@ -91,11 +91,7 @@ export function isStampOnlyDiff(diffText) {
  * and hash comments (# ...).
  */
 export function hasSlimInlineHeader(text) {
-  return (
-    /\/\*\s*@HEADER/.test(text) ||
-    /<!--\s*@HEADER/.test(text) ||
-    /^#\s*@HEADER/m.test(text)
-  );
+  return /\/\*\s*@HEADER/.test(text) || /<!--\s*@HEADER/.test(text) || /^#\s*@HEADER/m.test(text);
 }
 
 /**
@@ -128,19 +124,11 @@ export function rewriteVersionField(text, newVersion, newDate) {
  * Each entry is { hash, date } where date is YYYY-MM-DD.
  */
 export function gitCommitsForFile(filePath, { runGitLines = gitLines } = {}) {
-  const raw = runGitLines([
-    'log',
-    '--follow',
-    '--pretty=format:%H %cs',
-    '--',
-    filePath,
-  ]);
-  return raw
-    .filter(Boolean)
-    .map((line) => {
-      const spaceIdx = line.indexOf(' ');
-      return { hash: line.slice(0, spaceIdx), date: line.slice(spaceIdx + 1) };
-    });
+  const raw = runGitLines(['log', '--follow', '--pretty=format:%H %cs', '--', filePath]);
+  return raw.filter(Boolean).map((line) => {
+    const spaceIdx = line.indexOf(' ');
+    return { hash: line.slice(0, spaceIdx), date: line.slice(spaceIdx + 1) };
+  });
 }
 
 /**
@@ -172,11 +160,7 @@ export function getVersionAtCommit(commit, { runGitText = gitText, cache = null 
  */
 export function findLastContentChangeCommit(
   filePath,
-  {
-    runGitLines = gitLines,
-    runGitText = gitText,
-    versionCache = null,
-  } = {},
+  { runGitLines = gitLines, runGitText = gitText, versionCache = null } = {},
 ) {
   const commits = gitCommitsForFile(filePath, { runGitLines });
   if (commits.length === 0) return null;
@@ -214,12 +198,7 @@ export function findLastContentChangeCommit(
  */
 export function repairFile(
   filePath,
-  {
-    write = false,
-    runGitLines = gitLines,
-    runGitText = gitText,
-    versionCache = null,
-  } = {},
+  { write = false, runGitLines = gitLines, runGitText = gitText, versionCache = null } = {},
 ) {
   const absPath = path.join(ROOT, filePath);
   let text;
@@ -342,7 +321,9 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.a
   const opts = parseCliArgs(process.argv);
 
   if (!opts.dryRun && !opts.write) {
-    console.error('Usage: version-repair.mjs [--dry-run | --write] [--scope=<prefix>] [--skip-generated]');
+    console.error(
+      'Usage: version-repair.mjs [--dry-run | --write] [--scope=<prefix>] [--skip-generated]',
+    );
     process.exit(1);
   }
 

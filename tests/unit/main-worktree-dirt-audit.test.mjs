@@ -43,7 +43,11 @@ describe('W1: isTransportWorktreePath', () => {
   test('returns false for plain main worktree paths', () => {
     assert.equal(isTransportWorktreePath('/repos/contextrail-template'), false);
     assert.equal(isTransportWorktreePath('C:\\Projects\\contextrail-template'), false);
-    assert.equal(isTransportWorktreePath('/repos/my-tx-project'), false, 'lowercase x after - is not a tx marker');
+    assert.equal(
+      isTransportWorktreePath('/repos/my-tx-project'),
+      false,
+      'lowercase x after - is not a tx marker',
+    );
   });
 
   test('returns true for tx-* transport worktree paths', () => {
@@ -133,19 +137,12 @@ describe('W1: filterUntrackedFiles', () => {
   });
 
   test('modified (not ??) lines are ignored', () => {
-    const lines = [
-      ' M tests/scratch.test.mjs',
-      '?? apps/starter/new.html',
-    ];
+    const lines = [' M tests/scratch.test.mjs', '?? apps/starter/new.html'];
     assert.deepEqual(filterUntrackedFiles(lines), ['apps/starter/new.html']);
   });
 
   test('files outside watched dirs are ignored', () => {
-    const lines = [
-      '?? CHANGELOG.md',
-      '?? VERSION',
-      '?? docs/analysis/notes.md',
-    ];
+    const lines = ['?? CHANGELOG.md', '?? VERSION', '?? docs/analysis/notes.md'];
     assert.deepEqual(filterUntrackedFiles(lines), ['docs/analysis/notes.md']);
   });
 

@@ -31,9 +31,18 @@ import { t } from '../messages.mjs';
  */
 
 const REQUIRED = [
-  'register', 'verifyEmail', 'getById', 'getByEmail',
-  'updateProfile', 'suspend', 'delete', 'invite',
-  'acceptInvitation', 'requestPasswordReset', 'resetPassword', 'clear',
+  'register',
+  'verifyEmail',
+  'getById',
+  'getByEmail',
+  'updateProfile',
+  'suspend',
+  'delete',
+  'invite',
+  'acceptInvitation',
+  'requestPasswordReset',
+  'resetPassword',
+  'clear',
 ];
 
 /**

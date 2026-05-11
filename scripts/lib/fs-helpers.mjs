@@ -30,9 +30,7 @@ export function resolveMainRepoRoot(worktreeRoot = ROOT) {
     });
     const commonDir = (r.stdout || '').trim();
     if (!commonDir) return worktreeRoot;
-    const abs = path.isAbsolute(commonDir)
-      ? commonDir
-      : path.join(worktreeRoot, commonDir);
+    const abs = path.isAbsolute(commonDir) ? commonDir : path.join(worktreeRoot, commonDir);
     // path.resolve normalises forward/back slashes on Windows so callers can
     // use strict equality regardless of whether git returned a POSIX path.
     return path.resolve(path.dirname(abs));

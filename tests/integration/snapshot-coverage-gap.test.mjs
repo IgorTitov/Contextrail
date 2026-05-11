@@ -24,9 +24,7 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import {
-  mkdtempSync, mkdirSync, writeFileSync, rmSync,
-} from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { safeGit, safeGitSpawn } from '../_setup/safe-git.mjs';
@@ -72,7 +70,11 @@ function runCheck(cwd, extraArgs = []) {
   const args = [CHECK, '--min-zip-version=0.0.1', '--json', ...extraArgs];
   const r = spawnSync(process.execPath, args, { cwd, encoding: 'utf8' });
   let payload = null;
-  try { payload = JSON.parse(r.stdout || '{}'); } catch { /* leave null */ }
+  try {
+    payload = JSON.parse(r.stdout || '{}');
+  } catch {
+    /* leave null */
+  }
   return { code: r.status, stdout: r.stdout, stderr: r.stderr, payload };
 }
 

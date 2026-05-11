@@ -48,7 +48,10 @@ function parseArgs() {
   }
   return {
     has: (k) => map.has(k),
-    get: (k) => { const v = map.get(k); return v === true ? undefined : v; },
+    get: (k) => {
+      const v = map.get(k);
+      return v === true ? undefined : v;
+    },
   };
 }
 
@@ -171,9 +174,10 @@ export function extractUnreleased(text) {
   const nextSection = text.indexOf('\n## ', afterHeading);
 
   const before = text.slice(0, start);
-  const unreleased = nextSection >= 0
-    ? text.slice(afterHeading, nextSection).trim()
-    : text.slice(afterHeading).trim();
+  const unreleased =
+    nextSection >= 0
+      ? text.slice(afterHeading, nextSection).trim()
+      : text.slice(afterHeading).trim();
   const after = nextSection >= 0 ? text.slice(nextSection) : '';
 
   return { before, unreleased, after };

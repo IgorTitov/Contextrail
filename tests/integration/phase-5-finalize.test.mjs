@@ -47,9 +47,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import {
-  mkdtempSync, mkdirSync, writeFileSync, rmSync, cpSync, readFileSync,
-} from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync, cpSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 
@@ -71,8 +69,14 @@ function makeTempWorkspace(suffix) {
   cpSync(CHECK, join(dir, 'scripts', 'checks', 'hook-integrity-check.mjs'));
   cpSync(LIB, join(dir, 'scripts', 'lib', 'hook-integrity.mjs'));
 
-  writeFileSync(join(dir, '.githooks', 'pre-commit'), '#!/usr/bin/env bash\n# mock pre-commit\necho ok\n');
-  writeFileSync(join(dir, '.githooks', 'pre-push'), '#!/usr/bin/env bash\n# mock pre-push\necho ok\n');
+  writeFileSync(
+    join(dir, '.githooks', 'pre-commit'),
+    '#!/usr/bin/env bash\n# mock pre-commit\necho ok\n',
+  );
+  writeFileSync(
+    join(dir, '.githooks', 'pre-push'),
+    '#!/usr/bin/env bash\n# mock pre-push\necho ok\n',
+  );
 
   return dir;
 }
@@ -92,7 +96,11 @@ function runCheck(cwd, extraArgs = [], envOverrides = {}) {
     encoding: 'utf8',
   });
   let payload = null;
-  try { payload = JSON.parse(r.stdout || '{}'); } catch { /* leave null */ }
+  try {
+    payload = JSON.parse(r.stdout || '{}');
+  } catch {
+    /* leave null */
+  }
   return { code: r.status, stdout: r.stdout, stderr: r.stderr, payload };
 }
 
@@ -131,7 +139,8 @@ describe('TPL-278 Test A: --from-pre-commit-hook bypasses COA_OPERATOR gate', ()
       // --from-pre-commit-hook alone (no GIT_DIR, no COA_OPERATOR) — must succeed
       const updated = runCheck(dir, ['--update', '--from-pre-commit-hook'], {});
       assert.equal(
-        updated.code, 0,
+        updated.code,
+        0,
         `Expected exit 0 with --from-pre-commit-hook, got ${updated.code}\nstdout: ${updated.stdout}\nstderr: ${updated.stderr}`,
       );
       assert.equal(updated.payload?.ok, true);
@@ -140,7 +149,8 @@ describe('TPL-278 Test A: --from-pre-commit-hook bypasses COA_OPERATOR gate', ()
       // Subsequent verify check must pass (registry now matches modified hook)
       const verify = runCheck(dir, []);
       assert.equal(
-        verify.code, 0,
+        verify.code,
+        0,
         `Expected exit 0 after --from-pre-commit-hook update, got ${verify.code}\nstdout: ${verify.stdout}`,
       );
       assert.equal(verify.payload?.ok, true);
@@ -168,7 +178,8 @@ describe('TPL-278 Test B: --update without authorization is refused', () => {
       });
 
       assert.equal(
-        r.code, 1,
+        r.code,
+        1,
         `Expected exit 1 without GIT_DIR, got ${r.code}\nstdout: ${r.stdout}\nstderr: ${r.stderr}`,
       );
       assert.equal(r.payload?.ok, false);
@@ -249,9 +260,10 @@ describe('TPL-278 Test C: sync.mjs auto-stage allow-list uses explicit paths (no
       '# Hook-integrity post-stamp regen (TPL-278)',
       tpl278Start,
     );
-    const block = blockEnd > 0
-      ? preCommitContent.slice(tpl278Start, blockEnd)
-      : preCommitContent.slice(tpl278Start);
+    const block =
+      blockEnd > 0
+        ? preCommitContent.slice(tpl278Start, blockEnd)
+        : preCommitContent.slice(tpl278Start);
 
     // Check for `git add .` as a standalone staging command (followed by space/newline/end),
     // not as a prefix of a legitimate path like `git add .cursorrules`.
@@ -273,8 +285,8 @@ describe('TPL-278 Test C: sync.mjs auto-stage allow-list uses explicit paths (no
     // escape-sequence ambiguity with the backslash in the regex pattern.
     assert.ok(
       preCommitContent.includes('echo "$ORIG_STAGED"') &&
-      preCommitContent.includes('grep -q') &&
-      preCommitContent.includes('.githooks/'),
+        preCommitContent.includes('grep -q') &&
+        preCommitContent.includes('.githooks/'),
       'hook-integrity regen must be guarded by ORIG_STAGED containing .githooks/ entries',
     );
     assert.ok(

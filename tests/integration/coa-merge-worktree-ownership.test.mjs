@@ -39,9 +39,7 @@
 
 import { describe, test, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
-import {
-  mkdtempSync, writeFileSync, readFileSync, rmSync, mkdirSync,
-} from 'node:fs';
+import { mkdtempSync, writeFileSync, readFileSync, rmSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
@@ -56,7 +54,13 @@ import {
 // ---------------------------------------------------------------------------
 
 function makeSession(agent = 'feature-implementer', extra = {}) {
-  return { sessionName: 'tx-TEST-001', created: new Date().toISOString(), repoRoot: '/tmp/repo', agent, ...extra };
+  return {
+    sessionName: 'tx-TEST-001',
+    created: new Date().toISOString(),
+    repoRoot: '/tmp/repo',
+    agent,
+    ...extra,
+  };
 }
 
 function makeTmpDir(label) {
@@ -70,7 +74,14 @@ function makeTmpDir(label) {
 describe('readCoaSession', () => {
   let dir = null;
   afterEach(() => {
-    if (dir) { try { rmSync(dir, { recursive: true, force: true }); } catch { /* ok */ } dir = null; }
+    if (dir) {
+      try {
+        rmSync(dir, { recursive: true, force: true });
+      } catch {
+        /* ok */
+      }
+      dir = null;
+    }
   });
 
   test('S1: returns parsed object when .coa-session exists', () => {
@@ -141,8 +152,8 @@ describe('verifyWorktreeOwnership — Case 2: different agent → refuse', () =>
     });
     assert.equal(result.ok, false, 'should refuse');
     assert.equal(result.reason, 'agent-mismatch');
-    assert.ok(result.message.includes("feature-implementer"), 'message should name session agent');
-    assert.ok(result.message.includes("frontend-specialist"), 'message should name caller agent');
+    assert.ok(result.message.includes('feature-implementer'), 'message should name session agent');
+    assert.ok(result.message.includes('frontend-specialist'), 'message should name caller agent');
     assert.ok(result.message.includes('COA_OPERATOR'), 'message should mention override path');
   });
 });
@@ -212,7 +223,14 @@ describe('verifyWorktreeOwnership — Case 5: detached HEAD → skip', () => {
 describe('verifyWorktreeOwnership — Case 6: agent-mismatch + dual-key → pass + audit', () => {
   let auditDir = null;
   afterEach(() => {
-    if (auditDir) { try { rmSync(auditDir, { recursive: true, force: true }); } catch { /* ok */ } auditDir = null; }
+    if (auditDir) {
+      try {
+        rmSync(auditDir, { recursive: true, force: true });
+      } catch {
+        /* ok */
+      }
+      auditDir = null;
+    }
   });
 
   test('mismatch + allowForeign=true → ok=true, reason=verified, overrideApplied=true', () => {
@@ -237,7 +255,11 @@ describe('verifyWorktreeOwnership — Case 6: agent-mismatch + dual-key → pass
     const auditPath = join(claimsDir, 'audit.log');
 
     // Write a fake .coa-session
-    writeFileSync(join(auditDir, '.coa-session'), JSON.stringify(makeSession('feature-implementer')), 'utf8');
+    writeFileSync(
+      join(auditDir, '.coa-session'),
+      JSON.stringify(makeSession('feature-implementer')),
+      'utf8',
+    );
 
     // Write the audit entry the same way the production code does
     const entry = JSON.stringify({

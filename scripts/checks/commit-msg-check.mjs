@@ -7,11 +7,22 @@
  * @edit careful
  */
 
-import { readFileSync, appendFileSync, writeFileSync, mkdirSync, existsSync, unlinkSync } from 'node:fs';
+import {
+  readFileSync,
+  appendFileSync,
+  writeFileSync,
+  mkdirSync,
+  existsSync,
+  unlinkSync,
+} from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { join, resolve, dirname, isAbsolute } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { findActiveClaimWithSlice, findRecentClaimWithSlice, findCommittedSliceUse } from './claim-check.mjs';
+import {
+  findActiveClaimWithSlice,
+  findRecentClaimWithSlice,
+  findCommittedSliceUse,
+} from './claim-check.mjs';
 import { validateAndConsumeOverride } from '../lib/rationale-override.mjs';
 
 const _scriptDir = dirname(fileURLToPath(import.meta.url));
@@ -176,11 +187,11 @@ export async function checkSliceIdUniqueness(sliceId, opts = {}) {
   const coaDir = opts.coaDir ?? join(resolveMainRepoRoot(repoRoot), '.coa');
 
   // Query git log subject lines only (--format=%s avoids --grep body matches).
-  const result = spawnSync(
-    'git',
-    ['log', '--all', '--format=%H %s'],
-    { cwd: repoRoot, encoding: 'utf8', stdio: 'pipe' },
-  );
+  const result = spawnSync('git', ['log', '--all', '--format=%H %s'], {
+    cwd: repoRoot,
+    encoding: 'utf8',
+    stdio: 'pipe',
+  });
 
   if (result.status !== 0) {
     // Git not available or repo empty — skip the check gracefully.
@@ -190,7 +201,9 @@ export async function checkSliceIdUniqueness(sliceId, opts = {}) {
   // Search subject lines for the slice ID pattern.
   // Use word-boundary equivalent: look for ID surrounded by non-word chars or
   // at string edges so "TPL-333" doesn't match "XTPL-333".
-  const idPattern = new RegExp(`(?<![A-Z0-9])${sliceId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![A-Z0-9-])`);
+  const idPattern = new RegExp(
+    `(?<![A-Z0-9])${sliceId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![A-Z0-9-])`,
+  );
   let duplicate = null;
   for (const line of (result.stdout || '').split('\n')) {
     const trimmed = line.trim();
@@ -261,8 +274,9 @@ export async function checkSliceCoverage(sliceId, opts = {}) {
   const claimsDir = opts.claimsDir ?? CLAIMS_DIR;
   const repoRoot = opts.repoRoot ?? REPO_ROOT;
   const env = opts.env ?? process.env;
-  const windowSeconds = opts.windowSeconds
-    ?? (env.COMMIT_MSG_RECENT_WINDOW_S ? Number(env.COMMIT_MSG_RECENT_WINDOW_S) : RECENT_WINDOW_S);
+  const windowSeconds =
+    opts.windowSeconds ??
+    (env.COMMIT_MSG_RECENT_WINDOW_S ? Number(env.COMMIT_MSG_RECENT_WINDOW_S) : RECENT_WINDOW_S);
 
   // Layer 0: dual-key operator override: both keys must be set.
   if (env.COA_OPERATOR === '1' && env.COMMIT_MSG_ALLOW_ORPHAN_SLICE === '1') {
@@ -350,15 +364,21 @@ async function main() {
       if (!uniqueness.ok) {
         const { duplicate, overrideReason } = uniqueness;
         console.error('[commit-msg-check] FAIL: duplicate-slice-id');
-        console.error(`  slice ${sliceId} already exists in git history (commit ${duplicate.hash}: "${duplicate.subject}").`);
+        console.error(
+          `  slice ${sliceId} already exists in git history (commit ${duplicate.hash}: "${duplicate.subject}").`,
+        );
         if (overrideReason && !overrideReason.startsWith('No override file found')) {
           console.error(`  Override rejected: ${overrideReason}`);
         }
         console.error('');
         console.error('  Recovery:');
-        console.error('    Pick a higher ID (use `coa-worktree --create` without --slice= for auto-pick),');
+        console.error(
+          '    Pick a higher ID (use `coa-worktree --create` without --slice= for auto-pick),',
+        );
         console.error('    or provide .coa/slice-id-override.json if this reuse is legitimate.');
-        console.error('    See docs/guides/slice-id-override-emergency.md for format and valid categories.');
+        console.error(
+          '    See docs/guides/slice-id-override-emergency.md for format and valid categories.',
+        );
         process.exit(1);
       }
       if (uniqueness.reason === 'override-accepted') {
@@ -377,9 +397,7 @@ async function main() {
         console.error('');
         console.error('  Recovery:');
         console.error('    1. Cancel this commit');
-        console.error(
-          `    2. Run: node scripts/coa-worktree.mjs --create --slice=${sliceId}`,
-        );
+        console.error(`    2. Run: node scripts/coa-worktree.mjs --create --slice=${sliceId}`);
         console.error('    3. Work in the resulting tx- worktree, then coa-merge');
         console.error('    OR');
         console.error(

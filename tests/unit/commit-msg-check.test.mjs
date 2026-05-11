@@ -9,7 +9,11 @@
 
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { validateCommitMessage, ALLOWED_TYPES, extractSliceIdFromHeader } from '../../scripts/checks/commit-msg-check.mjs';
+import {
+  validateCommitMessage,
+  ALLOWED_TYPES,
+  extractSliceIdFromHeader,
+} from '../../scripts/checks/commit-msg-check.mjs';
 
 describe('validateCommitMessage — happy paths', () => {
   test('accepts a minimal conventional commit with work-item ID', () => {
@@ -169,7 +173,18 @@ describe('WORK_ITEM_PATTERN — multi-segment prefix extraction', () => {
 });
 
 describe('ALLOWED_TYPES — constant pin (CG-T3-1, TPL-241)', () => {
-  const EXPECTED = ['feat', 'fix', 'docs', 'test', 'refactor', 'chore', 'perf', 'build', 'ci', 'style'];
+  const EXPECTED = [
+    'feat',
+    'fix',
+    'docs',
+    'test',
+    'refactor',
+    'chore',
+    'perf',
+    'build',
+    'ci',
+    'style',
+  ];
 
   test('ALLOWED_TYPES has exactly 10 entries', () => {
     assert.equal(ALLOWED_TYPES.length, 10);

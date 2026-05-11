@@ -33,9 +33,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import {
-  mkdtempSync, mkdirSync, writeFileSync, rmSync, cpSync, existsSync,
-} from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync, cpSync, existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 
@@ -70,9 +68,16 @@ function runCheck(cwd, extraArgs = [], envOverrides = {}) {
     encoding: 'utf8',
   });
   let payload = null;
-  try { payload = JSON.parse(r.stdout || '{}'); } catch { /* leave null */ }
+  try {
+    payload = JSON.parse(r.stdout || '{}');
+  } catch {
+    /* leave null */
+  }
   return {
-    code: r.status, payload, stdout: r.stdout, stderr: r.stderr,
+    code: r.status,
+    payload,
+    stdout: r.stdout,
+    stderr: r.stderr,
   };
 }
 
@@ -94,19 +99,18 @@ describe('TPL-287 Test D — ORIG_STAGED guard: no .githooks/ in staged set', ()
       { staged: 'README.md\nCHANGELOG.md', expectMatch: false, label: 'docs-only staged' },
       { staged: 'scripts/checks/foo.mjs', expectMatch: false, label: 'scripts-only staged' },
       { staged: '.githooks/pre-commit', expectMatch: true, label: '.githooks/ in staged' },
-      { staged: 'README.md\n.githooks/pre-commit\nCHANGELOG.md', expectMatch: true, label: 'mixed staged with .githooks/' },
+      {
+        staged: 'README.md\n.githooks/pre-commit\nCHANGELOG.md',
+        expectMatch: true,
+        label: 'mixed staged with .githooks/',
+      },
     ];
 
     for (const { staged, expectMatch, label } of cases) {
       // Replicate: [ -n "$ORIG_STAGED" ] && echo "$ORIG_STAGED" | grep -q '^\.githooks/'
-      const hasGitHooks = staged.length > 0 && staged.split('\n').some(
-        line => line.startsWith('.githooks/'),
-      );
-      assert.equal(
-        hasGitHooks,
-        expectMatch,
-        `Guard should be ${expectMatch} for case: ${label}`,
-      );
+      const hasGitHooks =
+        staged.length > 0 && staged.split('\n').some((line) => line.startsWith('.githooks/'));
+      assert.equal(hasGitHooks, expectMatch, `Guard should be ${expectMatch} for case: ${label}`);
     }
   });
 });
@@ -127,7 +131,8 @@ describe('TPL-287 Test C — Successful flow: fingerprints remain consistent', (
       // Simulate Addition B (Phase 5 inline): --update --from-pre-commit-hook
       const updateResult = runAdditionB(dir);
       assert.equal(
-        updateResult.code, 0,
+        updateResult.code,
+        0,
         `Addition B should succeed. stdout: ${updateResult.stdout} stderr: ${updateResult.stderr}`,
       );
       assert.equal(updateResult.payload?.ok, true);
@@ -142,7 +147,8 @@ describe('TPL-287 Test C — Successful flow: fingerprints remain consistent', (
       // Subsequent plain check must pass
       const checkResult = runCheck(dir);
       assert.equal(
-        checkResult.code, 0,
+        checkResult.code,
+        0,
         `Plain check after Addition B should exit 0. stdout: ${checkResult.stdout} stderr: ${checkResult.stderr}`,
       );
       assert.equal(checkResult.payload?.ok, true);
@@ -187,7 +193,8 @@ describe('TPL-287 Test A — Post-stamp regen: fingerprints match changed @versi
       // Simulate Addition B at Phase 5 inline position: re-run --update
       const additionB = runAdditionB(dir);
       assert.equal(
-        additionB.code, 0,
+        additionB.code,
+        0,
         `Addition B (--update --from-pre-commit-hook) must succeed after Phase 5 stamp. stderr: ${additionB.stderr}`,
       );
       assert.equal(additionB.payload?.action, 'updated');
@@ -195,7 +202,8 @@ describe('TPL-287 Test A — Post-stamp regen: fingerprints match changed @versi
       // After Addition B: check must pass with the post-stamp registry
       const r3 = runCheck(dir);
       assert.equal(
-        r3.code, 0,
+        r3.code,
+        0,
         `Check after Addition B must exit 0 (fingerprints reflect post-stamp content). stdout: ${r3.stdout} stderr: ${r3.stderr}`,
       );
       assert.equal(r3.payload?.ok, true);
@@ -219,13 +227,15 @@ describe('TPL-287 Test B — Phase 6/7 failure scenario: retry succeeds without 
       // 3. Phase 7 "fails" (we skip it in test — just verify state after step 2)
       // 4. On retry, Phase 1.0 runs check — must pass because registry was already updated
 
-      const stampedContent = '#!/usr/bin/env bash\n# @version 0.0.2\n# mock hook after Phase-5 stamp\necho ok\n';
+      const stampedContent =
+        '#!/usr/bin/env bash\n# @version 0.0.2\n# mock hook after Phase-5 stamp\necho ok\n';
       writeFileSync(join(dir, '.githooks', 'pre-commit'), stampedContent);
 
       // Addition B runs immediately after Phase 5 (Phase 5 inline)
       const additionB = runAdditionB(dir);
       assert.equal(
-        additionB.code, 0,
+        additionB.code,
+        0,
         `Addition B must succeed. stdout: ${additionB.stdout} stderr: ${additionB.stderr}`,
       );
 
@@ -237,7 +247,8 @@ describe('TPL-287 Test B — Phase 6/7 failure scenario: retry succeeds without 
       // Phase 1.0 runs hook-integrity-check (no flags):
       const retryCheck = runCheck(dir);
       assert.equal(
-        retryCheck.code, 0,
+        retryCheck.code,
+        0,
         `Phase 1.0 check on retry must exit 0 — no manual --update required. stdout: ${retryCheck.stdout}`,
       );
       assert.equal(retryCheck.payload?.ok, true);

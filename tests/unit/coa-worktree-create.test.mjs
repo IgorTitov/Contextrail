@@ -36,10 +36,7 @@ import {
 import { tmpdir } from 'node:os';
 import { join, basename } from 'node:path';
 import { safeGitSpawn } from '../_setup/safe-git.mjs';
-import {
-  runCreate,
-  transportWorktreePath,
-} from '../../scripts/coa-worktree.mjs';
+import { runCreate, transportWorktreePath } from '../../scripts/coa-worktree.mjs';
 
 // ---------------------------------------------------------------------------
 // Fixture helper
@@ -62,11 +59,21 @@ function cleanupWorktree(mainRoot, wtPath) {
   // traversal into the junction target.
   const nmInWt = join(wtPath, 'node_modules');
   if (existsSync(nmInWt)) {
-    try { rmSync(nmInWt, { recursive: false }); } catch {
-      try { rmSync(nmInWt, { recursive: true, force: true }); } catch { /* best effort */ }
+    try {
+      rmSync(nmInWt, { recursive: false });
+    } catch {
+      try {
+        rmSync(nmInWt, { recursive: true, force: true });
+      } catch {
+        /* best effort */
+      }
     }
   }
-  try { safeGitSpawn(mainRoot, ['worktree', 'remove', '--force', wtPath]); } catch { /* best effort */ }
+  try {
+    safeGitSpawn(mainRoot, ['worktree', 'remove', '--force', wtPath]);
+  } catch {
+    /* best effort */
+  }
   if (existsSync(wtPath)) rmSync(wtPath, { recursive: true, force: true });
   rmSync(mainRoot, { recursive: true, force: true });
   // .worktrees/ parent dir in tmpdir — intentionally not removed; it is
@@ -94,7 +101,10 @@ describe('transportWorktreePath', () => {
   test('works for AIC prefix', () => {
     const p = transportWorktreePath('/home/user/cockpit', 'AIC-088');
     assert.ok(p.endsWith('cockpit-tx-AIC-088'), `Got: ${p}`);
-    assert.ok(p.replaceAll('\\', '/').includes('/.worktrees/'), `Expected .worktrees/ in path: ${p}`);
+    assert.ok(
+      p.replaceAll('\\', '/').includes('/.worktrees/'),
+      `Expected .worktrees/ in path: ${p}`,
+    );
   });
 
   test('throws on invalid slice ID', () => {
@@ -133,7 +143,11 @@ describe('runCreate: invalid slice ID is rejected before git', () => {
     const expectedWtPath = transportWorktreePath(mainRoot, 'TPL-251');
     mkdirSync(expectedWtPath, { recursive: true });
     try {
-      const { exitCode, result } = runCreate(mainRoot, { sliceId: 'TPL-251', silent: true, skipSliceCheck: true });
+      const { exitCode, result } = runCreate(mainRoot, {
+        sliceId: 'TPL-251',
+        silent: true,
+        skipSliceCheck: true,
+      });
       assert.strictEqual(exitCode, 1);
       assert.match(result.error, /already exists/);
     } finally {
@@ -152,14 +166,24 @@ describe('runCreate --slice: transport worktree creation', () => {
     const mainRoot = createBaseRepo('create-basic');
     const wtPath = transportWorktreePath(mainRoot, 'TPL-251');
     try {
-      const { exitCode, result } = runCreate(mainRoot, { sliceId: 'TPL-251', silent: true, skipSliceCheck: true });
+      const { exitCode, result } = runCreate(mainRoot, {
+        sliceId: 'TPL-251',
+        silent: true,
+        skipSliceCheck: true,
+      });
       assert.strictEqual(exitCode, 0, `runCreate failed: ${result?.error}`);
       assert.ok(existsSync(wtPath), `Transport worktree should exist at ${wtPath}`);
       assert.strictEqual(result.branch, 'tx-TPL-251');
       assert.strictEqual(result.sessionName, 'tx-TPL-251');
-      assert.ok(result.path.endsWith(`${basename(mainRoot)}-tx-TPL-251`), `path mismatch: ${result.path}`);
+      assert.ok(
+        result.path.endsWith(`${basename(mainRoot)}-tx-TPL-251`),
+        `path mismatch: ${result.path}`,
+      );
       // TPL-334: worktree must land inside .worktrees/ subdir (ADR-0050)
-      assert.ok(result.path.replaceAll('\\', '/').includes('/.worktrees/'), `path must be inside .worktrees/: ${result.path}`);
+      assert.ok(
+        result.path.replaceAll('\\', '/').includes('/.worktrees/'),
+        `path must be inside .worktrees/: ${result.path}`,
+      );
     } finally {
       cleanupWorktree(mainRoot, wtPath);
     }
@@ -188,7 +212,11 @@ describe('runCreate --slice: transport worktree creation', () => {
 
     const wtPath = transportWorktreePath(mainRoot, 'TPL-251');
     try {
-      const { exitCode, result } = runCreate(mainRoot, { sliceId: 'TPL-251', silent: true, skipSliceCheck: true });
+      const { exitCode, result } = runCreate(mainRoot, {
+        sliceId: 'TPL-251',
+        silent: true,
+        skipSliceCheck: true,
+      });
       assert.strictEqual(exitCode, 0, `runCreate failed: ${result?.error}`);
 
       // Junction must exist in the transport worktree
@@ -197,7 +225,10 @@ describe('runCreate --slice: transport worktree creation', () => {
 
       // Junction must resolve — the package from main's node_modules is readable
       const pkgViaJunction = join(nmInWt, 'somepackage', 'index.js');
-      assert.ok(existsSync(pkgViaJunction), 'somepackage/index.js should be accessible via junction');
+      assert.ok(
+        existsSync(pkgViaJunction),
+        'somepackage/index.js should be accessible via junction',
+      );
       const content = readFileSync(pkgViaJunction, 'utf8');
       assert.ok(content.includes('ok: true'), 'Junction content should match main node_modules');
 
@@ -211,10 +242,17 @@ describe('runCreate --slice: transport worktree creation', () => {
     const mainRoot = createBaseRepo('nm-absent');
     const wtPath = transportWorktreePath(mainRoot, 'TPL-251');
     try {
-      const { exitCode, result } = runCreate(mainRoot, { sliceId: 'TPL-251', silent: true, skipSliceCheck: true });
+      const { exitCode, result } = runCreate(mainRoot, {
+        sliceId: 'TPL-251',
+        silent: true,
+        skipSliceCheck: true,
+      });
       assert.strictEqual(exitCode, 0, `runCreate failed: ${result?.error}`);
       assert.strictEqual(result.nodeModulesLinked, false);
-      assert.ok(!existsSync(join(wtPath, 'node_modules')), 'node_modules should not be created when absent in main');
+      assert.ok(
+        !existsSync(join(wtPath, 'node_modules')),
+        'node_modules should not be created when absent in main',
+      );
     } finally {
       cleanupWorktree(mainRoot, wtPath);
     }
@@ -227,11 +265,19 @@ describe('runCreate --slice: transport worktree creation', () => {
 
     const wtPath = transportWorktreePath(mainRoot, 'TPL-251');
     try {
-      const { exitCode } = runCreate(mainRoot, { sliceId: 'TPL-251', silent: true, skipSliceCheck: true });
+      const { exitCode } = runCreate(mainRoot, {
+        sliceId: 'TPL-251',
+        silent: true,
+        skipSliceCheck: true,
+      });
       assert.strictEqual(exitCode, 0);
 
       // Calling runCreate again on same path should fail with "already exists"
-      const { exitCode: ec2 } = runCreate(mainRoot, { sliceId: 'TPL-251', silent: true, skipSliceCheck: true });
+      const { exitCode: ec2 } = runCreate(mainRoot, {
+        sliceId: 'TPL-251',
+        silent: true,
+        skipSliceCheck: true,
+      });
       assert.strictEqual(ec2, 1);
     } finally {
       cleanupWorktree(mainRoot, wtPath);
@@ -248,17 +294,27 @@ describe('runCreate --slice: .claude/settings*.json copy', () => {
     const mainRoot = createBaseRepo('settings-copy');
     mkdirSync(join(mainRoot, '.claude'), { recursive: true });
     writeFileSync(join(mainRoot, '.claude', 'settings.json'), JSON.stringify({ permissions: [] }));
-    writeFileSync(join(mainRoot, '.claude', 'settings.local.json'), JSON.stringify({ permissions: ['allow:Bash'] }));
+    writeFileSync(
+      join(mainRoot, '.claude', 'settings.local.json'),
+      JSON.stringify({ permissions: ['allow:Bash'] }),
+    );
 
     const wtPath = transportWorktreePath(mainRoot, 'TPL-267');
     try {
-      const { exitCode, result } = runCreate(mainRoot, { sliceId: 'TPL-267', silent: true, skipSliceCheck: true });
+      const { exitCode, result } = runCreate(mainRoot, {
+        sliceId: 'TPL-267',
+        silent: true,
+        skipSliceCheck: true,
+      });
       assert.strictEqual(exitCode, 0, `runCreate failed: ${result?.error}`);
 
       const dstSettings = join(wtPath, '.claude', 'settings.json');
       const dstLocal = join(wtPath, '.claude', 'settings.local.json');
       assert.ok(existsSync(dstSettings), 'settings.json should be copied into transport .claude/');
-      assert.ok(existsSync(dstLocal), 'settings.local.json should be copied into transport .claude/');
+      assert.ok(
+        existsSync(dstLocal),
+        'settings.local.json should be copied into transport .claude/',
+      );
 
       assert.strictEqual(
         readFileSync(dstSettings, 'utf8'),
@@ -280,9 +336,16 @@ describe('runCreate --slice: .claude/settings*.json copy', () => {
     // No .claude/ directory in main repo
     const wtPath = transportWorktreePath(mainRoot, 'TPL-267');
     try {
-      const { exitCode, result } = runCreate(mainRoot, { sliceId: 'TPL-267', silent: true, skipSliceCheck: true });
+      const { exitCode, result } = runCreate(mainRoot, {
+        sliceId: 'TPL-267',
+        silent: true,
+        skipSliceCheck: true,
+      });
       assert.strictEqual(exitCode, 0, `runCreate failed: ${result?.error}`);
-      assert.ok(!existsSync(join(wtPath, '.claude', 'settings.json')), 'No settings.json should be created');
+      assert.ok(
+        !existsSync(join(wtPath, '.claude', 'settings.json')),
+        'No settings.json should be created',
+      );
     } finally {
       cleanupWorktree(mainRoot, wtPath);
     }
@@ -296,7 +359,11 @@ describe('runCreate --slice: .claude/settings*.json copy', () => {
     const wtPath = transportWorktreePath(mainRoot, 'TPL-267');
     try {
       // First create
-      const { exitCode } = runCreate(mainRoot, { sliceId: 'TPL-267', silent: true, skipSliceCheck: true });
+      const { exitCode } = runCreate(mainRoot, {
+        sliceId: 'TPL-267',
+        silent: true,
+        skipSliceCheck: true,
+      });
       assert.strictEqual(exitCode, 0);
 
       // Manually pre-place identical file in transport to simulate idempotent check
@@ -322,12 +389,25 @@ describe('runCreate --slice: .claude/settings*.json copy', () => {
 
     const wtPath = transportWorktreePath(mainRoot, 'TPL-267');
     try {
-      const { exitCode } = runCreate(mainRoot, { sliceId: 'TPL-267', silent: true, skipSliceCheck: true });
+      const { exitCode } = runCreate(mainRoot, {
+        sliceId: 'TPL-267',
+        silent: true,
+        skipSliceCheck: true,
+      });
       assert.strictEqual(exitCode, 0);
 
-      assert.ok(existsSync(join(wtPath, '.claude', 'settings.json')), 'settings.json should be copied');
-      assert.ok(!existsSync(join(wtPath, '.claude', 'CLAUDE.md')), 'CLAUDE.md should NOT be copied');
-      assert.ok(!existsSync(join(wtPath, '.claude', 'rules.json')), 'rules.json should NOT be copied');
+      assert.ok(
+        existsSync(join(wtPath, '.claude', 'settings.json')),
+        'settings.json should be copied',
+      );
+      assert.ok(
+        !existsSync(join(wtPath, '.claude', 'CLAUDE.md')),
+        'CLAUDE.md should NOT be copied',
+      );
+      assert.ok(
+        !existsSync(join(wtPath, '.claude', 'rules.json')),
+        'rules.json should NOT be copied',
+      );
     } finally {
       cleanupWorktree(mainRoot, wtPath);
     }
@@ -368,7 +448,8 @@ describe('runCreate --slice: .coa-session.agent caller identity (TPL-310)', () =
       const session = JSON.parse(readFileSync(join(wtPath, '.coa-session'), 'utf8'));
       assert.strictEqual(session.agent, 'frontend-specialist');
     } finally {
-      if (prev === undefined) delete process.env.COA_AGENT; else process.env.COA_AGENT = prev;
+      if (prev === undefined) delete process.env.COA_AGENT;
+      else process.env.COA_AGENT = prev;
       cleanupWorktree(mainRoot, wtPath);
     }
   });
@@ -388,7 +469,8 @@ describe('runCreate --slice: .coa-session.agent caller identity (TPL-310)', () =
       const session = JSON.parse(readFileSync(join(wtPath, '.coa-session'), 'utf8'));
       assert.strictEqual(session.agent, 'flag-agent');
     } finally {
-      if (prev === undefined) delete process.env.COA_AGENT; else process.env.COA_AGENT = prev;
+      if (prev === undefined) delete process.env.COA_AGENT;
+      else process.env.COA_AGENT = prev;
       cleanupWorktree(mainRoot, wtPath);
     }
   });
@@ -428,7 +510,8 @@ describe('runCreate --slice: .coa-session.agent caller identity (TPL-310)', () =
       const session = JSON.parse(readFileSync(join(wtPath, '.coa-session'), 'utf8'));
       assert.strictEqual(session.agent, 'feature-implementer');
     } finally {
-      if (prev === undefined) delete process.env.COA_AGENT; else process.env.COA_AGENT = prev;
+      if (prev === undefined) delete process.env.COA_AGENT;
+      else process.env.COA_AGENT = prev;
       cleanupWorktree(mainRoot, wtPath);
     }
   });
@@ -452,7 +535,11 @@ describe('runCreate --slice: trunk name resolved dynamically', () => {
 
     const wtPath = transportWorktreePath(mainRoot, 'TPL-264');
     try {
-      const { exitCode, result } = runCreate(mainRoot, { sliceId: 'TPL-264', silent: true, skipSliceCheck: true });
+      const { exitCode, result } = runCreate(mainRoot, {
+        sliceId: 'TPL-264',
+        silent: true,
+        skipSliceCheck: true,
+      });
       assert.strictEqual(exitCode, 0, `runCreate failed: ${result?.error}`);
       assert.ok(existsSync(wtPath), `Transport worktree should exist at ${wtPath}`);
       assert.strictEqual(result.branch, 'tx-TPL-264');
@@ -479,4 +566,3 @@ describe('runCreate --slice: trunk name resolved dynamically', () => {
     }
   });
 });
-

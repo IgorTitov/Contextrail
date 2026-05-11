@@ -22,8 +22,19 @@ import {
 
 const PLANS = [
   { id: 'free', name: 'Free', entitlements: ['basic-view'], priceMonthly: 0 },
-  { id: 'pro', name: 'Pro', entitlements: ['basic-view', 'export', 'api-access'], priceMonthly: 1999 },
-  { id: 'enterprise', name: 'Enterprise', entitlements: ['basic-view', 'export', 'api-access', 'sso', 'audit-log'], priceMonthly: 9999, maxSeats: 100 },
+  {
+    id: 'pro',
+    name: 'Pro',
+    entitlements: ['basic-view', 'export', 'api-access'],
+    priceMonthly: 1999,
+  },
+  {
+    id: 'enterprise',
+    name: 'Enterprise',
+    entitlements: ['basic-view', 'export', 'api-access', 'sso', 'audit-log'],
+    priceMonthly: 9999,
+    maxSeats: 100,
+  },
 ];
 
 describe('subscription domain — createSubscription()', () => {

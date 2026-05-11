@@ -23,14 +23,7 @@
 
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import {
-  mkdtempSync,
-  mkdirSync,
-  writeFileSync,
-  existsSync,
-  rmSync,
-  symlinkSync,
-} from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, existsSync, rmSync, symlinkSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, basename, dirname, resolve } from 'node:path';
 import { safeGitSpawn } from '../_setup/safe-git.mjs';
@@ -62,11 +55,21 @@ function createBaseRepo(label) {
 function cleanupWorktree(mainRoot, wtPath) {
   const nmInWt = join(wtPath, 'node_modules');
   if (existsSync(nmInWt)) {
-    try { rmSync(nmInWt, { recursive: false }); } catch {
-      try { rmSync(nmInWt, { recursive: true, force: true }); } catch { /* best effort */ }
+    try {
+      rmSync(nmInWt, { recursive: false });
+    } catch {
+      try {
+        rmSync(nmInWt, { recursive: true, force: true });
+      } catch {
+        /* best effort */
+      }
     }
   }
-  try { safeGitSpawn(mainRoot, ['worktree', 'remove', '--force', wtPath]); } catch { /* best effort */ }
+  try {
+    safeGitSpawn(mainRoot, ['worktree', 'remove', '--force', wtPath]);
+  } catch {
+    /* best effort */
+  }
   if (existsSync(wtPath)) rmSync(wtPath, { recursive: true, force: true });
   rmSync(mainRoot, { recursive: true, force: true });
 }
@@ -81,10 +84,7 @@ describe('transportWorktreePath: .worktrees/ subdir (ADR-0050)', () => {
     const p = transportWorktreePath(repoRoot, 'TPL-334');
     const normalised = p.replaceAll('\\', '/');
     // Must be inside .worktrees/ (not a direct sibling)
-    assert.ok(
-      normalised.includes('/.worktrees/'),
-      `Expected .worktrees/ in path, got: ${p}`,
-    );
+    assert.ok(normalised.includes('/.worktrees/'), `Expected .worktrees/ in path, got: ${p}`);
     // Must end with repo-name + branch suffix
     assert.ok(
       normalised.endsWith('my-app-tx-TPL-334'),
@@ -125,7 +125,10 @@ describe('runCreate: auto-creates .worktrees/ parent dir', () => {
         skipSliceCheck: true,
       });
       assert.strictEqual(exitCode, 0, `runCreate failed: ${result?.error}`);
-      assert.ok(existsSync(worktreesDir), `.worktrees/ dir should exist after --create: ${worktreesDir}`);
+      assert.ok(
+        existsSync(worktreesDir),
+        `.worktrees/ dir should exist after --create: ${worktreesDir}`,
+      );
       assert.ok(existsSync(wtPath), `Worktree should exist at ${wtPath}`);
     } finally {
       cleanupWorktree(mainRoot, wtPath);
@@ -171,7 +174,10 @@ describe('runCreate: auto-creates .worktrees/ parent dir', () => {
 
       // Junction must resolve through the .worktrees/ path
       const pkgViaJunction = join(wtPath, 'node_modules', 'mypkg', 'index.js');
-      assert.ok(existsSync(pkgViaJunction), `mypkg/index.js accessible via junction at ${pkgViaJunction}`);
+      assert.ok(
+        existsSync(pkgViaJunction),
+        `mypkg/index.js accessible via junction at ${pkgViaJunction}`,
+      );
     } finally {
       cleanupWorktree(mainRoot, wtPath);
     }
@@ -205,10 +211,18 @@ describe('runTeardown: backward compat — finds worktrees in old sibling locati
       assert.ok(!existsSync(oldStylePath), 'Old-style worktree dir should be removed');
     } finally {
       if (existsSync(oldStylePath)) {
-        try { safeGitSpawn(mainRoot, ['worktree', 'remove', '--force', oldStylePath]); } catch { /* best effort */ }
+        try {
+          safeGitSpawn(mainRoot, ['worktree', 'remove', '--force', oldStylePath]);
+        } catch {
+          /* best effort */
+        }
         rmSync(oldStylePath, { recursive: true, force: true });
       }
-      try { safeGitSpawn(mainRoot, ['branch', '-D', 'tx-TPL-001']); } catch { /* best effort */ }
+      try {
+        safeGitSpawn(mainRoot, ['branch', '-D', 'tx-TPL-001']);
+      } catch {
+        /* best effort */
+      }
       rmSync(mainRoot, { recursive: true, force: true });
     }
   });
@@ -261,8 +275,8 @@ describe('runTeardownStale: enumerates worktrees in both locations', () => {
 
       // listWorktrees must include the new-location worktree
       const worktrees = listWorktrees(mainRoot);
-      const found = worktrees.find(
-        (w) => w.path.replaceAll('\\', '/').includes(`${basename(mainRoot)}-tx-TPL-334`),
+      const found = worktrees.find((w) =>
+        w.path.replaceAll('\\', '/').includes(`${basename(mainRoot)}-tx-TPL-334`),
       );
       assert.ok(
         found,
@@ -273,9 +287,17 @@ describe('runTeardownStale: enumerates worktrees in both locations', () => {
         `Worktree path must contain /.worktrees/: ${found.path}`,
       );
     } finally {
-      try { safeGitSpawn(mainRoot, ['worktree', 'remove', '--force', wtPath]); } catch { /* best effort */ }
+      try {
+        safeGitSpawn(mainRoot, ['worktree', 'remove', '--force', wtPath]);
+      } catch {
+        /* best effort */
+      }
       if (existsSync(wtPath)) rmSync(wtPath, { recursive: true, force: true });
-      try { safeGitSpawn(mainRoot, ['branch', '-D', 'tx-TPL-334']); } catch { /* best effort */ }
+      try {
+        safeGitSpawn(mainRoot, ['branch', '-D', 'tx-TPL-334']);
+      } catch {
+        /* best effort */
+      }
       rmSync(mainRoot, { recursive: true, force: true });
     }
   });
@@ -310,17 +332,25 @@ describe('runTeardownStale: enumerates worktrees in both locations', () => {
         ...(result.eligible || []).map((e) => e.path),
         ...(result.ineligible || []).map((e) => e.path),
       ];
-      const discovered = allPaths.find(
-        (p) => p.replaceAll('\\', '/').includes(`${basename(mainRoot)}-tx-TPL-334`),
+      const discovered = allPaths.find((p) =>
+        p.replaceAll('\\', '/').includes(`${basename(mainRoot)}-tx-TPL-334`),
       );
       assert.ok(
         discovered,
         `Worktree must be discovered (in eligible or ineligible). allPaths: ${JSON.stringify(allPaths)}`,
       );
     } finally {
-      try { safeGitSpawn(mainRoot, ['worktree', 'remove', '--force', wtPath]); } catch { /* best effort */ }
+      try {
+        safeGitSpawn(mainRoot, ['worktree', 'remove', '--force', wtPath]);
+      } catch {
+        /* best effort */
+      }
       if (existsSync(wtPath)) rmSync(wtPath, { recursive: true, force: true });
-      try { safeGitSpawn(mainRoot, ['branch', '-D', 'tx-TPL-334']); } catch { /* best effort */ }
+      try {
+        safeGitSpawn(mainRoot, ['branch', '-D', 'tx-TPL-334']);
+      } catch {
+        /* best effort */
+      }
       rmSync(mainRoot, { recursive: true, force: true });
     }
   });

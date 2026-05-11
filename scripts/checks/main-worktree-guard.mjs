@@ -63,14 +63,14 @@ export function isTransportWorktree(worktreePath) {
 // ---------------------------------------------------------------------------
 
 const SELF_TEST_CASES = [
-  { path: '/repos/contextrail-template',                 expected: false },
-  { path: 'C:\\Projects\\contextrail-template',          expected: false },
-  { path: '/repos/contextrail-template-tx-TPL-276',      expected: true  },
+  { path: '/repos/contextrail-template', expected: false },
+  { path: 'C:\\Projects\\contextrail-template', expected: false },
+  { path: '/repos/contextrail-template-tx-TPL-276', expected: true },
   { path: 'C:\\Projects\\contextrail-template-tx-TPL-276', expected: true },
-  { path: '/repos/ai-cockpit-tx-AIC-DEV-132',            expected: true  },
-  { path: '/repos/zvenix-tx-ZVX-DEV-068',                expected: true  },
-  { path: '/repos/my-project',                           expected: false },
-  { path: '/repos/my-tx-project',                        expected: false },
+  { path: '/repos/ai-cockpit-tx-AIC-DEV-132', expected: true },
+  { path: '/repos/zvenix-tx-ZVX-DEV-068', expected: true },
+  { path: '/repos/my-project', expected: false },
+  { path: '/repos/my-tx-project', expected: false },
 ];
 
 function runSelfTest() {
@@ -80,7 +80,7 @@ function runSelfTest() {
     const pass = got === expected;
     if (!pass) {
       process.stderr.write(
-        `[R5 self-test] FAIL: isTransportWorktree(${JSON.stringify(path)}) → ${got}, expected ${expected}\n`
+        `[R5 self-test] FAIL: isTransportWorktree(${JSON.stringify(path)}) → ${got}, expected ${expected}\n`,
       );
       allPass = false;
     }
@@ -151,7 +151,9 @@ function main() {
   if (worktreeRoot === null) {
     // Not a git repo — no false positives outside git
     if (jsonMode) {
-      process.stdout.write(JSON.stringify({ ok: true, worktreeRoot: null, isTransport: null }) + '\n');
+      process.stdout.write(
+        JSON.stringify({ ok: true, worktreeRoot: null, isTransport: null }) + '\n',
+      );
     }
     process.exit(0);
     return;
@@ -194,7 +196,7 @@ function main() {
 
     process.stderr.write(
       `[R5] Override accepted via .coa/r5-override.json. Direct commit authorised.\n` +
-      `     File consumed and archived to .coa/r5-override-log/.\n`
+        `     File consumed and archived to .coa/r5-override-log/.\n`,
     );
     process.exit(0);
     return;

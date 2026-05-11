@@ -34,9 +34,7 @@ import {
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { safeGitSpawn } from '../_setup/safe-git.mjs';
-import {
-  unsetStaleCoreWorktree,
-} from '../../scripts/coa-worktree.mjs';
+import { unsetStaleCoreWorktree } from '../../scripts/coa-worktree.mjs';
 
 // ---------------------------------------------------------------------------
 // Fixture helper
@@ -59,7 +57,9 @@ function setConfigValue(repoRoot, key, value) {
 }
 
 function getConfigValue(repoRoot, key) {
-  const { stdout, status } = safeGitSpawn(repoRoot, ['config', '--local', '--get', key], { capture: true });
+  const { stdout, status } = safeGitSpawn(repoRoot, ['config', '--local', '--get', key], {
+    capture: true,
+  });
   if (status !== 0) return null;
   return stdout.trim();
 }
@@ -137,11 +137,19 @@ describe('unsetStaleCoreWorktree: points to still-valid path', () => {
     const otherRemovedPath = join(tmpdir(), 'tpl269-some-other-path-' + Date.now());
     try {
       const r = unsetStaleCoreWorktree(root, otherRemovedPath);
-      assert.strictEqual(r.unset, false, 'Should not unset when path still exists and does not match removed');
+      assert.strictEqual(
+        r.unset,
+        false,
+        'Should not unset when path still exists and does not match removed',
+      );
       assert.strictEqual(r.reason, 'points-to-existing-path');
       // Verify the config key is still set
       const remaining = getConfigValue(root, 'core.worktree');
-      assert.strictEqual(remaining, liveWorktree, 'core.worktree should still be set to liveWorktree');
+      assert.strictEqual(
+        remaining,
+        liveWorktree,
+        'core.worktree should still be set to liveWorktree',
+      );
     } finally {
       rmSync(liveWorktree, { recursive: true, force: true });
       rmSync(root, { recursive: true, force: true });
@@ -219,8 +227,8 @@ describe('R1 isolation invariants (TPL-274 regression)', () => {
     assert.ok(
       val === undefined || val === '',
       `GIT_COMMON_DIR must be absent from process.env during tests. Got: ${val}\n` +
-      'This env var causes git to write objects/refs to the live repo even with cwd in tmpdir. ' +
-      'Check that pre-commit Phase 7 unsets GIT_COMMON_DIR and that no-live-git.mjs scrubs it.',
+        'This env var causes git to write objects/refs to the live repo even with cwd in tmpdir. ' +
+        'Check that pre-commit Phase 7 unsets GIT_COMMON_DIR and that no-live-git.mjs scrubs it.',
     );
   });
 });
