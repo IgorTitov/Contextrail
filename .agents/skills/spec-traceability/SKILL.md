@@ -1,11 +1,12 @@
 <!-- @HEADER
- * @version 0.8.6 | 2026-05-11
+ * @version 0.8.6 | 2026-05-12
  * @purpose Keep backlog, PRD, USM, design, and proof references aligned around the changed slice.
  * @sidecar SKILL.md.header.md
  * @layer control-plane
  * @public true
  * @edit sync-only
  -->
+
 # spec-traceability
 
 Keep backlog, PRD, USM, design, and proof references aligned around the changed slice.

@@ -1,11 +1,12 @@
 <!-- @HEADER
- * @version 0.8.6 | 2026-05-11
+ * @version 0.8.6 | 2026-05-12
  * @purpose Ship through trunk using Branch by Abstraction and stable seams instead of long-lived hidden branches.
  * @sidecar SKILL.md.header.md
  * @layer control-plane
  * @public true
  * @edit sync-only
  -->
+
 # trunk-bba
 
 Ship through trunk using Branch by Abstraction and stable seams instead of long-lived hidden branches.

@@ -1,11 +1,12 @@
 <!-- @HEADER
- * @version 0.8.6 | 2026-05-11
+ * @version 0.8.6 | 2026-05-12
  * @purpose Close an implemented slice against acceptance and determine readiness for finalization.
  * @sidecar SKILL.md.header.md
  * @layer control-plane
  * @public true
  * @edit sync-only
  -->
+
 # acceptance-validation
 
 Close an implemented slice against acceptance and determine readiness for finalization.

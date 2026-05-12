@@ -1,11 +1,12 @@
 <!-- @HEADER
- * @version 0.8.6 | 2026-05-11
+ * @version 0.8.6 | 2026-05-12
  * @purpose Carry user-facing design work from intent to accepted handoff without replacing PRD or USM.
  * @sidecar SKILL.md.header.md
  * @layer control-plane
  * @public true
  * @edit sync-only
  -->
+
 # design-delivery
 
 Carry user-facing design work from intent to accepted handoff without replacing PRD or USM.

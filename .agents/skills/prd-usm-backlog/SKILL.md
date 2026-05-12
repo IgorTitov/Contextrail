@@ -1,11 +1,12 @@
 <!-- @HEADER
- * @version 0.8.6 | 2026-05-11
+ * @version 0.8.6 | 2026-05-12
  * @purpose Normalize intake, PRD, USM, and backlog so implementation slices start from the right source.
  * @sidecar SKILL.md.header.md
  * @layer control-plane
  * @public true
  * @edit sync-only
  -->
+
 # prd-usm-backlog
 
 Normalize intake, PRD, USM, and backlog so implementation slices start from the right source.

@@ -1,11 +1,12 @@
 <!-- @HEADER
- * @version 0.8.6 | 2026-05-11
+ * @version 0.8.6 | 2026-05-12
  * @purpose Express visible behavior through Gherkin and deterministic browser-oriented proof when needed.
  * @sidecar SKILL.md.header.md
  * @layer control-plane
  * @public true
  * @edit sync-only
  -->
+
 # bdd-playwright
 
 Express visible behavior through Gherkin and deterministic browser-oriented proof when needed.

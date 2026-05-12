@@ -1,11 +1,12 @@
 <!-- @HEADER
- * @version 0.8.6 | 2026-05-11
+ * @version 0.8.6 | 2026-05-12
  * @purpose Navigate untouched repo areas through headers, public APIs, tests, and nearby docs first.
  * @sidecar SKILL.md.header.md
  * @layer control-plane
  * @public true
  * @edit sync-only
  -->
+
 # repo-nav
 
 Navigate untouched repo areas through headers, public APIs, tests, and nearby docs first.

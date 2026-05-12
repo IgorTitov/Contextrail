@@ -1,11 +1,12 @@
 <!-- @HEADER
- * @version 0.8.6 | 2026-05-11
+ * @version 0.8.6 | 2026-05-12
  * @purpose Codex adapter for the shared repo-level delivery contract and skill map.
  * @sidecar AGENTS.md.header.md
  * @layer root
  * @public true
  * @edit sync-only
  -->
+
 # AGENTS
 
 This repository supports **Claude, Codex, Cursor, and any harness driving a frontier-, mid-, or small-tier agent** through one shared delivery contract.

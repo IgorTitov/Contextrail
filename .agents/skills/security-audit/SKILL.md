@@ -1,11 +1,12 @@
 <!-- @HEADER
- * @version 0.8.6 | 2026-05-11
+ * @version 0.8.6 | 2026-05-12
  * @purpose Screen risky commands, sensitive paths, and security regressions before calling work done.
  * @sidecar SKILL.md.header.md
  * @layer control-plane
  * @public true
  * @edit sync-only
  -->
+
 # security-audit
 
 Screen risky commands, sensitive paths, and security regressions before calling work done.

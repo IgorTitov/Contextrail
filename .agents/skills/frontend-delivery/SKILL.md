@@ -1,11 +1,12 @@
 <!-- @HEADER
- * @version 0.8.6 | 2026-05-11
+ * @version 0.8.6 | 2026-05-12
  * @purpose Implement visible UI slices with explicit accessibility, messages, and selector discipline.
  * @sidecar SKILL.md.header.md
  * @layer control-plane
  * @public true
  * @edit sync-only
  -->
+
 # frontend-delivery
 
 Implement visible UI slices with explicit accessibility, messages, and selector discipline.
