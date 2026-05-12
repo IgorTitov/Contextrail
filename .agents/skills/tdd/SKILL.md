@@ -6,7 +6,6 @@
  * @public true
  * @edit sync-only
  -->
-
 # tdd
 
 Start from the smallest failing proof, then implement only what makes it pass.

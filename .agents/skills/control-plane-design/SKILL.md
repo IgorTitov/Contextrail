@@ -6,7 +6,6 @@
  * @public true
  * @edit sync-only
  -->
-
 # control-plane-design
 
 Shape repo-level orchestration and control-plane changes without creating duplicate authority.

@@ -6,7 +6,6 @@
  * @public true
  * @edit sync-only
  -->
-
 # control-plane-audit
 
 Audit drift across instructions, hooks, scripts, docs, and tests, then repair the real source.

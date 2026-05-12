@@ -6,7 +6,6 @@
  * @public true
  * @edit sync-only
  -->
-
 # AGENTS
 
 This repository supports **Claude, Codex, Cursor, and any harness driving a frontier-, mid-, or small-tier agent** through one shared delivery contract.

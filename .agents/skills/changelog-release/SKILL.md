@@ -6,7 +6,6 @@
  * @public true
  * @edit sync-only
  -->
-
 # changelog-release
 
 Keep changelog and release/finalization discipline aligned with the real change.

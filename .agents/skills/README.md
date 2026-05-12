@@ -6,7 +6,6 @@
  * @public true
  * @edit sync-only
  -->
-
 # Skills
 
 These Codex-compatible skills are generated from the shared compatibility contract.

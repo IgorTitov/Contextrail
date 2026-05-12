@@ -6,7 +6,6 @@
  * @public true
  * @edit sync-only
  -->
-
 # feature-delivery
 
 Implement one bounded backlog slice by deep-reading only touched files and direct collaborators.

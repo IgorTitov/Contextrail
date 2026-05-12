@@ -6,7 +6,6 @@
  * @public true
  * @edit sync-only
  -->
-
 # hex-boundary
 
 Preserve modular boundaries and public-API-only access across the repo.

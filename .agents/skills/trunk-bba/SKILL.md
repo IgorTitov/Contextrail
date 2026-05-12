@@ -6,7 +6,6 @@
  * @public true
  * @edit sync-only
  -->
-
 # trunk-bba
 
 Ship through trunk using Branch by Abstraction and stable seams instead of long-lived hidden branches.

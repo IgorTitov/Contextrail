@@ -6,7 +6,6 @@
  * @public true
  * @edit sync-only
  -->
-
 # frontend-delivery
 
 Implement visible UI slices with explicit accessibility, messages, and selector discipline.

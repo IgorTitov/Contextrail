@@ -6,7 +6,6 @@
  * @public true
  * @edit sync-only
  -->
-
 # readme-discipline
 
 Keep folder-level READMEs aligned with real ownership and entrypoints.

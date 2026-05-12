@@ -6,7 +6,6 @@
  * @public true
  * @edit sync-only
  -->
-
 # design-delivery
 
 Carry user-facing design work from intent to accepted handoff without replacing PRD or USM.

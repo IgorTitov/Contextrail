@@ -6,7 +6,6 @@
  * @public true
  * @edit sync-only
  -->
-
 # spec-traceability
 
 Keep backlog, PRD, USM, design, and proof references aligned around the changed slice.

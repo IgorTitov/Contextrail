@@ -6,7 +6,6 @@
  * @public true
  * @edit sync-only
  -->
-
 # acceptance-validation
 
 Close an implemented slice against acceptance and determine readiness for finalization.

@@ -6,7 +6,6 @@
  * @public true
  * @edit sync-only
  -->
-
 # bdd-playwright
 
 Express visible behavior through Gherkin and deterministic browser-oriented proof when needed.

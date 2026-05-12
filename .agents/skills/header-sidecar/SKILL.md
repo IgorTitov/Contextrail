@@ -6,7 +6,6 @@
  * @public true
  * @edit sync-only
  -->
-
 # header-sidecar
 
 Keep structured headers and sidecars aligned with the real file role.

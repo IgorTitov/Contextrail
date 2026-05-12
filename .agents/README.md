@@ -6,7 +6,6 @@
  * @public true
  * @edit sync-only
  -->
-
 # .agents
 
 This folder contains the Codex-facing adapter layer generated from `docs/agent-contract/compatibility-contract.json`.

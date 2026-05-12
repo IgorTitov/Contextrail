@@ -6,7 +6,6 @@
  * @public true
  * @edit sync-only
  -->
-
 # security-audit
 
 Screen risky commands, sensitive paths, and security regressions before calling work done.
