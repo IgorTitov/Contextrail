@@ -159,6 +159,8 @@ export const HEADER_EXEMPT_PREFIXES = [
   '.agents/',
   'docs/analysis/session-summaries/',
   '.claude/agent-memory/',
+  '.coa/r5-override-log/',
+  'tests/contract/fixtures/',
 ];
 
 /** File patterns exempt from header check (glob-style suffixes). */

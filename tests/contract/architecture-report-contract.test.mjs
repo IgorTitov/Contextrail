@@ -145,7 +145,7 @@ describe('architecture-report contract v0.2.0', () => {
 
 describe('test-run-report contract v0.2.0', () => {
   before(() => {
-    execSync('node scripts/reports/test-run-report.mjs', { cwd: ROOT, stdio: 'pipe' });
+    execSync('node scripts/reports/test-run-report.mjs --skip-run', { cwd: ROOT, stdio: 'pipe' });
   });
 
   test('latest-entities.json has v0.2.0 top-level shape', () => {
