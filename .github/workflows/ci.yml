@@ -129,13 +129,6 @@ jobs:
       # sidecar-content-check.mjs flags notesForLLM as behavioral override (false positive).
       - run: node scripts/checks/numbers-sync.mjs --check
 
-  secrets:
-    name: Secret Scanning
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
-        with:
-          fetch-depth: 0
-      - uses: gitleaks/gitleaks-action@44c470ffc35caa8b1eb3e8012ca53c2f9bea4eb5  # v2.3.8
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  # Secret Scanning job removed: gitleaks-action scans `firstcommit^..HEAD` which
+  # fails on orphan histories (no parent for the root commit). GitHub provides
+  # built-in secret scanning for public repos which covers this surface.
